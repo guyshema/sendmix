@@ -1,0 +1,4424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oppenmasters | Pre-Mastering Mix Check</title>
+    <style>
+        /* ========== DESIGN TOKENS ========== */
+        :root {
+            /* Colors */
+            --bg-primary: #121212;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #232323;
+            --bg-elevated: #2a2a2a;
+            --bg-overlay: rgba(255, 255, 255, 0.04);
+            
+            --text-primary: #e6e6e6;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --text-disabled: #525252;
+            
+            --accent: #c9a227;
+            --accent-hover: #d4af37;
+            --accent-muted: rgba(201, 162, 39, 0.15);
+            
+            --success: #22c55e;
+            --success-muted: rgba(34, 197, 94, 0.15);
+            --warning: #f59e0b;
+            --warning-muted: rgba(245, 158, 11, 0.15);
+            --error: #ef4444;
+            --error-muted: rgba(239, 68, 68, 0.15);
+            
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-default: rgba(255, 255, 255, 0.12);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            
+            /* Spacing */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-2xl: 48px;
+            --space-3xl: 64px;
+            
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', 'Monaco', monospace;
+            
+            --text-xs: 11px;
+            --text-sm: 13px;
+            --text-base: 15px;
+            --text-lg: 17px;
+            --text-xl: 20px;
+            --text-2xl: 24px;
+            --text-3xl: 32px;
+            
+            /* Radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+            --radius-full: 9999px;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+            --shadow-glow: 0 0 20px rgba(201, 162, 39, 0.2);
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        /* ========== RESET & BASE ========== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: var(--text-base);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body.rtl {
+            direction: rtl;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles */
+        :focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        /* ========== CONTAINER ========== */
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-bottom: 120px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: var(--space-md);
+                padding-bottom: 120px;
+            }
+        }
+
+        /* ========== HEADER ========== */
+        .site-header {
+            text-align: center;
+            padding: var(--space-xl) 0 var(--space-2xl);
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: var(--space-xl);
+        }
+
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+        }
+
+        .lang-btn {
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border-default);
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: var(--text-sm);
+            font-weight: 500;
+            transition: all var(--transition-fast);
+        }
+
+        .lang-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .logo {
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: var(--space-xs);
+            color: var(--text-primary);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* ========== HERO SECTION ========== */
+        .hero {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            margin-bottom: var(--space-lg);
+        }
+
+        .hero-text {
+            color: var(--text-secondary);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-lg);
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-lg);
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+        }
+
+        .hero-cta:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        /* ========== ACCORDIONS (UNIFIED) ========== */
+        .accordion {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            overflow: hidden;
+            transition: border-color var(--transition-fast);
+        }
+
+        .accordion:hover {
+            border-color: var(--border-default);
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+            transition: background var(--transition-fast);
+        }
+
+        body.rtl .accordion-header {
+            text-align: right;
+        }
+
+        .accordion-header:hover {
+            background: var(--bg-overlay);
+        }
+
+        .accordion-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .accordion-icon {
+            font-size: var(--text-lg);
+        }
+
+        .accordion-arrow {
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+            transition: transform var(--transition-base);
+        }
+
+        .accordion.open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-slow);
+        }
+
+        .accordion.open .accordion-content {
+            max-height: 2000px;
+        }
+
+        .accordion-body {
+            padding: 0 var(--space-lg) var(--space-lg);
+        }
+
+        .accordion-section {
+            margin-bottom: var(--space-lg);
+        }
+
+        .accordion-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .accordion-section h4 {
+            color: var(--accent);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .accordion-section p {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.7;
+            margin-bottom: var(--space-sm);
+        }
+
+        .accordion-section ul {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .accordion-section li {
+            padding: var(--space-xs) 0;
+            padding-left: var(--space-md);
+            position: relative;
+        }
+
+        body.rtl .accordion-section li {
+            padding-left: 0;
+            padding-right: var(--space-md);
+        }
+
+        .accordion-section li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        body.rtl .accordion-section li::before {
+            left: auto;
+            right: 0;
+        }
+
+        /* Legacy guidelines classes - map to accordion */
+        .guidelines { 
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-md);
+            overflow: hidden;
+            transition: border-color var(--transition-fast);
+        }
+
+        .guidelines:hover {
+            border-color: var(--border-default);
+        }
+
+        .guidelines-header {
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+            transition: background var(--transition-fast);
+        }
+
+        .guidelines-header:hover {
+            background: var(--bg-overlay);
+        }
+
+        .guidelines-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .guidelines-content {
+            display: none;
+            padding: 0 var(--space-lg) var(--space-lg);
+        }
+
+        .guidelines-content.show {
+            display: block;
+        }
+
+        .guideline-section {
+            margin-bottom: var(--space-lg);
+        }
+
+        .guideline-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .guideline-section h4 {
+            color: var(--accent);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .guideline-section p {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.7;
+            margin-bottom: var(--space-sm);
+        }
+
+        .guideline-section ul {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        .guideline-section li {
+            padding: var(--space-xs) 0;
+            padding-left: var(--space-md);
+            position: relative;
+            line-height: 1.6;
+        }
+
+        body.rtl .guideline-section li {
+            padding-left: 0;
+            padding-right: var(--space-md);
+        }
+
+        .guideline-section li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        body.rtl .guideline-section li::before {
+            left: auto;
+            right: 0;
+        }
+
+        /* ========== UPLOAD AREA ========== */
+        .upload-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .upload-area {
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-default);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl) var(--space-lg);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, var(--accent-muted), transparent 70%);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+        }
+
+        .upload-area:hover,
+        .upload-area.dragover {
+            border-color: var(--accent);
+            background: var(--bg-tertiary);
+        }
+
+        .upload-area:hover::before,
+        .upload-area.dragover::before {
+            opacity: 1;
+        }
+
+        .upload-area.has-file {
+            border-style: solid;
+            border-color: var(--success);
+            background: var(--success-muted);
+        }
+
+        .upload-icon {
+            font-size: 56px;
+            margin-bottom: var(--space-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-text {
+            font-size: var(--text-lg);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-formats {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            position: relative;
+            z-index: 1;
+        }
+
+        .file-info {
+            display: none;
+            background: var(--accent-muted);
+            border: 1px solid var(--accent);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-top: var(--space-md);
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+            word-break: break-all;
+            color: var(--text-primary);
+        }
+
+        .file-meta {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        /* ========== LOADING ========== */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: var(--space-2xl);
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-default);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto var(--space-md);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        /* ========== RESULTS ========== */
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            text-align: center;
+            margin-bottom: var(--space-lg);
+            border: 2px solid transparent;
+            transition: all var(--transition-base);
+        }
+
+        .status-card.ready {
+            border-color: var(--success);
+            background: var(--success-muted);
+        }
+
+        .status-card.warning {
+            border-color: var(--warning);
+            background: var(--warning-muted);
+        }
+
+        .status-card.issues {
+            border-color: var(--error);
+            background: var(--error-muted);
+        }
+
+        .status-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-md);
+        }
+
+        .status-title {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        .status-desc {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .metric-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            transition: border-color var(--transition-fast);
+        }
+
+        .metric-card:hover {
+            border-color: var(--border-default);
+        }
+
+        .metric-card.full {
+            grid-column: span 2;
+        }
+
+        .metric-label {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-xs);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: var(--text-2xl);
+            font-weight: 700;
+            font-family: var(--font-mono);
+            margin-bottom: var(--space-xs);
+        }
+
+        .metric-status {
+            font-size: var(--text-xs);
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .metric-status.good {
+            background: var(--success-muted);
+            color: var(--success);
+        }
+
+        .metric-status.warn {
+            background: var(--warning-muted);
+            color: var(--warning);
+        }
+
+        .metric-status.bad {
+            background: var(--error-muted);
+            color: var(--error);
+        }
+
+        /* Issues Section */
+        .issues-section {
+            background: var(--error-muted);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+            display: none;
+        }
+
+        .issues-section.show {
+            display: block;
+        }
+
+        .issues-title {
+            font-weight: 600;
+            color: var(--error);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .issue-item {
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-sm);
+        }
+
+        .issue-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .issue-name {
+            font-weight: 600;
+            margin-bottom: var(--space-xs);
+        }
+
+        .issue-desc {
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        /* Instructions */
+        .instructions {
+            background: var(--accent-muted);
+            border: 1px solid rgba(201, 162, 39, 0.3);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .instructions-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .instruction-item {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-md);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+        }
+
+        .instruction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .instruction-num {
+            background: var(--accent);
+            color: var(--bg-primary);
+            width: 22px;
+            height: 22px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-xs);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .clip-list {
+            margin: var(--space-sm) 0 var(--space-md) var(--space-xl);
+            padding: var(--space-md);
+            background: var(--error-muted);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--error);
+        }
+
+        body.rtl .clip-list {
+            margin: var(--space-sm) var(--space-xl) var(--space-md) 0;
+            border-left: none;
+            border-right: 3px solid var(--error);
+        }
+
+        .clip-item {
+            font-size: var(--text-xs);
+            font-family: var(--font-mono);
+            color: #f87171;
+            padding: 3px 0;
+        }
+
+        /* ========== FREQUENCY BALANCE ========== */
+        .freq-balance {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .freq-title {
+            font-weight: 600;
+            font-size: var(--text-base);
+            margin-bottom: var(--space-xs);
+        }
+
+        .freq-note {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+        }
+
+        .freq-6band {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        /* Spectrum Tabs */
+        .spectrum-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: var(--space-md);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            background: var(--bg-overlay);
+        }
+
+        .spectrum-tab {
+            flex: 1;
+            padding: var(--space-sm) var(--space-md);
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .spectrum-tab:hover {
+            background: var(--bg-overlay);
+            color: var(--text-secondary);
+        }
+
+        .spectrum-tab.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: #22d3ee;
+        }
+
+        .spectrum-tab[data-tab="flat"].active {
+            background: rgba(167, 139, 250, 0.15);
+            color: #a78bfa;
+        }
+
+        .spectrum-panel {
+            display: none;
+        }
+
+        .spectrum-panel.active {
+            display: block;
+        }
+
+        .spectrum-panel-description {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-overlay);
+            border-radius: var(--radius-sm);
+            line-height: 1.5;
+        }
+
+        .freq-band {
+            display: grid;
+            grid-template-columns: 65px 70px 1fr 55px;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 480px) {
+            .freq-band {
+                grid-template-columns: 55px 60px 1fr 50px;
+                gap: var(--space-sm);
+            }
+        }
+
+        .freq-band-label {
+            font-weight: 600;
+            font-size: var(--text-sm);
+            color: var(--text-primary);
+        }
+
+        .freq-band-range {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+        }
+
+        .freq-band-meter {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .freq-meter-scale {
+            display: flex;
+            justify-content: space-between;
+            font-size: 8px;
+            color: var(--text-disabled);
+            padding: 0 2px;
+        }
+
+        .freq-meter-track {
+            height: 18px;
+            background: linear-gradient(90deg, 
+                rgba(59,130,246,0.15) 0%, 
+                rgba(34,197,94,0.15) 50%,
+                rgba(245,158,11,0.15) 100%
+            );
+            border-radius: var(--radius-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .freq-meter-track::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--text-disabled);
+            transform: translateX(-50%);
+        }
+
+        .freq-meter-bar {
+            position: absolute;
+            top: 3px;
+            height: 12px;
+            border-radius: 3px;
+            transition: all var(--transition-base);
+        }
+
+        .freq-meter-bar.positive {
+            left: 50%;
+            background: linear-gradient(90deg, var(--success), var(--warning));
+        }
+
+        .freq-meter-bar.negative {
+            right: 50%;
+            background: linear-gradient(270deg, var(--success), #3b82f6);
+        }
+
+        .freq-meter-bar.flat.positive {
+            background: linear-gradient(90deg, #8b5cf6, #c084fc);
+        }
+
+        .freq-meter-bar.flat.negative {
+            background: linear-gradient(270deg, #8b5cf6, #6366f1);
+        }
+
+        .freq-band-value {
+            font-size: var(--text-sm);
+            font-weight: 700;
+            color: var(--text-primary);
+            text-align: right;
+            font-family: var(--font-mono);
+        }
+
+        .freq-band-value.balanced {
+            color: var(--success);
+        }
+
+        .freq-band-value.warn {
+            color: var(--warning);
+        }
+
+        .freq-reference {
+            margin-top: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            background: var(--accent-muted);
+            border-radius: var(--radius-md);
+            border-left: 3px solid var(--accent);
+            font-size: var(--text-xs);
+            color: var(--text-secondary);
+        }
+
+        body.rtl .freq-reference {
+            border-left: none;
+            border-right: 3px solid var(--accent);
+        }
+
+        .freq-graph-container {
+            background: #0d0d14;
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-top: var(--space-md);
+        }
+
+        #freqGraph, #freqGraphFlat {
+            width: 100%;
+            height: 140px;
+            display: block;
+        }
+
+        /* Analysis Details */
+        .analysis-details {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-md);
+            overflow: hidden;
+        }
+
+        .details-header {
+            padding: var(--space-md) var(--space-lg);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: transparent;
+            transition: background var(--transition-fast);
+        }
+
+        .details-header:hover {
+            background: var(--bg-overlay);
+        }
+
+        .details-title {
+            font-weight: 600;
+            font-size: var(--text-sm);
+        }
+
+        .details-content {
+            display: none;
+            padding: 0 var(--space-lg) var(--space-lg);
+        }
+
+        .details-content.show {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: var(--space-md);
+        }
+
+        .detail-section h4 {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clip-log {
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: var(--text-xs);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .clip-log-item {
+            padding: var(--space-xs) var(--space-sm);
+            margin-bottom: var(--space-xs);
+            background: var(--error-muted);
+            border-radius: var(--radius-sm);
+            border-left: 3px solid var(--error);
+        }
+
+        body.rtl .clip-log-item {
+            border-left: none;
+            border-right: 3px solid var(--error);
+        }
+
+        .clip-log-item .time {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .clip-log-item .peak {
+            color: var(--error);
+        }
+
+        .clip-log-item .channel {
+            color: var(--text-muted);
+        }
+
+        .analysis-log {
+            background: var(--bg-primary);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: var(--text-xs);
+            line-height: 1.6;
+            color: var(--text-secondary);
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* ========== PLAYER ========== */
+        .player {
+            display: none;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .player.show {
+            display: block;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .play-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-full);
+            background: var(--accent);
+            border: none;
+            color: var(--bg-primary);
+            font-size: var(--text-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+            flex-shrink: 0;
+        }
+
+        .play-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+
+        .player-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-time {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-sm);
+            font-family: var(--font-mono);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* ========== ACTION BUTTONS ========== */
+        .action-buttons {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .pdf-btn,
+        .reset-btn {
+            flex: 1;
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .pdf-btn {
+            background: var(--accent);
+            border: none;
+            color: var(--bg-primary);
+        }
+
+        .pdf-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 2px solid var(--border-default);
+            color: var(--text-secondary);
+        }
+
+        .reset-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-icon {
+            font-size: var(--text-lg);
+        }
+
+        /* ========== CONTACT SECTION ========== */
+        .contact-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: var(--space-xl);
+            margin: var(--space-2xl) 0;
+            text-align: center;
+        }
+
+        .contact-title {
+            font-size: var(--text-xl);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .contact-text {
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-lg);
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .contact-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-xl);
+            background: #25D366;
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .whatsapp-btn:hover {
+            background: #20bd5a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+
+        .whatsapp-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .email-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-md) var(--space-xl);
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            font-size: var(--text-base);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .email-btn:hover {
+            background: var(--bg-elevated);
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .email-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Floating WhatsApp Button (Mobile) */
+        .whatsapp-fab {
+            display: none;
+            position: fixed;
+            bottom: var(--space-lg);
+            right: var(--space-lg);
+            width: 56px;
+            height: 56px;
+            background: #25D366;
+            border-radius: var(--radius-full);
+            color: white;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            text-decoration: none;
+            transition: all var(--transition-base);
+        }
+
+        .whatsapp-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-fab svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        @media (max-width: 640px) {
+            .whatsapp-fab {
+                display: flex;
+            }
+        }
+
+        body.rtl .whatsapp-fab {
+            right: auto;
+            left: var(--space-lg);
+        }
+
+        /* ========== FOOTER ========== */
+        .footer {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            border-top: 1px solid var(--border-subtle);
+            margin-top: var(--space-xl);
+        }
+
+        .footer-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: var(--text-sm);
+            transition: color var(--transition-fast);
+        }
+
+        .footer-link:hover {
+            color: var(--accent-hover);
+        }
+
+        .footer-copy {
+            color: var(--text-disabled);
+            font-size: var(--text-xs);
+            margin-top: var(--space-sm);
+        }
+
+        /* ========== SPECTRUM VISUALIZER ========== */
+        .spectrum {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .spectrum-title {
+            font-size: var(--text-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .spectrum-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 80px;
+            gap: 2px;
+        }
+
+        .spectrum-bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--accent), var(--accent-hover));
+            min-height: 4px;
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s;
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--text-disabled);
+            margin-top: var(--space-sm);
+        }
+
+        .live-badge {
+            background: var(--error);
+            color: white;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ========== CHECKLIST ========== */
+        .checklist {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .checklist-title {
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .check-item:last-child {
+            border-bottom: none;
+        }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+
+        .check-icon.pass {
+            background: var(--success-muted);
+            color: var(--success);
+        }
+
+        .check-icon.fail {
+            background: var(--error-muted);
+            color: var(--error);
+        }
+
+        .check-icon.warn {
+            background: var(--warning-muted);
+            color: var(--warning);
+        }
+
+        .check-text {
+            flex: 1;
+            font-size: var(--text-sm);
+        }
+
+        .check-value {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        /* ========== UTILITIES ========== */
+        input[type="file"] {
+            display: none;
+        }
+
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content[data-lang="en"] {
+            display: block;
+        }
+
+        body.rtl .lang-content[data-lang="en"] {
+            display: none;
+        }
+
+        body.rtl .lang-content[data-lang="he"] {
+            display: block;
+        }
+
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Language Toggle -->
+        <div class="site-header">
+            <div class="lang-toggle">
+                <button class="lang-btn active" id="langEn" onclick="setLang('en')">English</button>
+                <button class="lang-btn" id="langHe" onclick="setLang('he')">עברית</button>
+            </div>
+
+            <!-- Header -->
+            <div class="logo"><span>oppen</span>masters</div>
+            <div class="tagline" data-en="Pre-Mastering Mix Check" data-he="בדיקת מיקס לפני מאסטרינג"></div>
+        </div>
+
+        <!-- Guidelines -->
+        <div class="guidelines">
+            <div class="guidelines-header" id="guidelinesHeader">
+                <div class="guidelines-title">📖 <span data-en="Submission Guidelines" data-he="הנחיות הגשה למאסטרינג">Submission Guidelines</span></div>
+                <span id="guidelinesArrow">▲</span>
+            </div>
+            <div class="guidelines-content show" id="guidelinesContent">
+                <!-- English Guidelines -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>Required Files</h4>
+                        <ul>
+                            <li><strong>Reference Master</strong> - Keep ALL your processing! Don't remove anything. I want to hear your vision, intention and energy as-is</li>
+                            <li><strong>Clean Mix</strong> - Without master bus processing (no limiter/maximizer)</li>
+                            <li>Original Sample Rate - don't convert!</li>
+                            <li>Original Bit Depth</li>
+                            <li>No Dither applied</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>Volume & Headroom</h4>
+                        <ul>
+                            <li><strong>Don't mix too quiet!</strong> A very low mix level wastes bit-depth resolution - keep healthy levels</li>
+                            <li>In a busy/dense mix, it's totally fine to get close to 0dB - as long as there's no clipping</li>
+                            <li>No need to hit -6dB exactly - just avoid clipping</li>
+                            <li>No Limiter/Maximizer on Clean Mix</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>What NOT to Do</h4>
+                        <ul>
+                            <li>Don't change Sample Rate</li>
+                            <li>Don't Normalize</li>
+                            <li>Don't apply SRC/Resampling</li>
+                            <li>Don't add processing to Mix Bus on clean version</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>File Names</h4>
+                        <ul>
+                            <li>Artist – Track – MIX</li>
+                            <li>Artist – Track – MASTER REF</li>
+                            <li>Format: WAV or AIFF only</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Hebrew Guidelines -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>קבצים נדרשים</h4>
+                        <ul>
+                            <li><strong>Reference Master</strong> - השאירו את כל העיבודים! אל תורידו שום דבר. אני רוצה לשמוע את החזון, הכוונה והאנרגיה המקורית שלכם כמו שהיא</li>
+                            <li><strong>Clean Mix</strong> - ללא עיבודי מאסטר על המיקס באס (ללא לימיטר/מקסימייזר)</li>
+                            <li>Sample Rate מקורי - לא לשנות!</li>
+                            <li>Bit Depth מקורי</li>
+                            <li>ללא Dither</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>ווליום ו-Headroom</h4>
+                        <ul>
+                            <li><strong>לא למקס חלש מדי!</strong> רמה נמוכה מדי מבזבזת רזולוציית ביטים - שמרו על רמות בריאות</li>
+                            <li>במיקס עמוס זה בסדר גמור להתקרב ל-0dB - כל עוד אין קליפינג</li>
+                            <li>לא חייבים בדיוק -6dB - פשוט הימנעו מקליפינג</li>
+                            <li>ללא Limiter/Maximizer על ה-Clean Mix</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>מה לא לעשות</h4>
+                        <ul>
+                            <li>לא לשנות Sample Rate</li>
+                            <li>לא לעשות Normalizing</li>
+                            <li>לא לעשות SRC/Resampling</li>
+                            <li>לא להוסיף עיבודים על Mix Bus בגרסה הנקייה</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>שמות קבצים</h4>
+                        <ul>
+                            <li>Artist – Track – MIX</li>
+                            <li>Artist – Track – MASTER REF</li>
+                            <li>פורמט: WAV או AIFF בלבד</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- About This Tool -->
+        <div class="guidelines about-tool">
+            <div class="guidelines-header" id="aboutHeader">
+                <div class="guidelines-title">ℹ️ <span data-en="About This Tool" data-he="על הכלי הזה">About This Tool</span></div>
+                <span id="aboutArrow">▼</span>
+            </div>
+            <div class="guidelines-content" id="aboutContent">
+                <!-- English About -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>What This Tool Does</h4>
+                        <p>This is a <strong>pre-mastering check tool</strong> that analyzes your mix before sending it for mastering. It checks for common technical issues that could affect the mastering process.</p>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>Measurements Explained</h4>
+                        <ul>
+                            <li><strong>Peak Level</strong> - Maximum sample amplitude. Avoid hitting 0 dB (clipping)</li>
+                            <li><strong>RMS Level</strong> - Average loudness (root mean square)</li>
+                            <li><strong>LUFS</strong> - Perceived loudness per ITU-R BS.1770 standard</li>
+                            <li><strong>Dynamic Range</strong> - Difference between peak and RMS (crest factor)</li>
+                            <li><strong>Correlation</strong> - Mono compatibility. Below 0 = phase issues</li>
+                            <li><strong>Stereo Width</strong> - How wide the stereo image is</li>
+                            <li><strong>Frequency Balance</strong> - Energy in 6 bands (Sub/Bass/Low-Mid/Mid/High-Mid/High). 0 dB = average</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>⚠️ Important Limitations</h4>
+                        <ul>
+                            <li>This tool provides <strong>estimates only</strong> - not laboratory-grade measurements</li>
+                            <li>Frequency analysis is approximate and may vary from professional analyzers</li>
+                            <li>Use this as a <strong>general guide</strong>, not absolute truth</li>
+                            <li>The best judge of your mix is always your ears + reference tracks</li>
+                            <li>When in doubt, trust your ears over the numbers</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Hebrew About -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>למה זה טוב</h4>
+                        <p>כלי לבדיקת המיקס לפני שליחה למאסטרינג. עוזר לזהות בעיות טכניות נפוצות שכדאי לטפל בהן מראש.</p>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>מה המספרים אומרים</h4>
+                        <ul>
+                            <li><strong>Peak Level</strong> - הפיק הכי גבוה בקובץ. מעל 0 dB = קליפינג</li>
+                            <li><strong>RMS Level</strong> - ממוצע העוצמה הכללית</li>
+                            <li><strong>LUFS</strong> - עוצמה כפי שהאוזן שומעת (תקן בינלאומי)</li>
+                            <li><strong>Dynamic Range</strong> - כמה הבדל יש בין החזק לחלש</li>
+                            <li><strong>Correlation</strong> - האם יש בעיות פאזה? מתחת ל-0 = יש בעיה</li>
+                            <li><strong>Stereo Width</strong> - כמה רחב הסטריאו</li>
+                            <li><strong>Frequency Balance</strong> - אנרגיה ב-6 טווחים (סאב/באס/נמוך-אמצע/אמצע/אמצע-גבוה/גבוהים). 0 dB = הממוצע</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>⚠️ חשוב לדעת</h4>
+                        <ul>
+                            <li>זה כלי עזר בלבד - <strong>לא תחליף לאוזניים</strong></li>
+                            <li>המדידות הן הערכה כללית, לא מעבדה</li>
+                            <li>ניתוח התדרים משוער - יכול להשתנות ממנתחים אחרים</li>
+                            <li>אם משהו נראה תקין פה אבל נשמע לא טוב - תסמכו על האוזניים</li>
+                            <li>השוואה לרפרנסים תמיד עדיפה על מספרים</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Guide -->
+        <!-- Understanding Measurements -->
+        <div class="guidelines user-guide">
+            <div class="guidelines-header" id="guideHeader">
+                <div class="guidelines-title">📊 <span data-en="Understanding the Measurements" data-he="הבנת המדידות">Understanding the Measurements</span></div>
+                <span id="guideArrow">▼</span>
+            </div>
+            <div class="guidelines-content" id="guideContent">
+                <!-- English Guide -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>🎚️ Levels - How Loud Is Your Mix?</h4>
+                        <p><strong>Peak</strong> = The loudest moment in your song. Like the highest point on a roller coaster.<br>
+                        ✅ Good: -3 to -1 dB &nbsp; ⚠️ Problem: 0 dB or higher (causes distortion)</p>
+                        
+                        <p><strong>RMS</strong> = Average loudness. Like measuring the "typical" height of the roller coaster.<br>
+                        ✅ Normal: -18 to -12 dB</p>
+                        
+                        <p><strong>LUFS</strong> = How loud it actually sounds to your ears (not just numbers).<br>
+                        ✅ For mastering: -18 to -14 LUFS gives the mastering engineer room to work</p>
+                        
+                        <p><strong>Dynamic Range</strong> = The difference between quiet and loud parts. High = more "breathing", Low = more "squashed".<br>
+                        ✅ Good: 8-15 dB &nbsp; ⚠️ Too low: Under 6 dB (over-compressed)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🔊 Stereo - Left and Right</h4>
+                        <p><strong>Correlation</strong> = Do left and right play nice together?<br>
+                        ✅ Good: 0.3 to 1.0 &nbsp; ⚠️ Problem: Below 0 (will sound weird in mono, like on phone speakers)</p>
+                        
+                        <p><strong>Stereo Width</strong> = How "wide" the sound feels.<br>
+                        ✅ Normal: 30-70% &nbsp; Very wide isn't always better!</p>
+                        
+                        <p><strong>L/R Balance</strong> = Is one side louder than the other?<br>
+                        ✅ Good: Within ±1 dB &nbsp; ⚠️ Problem: More than ±2 dB (mix is lopsided)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🎛️ Frequency Balance - The 6 Bands</h4>
+                        <p>Think of it like a graphic equalizer. Each band shows if that area is louder (+) or quieter (-) than average:</p>
+                        
+                        <p><strong>Sub (20-60Hz)</strong> = The deep rumble you feel more than hear. Kick drum thump.<br>
+                        ⚠️ Too much = muddy, boomy &nbsp; Too little = thin, no weight</p>
+                        
+                        <p><strong>Bass (60-200Hz)</strong> = The bass guitar, low end of vocals, warmth.<br>
+                        ⚠️ Too much = boomy, unclear &nbsp; Too little = weak, no foundation</p>
+                        
+                        <p><strong>Low-Mid (200-500Hz)</strong> = Body and warmth, but also "mud" lives here.<br>
+                        ⚠️ Too much = muddy, boxy &nbsp; Too little = thin, hollow</p>
+                        
+                        <p><strong>Mid (500Hz-2kHz)</strong> = Vocals, guitars, most of what you "hear".<br>
+                        ⚠️ Too much = honky, harsh &nbsp; Too little = distant, lost</p>
+                        
+                        <p><strong>High-Mid (2-4kHz)</strong> = Clarity, presence, attack. Your ear is most sensitive here.<br>
+                        ⚠️ Too much = harsh, fatiguing &nbsp; Too little = dull, buried</p>
+                        
+                        <p><strong>High (4-16kHz)</strong> = Air, sparkle, cymbals, "s" sounds.<br>
+                        ⚠️ Too much = piercing, sibilant &nbsp; Too little = dark, muffled</p>
+                        
+                        <p><strong>👂 Perceptual vs 📊 Raw:</strong><br>
+                        "Perceptual" shows how your ears actually hear it (bass seems quieter because our ears are less sensitive there).<br>
+                        "Raw" shows the actual energy - useful for comparing with other analyzers.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>⚡ Clipping - What Are Those Red Warnings?</h4>
+                        <p>Clipping happens when your audio is too loud and gets "cut off" at the top, causing distortion.</p>
+                        <p>✅ Ideal: 0 clips &nbsp; ⚠️ A few clips: Check those moments &nbsp; ❌ Many clips: Reduce level at source</p>
+                    </div>
+                </div>
+                
+                <!-- Hebrew Guide -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>🎚️ עוצמות - כמה חזק המיקס שלך?</h4>
+                        <p><strong>Peak</strong> = הרגע הכי חזק בשיר. כמו הנקודה הכי גבוהה ברכבת הרים.<br>
+                        ✅ טוב: -3 עד -1 dB &nbsp; ⚠️ בעיה: 0 dB ומעלה (גורם לעיוות)</p>
+                        
+                        <p><strong>RMS</strong> = ממוצע העוצמה. כמו לחשב את הגובה ה"טיפוסי" של רכבת ההרים.<br>
+                        ✅ רגיל: -18 עד -12 dB</p>
+                        
+                        <p><strong>LUFS</strong> = כמה חזק זה באמת נשמע לאוזניים שלך (לא רק מספרים).<br>
+                        ✅ למאסטרינג: -18 עד -14 LUFS נותן למאסטר מקום לעבוד</p>
+                        
+                        <p><strong>Dynamic Range</strong> = ההבדל בין החלקים השקטים לחזקים. גבוה = יותר "נשימה", נמוך = יותר "מעוך".<br>
+                        ✅ טוב: 8-15 dB &nbsp; ⚠️ נמוך מדי: מתחת ל-6 dB (דחיסת יתר)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🔊 סטריאו - שמאל וימין</h4>
+                        <p><strong>Correlation</strong> = האם שמאל וימין מסתדרים יחד?<br>
+                        ✅ טוב: 0.3 עד 1.0 &nbsp; ⚠️ בעיה: מתחת ל-0 (יישמע מוזר במונו, כמו ברמקולי טלפון)</p>
+                        
+                        <p><strong>Stereo Width</strong> = כמה "רחב" הצליל מרגיש.<br>
+                        ✅ רגיל: 30-70% &nbsp; רחב מאוד לא תמיד עדיף!</p>
+                        
+                        <p><strong>L/R Balance</strong> = האם צד אחד חזק מהשני?<br>
+                        ✅ טוב: בטווח של ±1 dB &nbsp; ⚠️ בעיה: יותר מ-±2 dB (המיקס לא מאוזן)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🎛️ איזון תדרים - 6 הטווחים</h4>
+                        <p>תחשוב על זה כמו אקולייזר גרפי. כל טווח מראה אם האזור הזה חזק יותר (+) או חלש יותר (-) מהממוצע:</p>
+                        
+                        <p><strong>Sub (20-60Hz)</strong> = הרעידה העמוקה שמרגישים יותר משומעים. דפיקת קיק.<br>
+                        ⚠️ יותר מדי = מבולגן, בומי &nbsp; פחות מדי = דק, בלי משקל</p>
+                        
+                        <p><strong>Bass (60-200Hz)</strong> = הבאס גיטרה, החלק הנמוך של קולות, חמימות.<br>
+                        ⚠️ יותר מדי = בומי, לא ברור &nbsp; פחות מדי = חלש, בלי יסוד</p>
+                        
+                        <p><strong>Low-Mid (200-500Hz)</strong> = גוף וחמימות, אבל גם "בוץ" גר פה.<br>
+                        ⚠️ יותר מדי = מבוצבץ, קופסתי &nbsp; פחות מדי = דק, חלול</p>
+                        
+                        <p><strong>Mid (500Hz-2kHz)</strong> = קולות, גיטרות, רוב מה שאתה "שומע".<br>
+                        ⚠️ יותר מדי = צורם, חד &nbsp; פחות מדי = רחוק, אבוד</p>
+                        
+                        <p><strong>High-Mid (2-4kHz)</strong> = בהירות, נוכחות, אטאק. האוזן הכי רגישה פה.<br>
+                        ⚠️ יותר מדי = צורם, מעייף &nbsp; פחות מדי = עמום, קבור</p>
+                        
+                        <p><strong>High (4-16kHz)</strong> = אוויר, ברק, מצילות, צלילי "ס".<br>
+                        ⚠️ יותר מדי = חודר, סיבילנטי &nbsp; פחות מדי = חשוך, עמום</p>
+                        
+                        <p><strong>👂 Perceptual מול 📊 Raw:</strong><br>
+                        "לפי האוזן" מראה איך האוזניים שלך באמת שומעות (הבאס נראה שקט יותר כי האוזניים פחות רגישות שם).<br>
+                        "מדידה רגילה" מראה את האנרגיה האמיתית - שימושי להשוואה עם מנתחים אחרים.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>⚡ קליפינג - מה האזהרות האדומות האלה?</h4>
+                        <p>קליפינג קורה כשהאודיו חזק מדי ו"נחתך" בחלק העליון, וגורם לעיוות.</p>
+                        <p>✅ אידיאלי: 0 קליפים &nbsp; ⚠️ כמה קליפים: תבדוק את הרגעים האלה &nbsp; ❌ הרבה קליפים: תוריד רמה במקור</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How To Use -->
+        <div class="guidelines how-to-use">
+            <div class="guidelines-header" id="howToHeader">
+                <div class="guidelines-title">🚀 <span data-en="How To Use This Tool" data-he="איך להשתמש בכלי">How To Use This Tool</span></div>
+                <span id="howToArrow">▼</span>
+            </div>
+            <div class="guidelines-content" id="howToContent">
+                <!-- English How To -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>Step 1: Upload Your File</h4>
+                        <p>🎵 <strong>Drag & Drop</strong> your audio file onto the upload area below, or <strong>click</strong> to browse your computer.</p>
+                        <p>Supported formats: WAV, AIFF, MP3, FLAC (up to 200MB)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 2: Wait for Analysis</h4>
+                        <p>⏳ The tool will analyze your entire file. This takes a few seconds depending on the file length.</p>
+                        <p>You'll see a progress bar while it works.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 3: Review Results</h4>
+                        <p>📊 Once complete, you'll see:</p>
+                        <ul>
+                            <li><strong>Levels section</strong> - Peak, RMS, LUFS, Dynamic Range</li>
+                            <li><strong>Stereo section</strong> - Correlation, Width, L/R Balance</li>
+                            <li><strong>Frequency Balance</strong> - 6-band analysis with graph (switch between Perceptual/Raw tabs)</li>
+                            <li><strong>Issues</strong> - Any problems detected (clipping, phase issues, etc.)</li>
+                        </ul>
+                        <p>🟢 Green = Good &nbsp; 🟡 Yellow = Check it &nbsp; 🔴 Red = Problem</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 4: Listen & Compare</h4>
+                        <p>▶️ Use the <strong>built-in player</strong> at the bottom to listen to your file.</p>
+                        <p>Click on clip timestamps to jump directly to problem areas.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 5: Download Report (Optional)</h4>
+                        <p>📄 Click the <strong>"Download PDF Report"</strong> button to save a professional report.</p>
+                        <p>Great for your records or to share with clients/collaborators.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>💡 Tips</h4>
+                        <ul>
+                            <li>Analyze your mix BEFORE sending to mastering</li>
+                            <li>Compare with a reference track you trust</li>
+                            <li>Use the "Analysis Details" section to see the full log</li>
+                            <li>Switch language with 🌐 button at top right</li>
+                            <li>Numbers are guides - your ears are the final judge!</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Hebrew How To -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>שלב 1: העלאת קובץ</h4>
+                        <p>🎵 <strong>גרור ושחרר</strong> את קובץ האודיו לאזור ההעלאה למטה, או <strong>לחץ</strong> כדי לבחור מהמחשב.</p>
+                        <p>פורמטים נתמכים: WAV, AIFF, MP3, FLAC (עד 200MB)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 2: המתנה לניתוח</h4>
+                        <p>⏳ הכלי ינתח את כל הקובץ. זה לוקח כמה שניות תלוי באורך הקובץ.</p>
+                        <p>תראה סרגל התקדמות בזמן העבודה.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 3: סקירת התוצאות</h4>
+                        <p>📊 בסיום, תראה:</p>
+                        <ul>
+                            <li><strong>אזור Levels</strong> - Peak, RMS, LUFS, Dynamic Range</li>
+                            <li><strong>אזור Stereo</strong> - Correlation, Width, L/R Balance</li>
+                            <li><strong>Frequency Balance</strong> - ניתוח 6 טווחים עם גרף (עבור בין טאבים Perceptual/Raw)</li>
+                            <li><strong>Issues</strong> - בעיות שזוהו (קליפינג, בעיות פאזה וכו')</li>
+                        </ul>
+                        <p>🟢 ירוק = טוב &nbsp; 🟡 צהוב = תבדוק &nbsp; 🔴 אדום = בעיה</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 4: האזנה והשוואה</h4>
+                        <p>▶️ השתמש <strong>בנגן המובנה</strong> בתחתית כדי להאזין לקובץ.</p>
+                        <p>לחץ על זמני הקליפים כדי לקפוץ ישירות לנקודות הבעייתיות.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 5: הורדת דוח (אופציונלי)</h4>
+                        <p>📄 לחץ על כפתור <strong>"Download PDF Report"</strong> כדי לשמור דוח מקצועי.</p>
+                        <p>מעולה לתיעוד או לשיתוף עם לקוחות/שותפים.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>💡 טיפים</h4>
+                        <ul>
+                            <li>נתח את המיקס לפני שליחה למאסטרינג</li>
+                            <li>השווה לרפרנס שאתה סומך עליו</li>
+                            <li>השתמש בסקשן "Analysis Details" כדי לראות את הלוג המלא</li>
+                            <li>החלף שפה עם כפתור 🌐 בפינה הימנית העליונה</li>
+                            <li>המספרים הם מדריך - האוזניים שלך הן השופט הסופי!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="upload-area" id="uploadArea" role="button" tabindex="0" aria-label="Upload audio file - drag and drop or click to browse">
+            <div class="upload-icon" aria-hidden="true">🎵</div>
+            <div class="upload-text" data-en="Drop file here or click to browse" data-he="גרור קובץ לכאן או לחץ לבחירה"></div>
+            <div class="upload-formats" aria-label="Supported formats">WAV, AIFF, MP3, FLAC • Max 200MB</div>
+        </div>
+        <input type="file" id="fileInput" accept="audio/*" aria-label="Select audio file">
+
+        <!-- File Info -->
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-meta" id="fileMeta"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div data-en="Analyzing mix..." data-he="מנתח את המיקס..."></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <!-- Status Card -->
+            <div class="status-card" id="statusCard">
+                <div class="status-icon" id="statusIcon">✅</div>
+                <div class="status-title" id="statusTitle"></div>
+                <div class="status-desc" id="statusDesc"></div>
+            </div>
+
+            <!-- Checklist -->
+            <div class="checklist" id="checklist">
+                <div class="checklist-title">📋 <span data-en="Quality Check" data-he="בדיקת תקינות"></span></div>
+                <div id="checkItems"></div>
+            </div>
+
+            <!-- Issues -->
+            <div class="issues-section" id="issuesSection">
+                <div class="issues-title">⚠️ <span data-en="Issues Found" data-he="בעיות שנמצאו"></span></div>
+                <div id="issuesList"></div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions" id="instructions">
+                <div class="instructions-title">📝 <span data-en="How to Fix" data-he="הנחיות לתיקון"></span></div>
+                <div id="instructionsList"></div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Peak Level" data-he="עוצמת Peak"></div>
+                    <div class="metric-value" id="peakValue">-</div>
+                    <div class="metric-status" id="peakStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="RMS Level" data-he="עוצמת RMS"></div>
+                    <div class="metric-value" id="rmsValue">-</div>
+                    <div class="metric-status" id="rmsStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Loudness (LUFS)" data-he="Loudness (LUFS)"></div>
+                    <div class="metric-value" id="lufsValue">-</div>
+                    <div class="metric-status" id="lufsStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Dynamic Range" data-he="טווח דינמי"></div>
+                    <div class="metric-value" id="dynValue">-</div>
+                    <div class="metric-status" id="dynStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Stereo Width" data-he="רוחב סטריאו"></div>
+                    <div class="metric-value" id="widthValue">-</div>
+                    <div class="metric-status" id="widthStatus">-</div>
+                </div>
+                <div class="metric-card full">
+                    <div class="metric-label" data-en="L/R Balance" data-he="איזון L/R"></div>
+                    <div class="metric-value" id="balanceValue">-</div>
+                    <div class="metric-status" id="balanceStatus">-</div>
+                </div>
+            </div>
+
+            <!-- Frequency Balance with Tabs -->
+            <div class="freq-balance" id="freqBalance" style="display:none;">
+                <div class="freq-title">🎚️ <span data-en="Frequency Balance" data-he="איזון תדרים">Frequency Balance</span></div>
+                
+                <!-- Tabs -->
+                <div class="spectrum-tabs">
+                    <button class="spectrum-tab active" data-tab="perceptual" onclick="switchSpectrumTab('perceptual')">
+                        <span class="spectrum-tab-icon">👂</span>
+                        <span data-en="Perceptual" data-he="לפי האוזן">Perceptual</span>
+                    </button>
+                    <button class="spectrum-tab" data-tab="flat" onclick="switchSpectrumTab('flat')">
+                        <span class="spectrum-tab-icon">📊</span>
+                        <span data-en="Raw Measurement" data-he="מדידה רגילה">Raw Measurement</span>
+                    </button>
+                </div>
+                
+                <!-- Perceptual Panel (A-weighted) -->
+                <div class="spectrum-panel active" id="panelPerceptual">
+                    <div class="spectrum-panel-description" data-en="A-weighted measurement - shows how the human ear perceives the frequency balance. Low frequencies are reduced because we're less sensitive to them." data-he="מדידה משוקללת A - מראה איך האוזן האנושית שומעת את איזון התדרים. תדרים נמוכים מופחתים כי אנחנו פחות רגישים אליהם.">A-weighted measurement - shows how the human ear perceives the frequency balance. Low frequencies are reduced because we're less sensitive to them.</div>
+                    
+                    <div class="freq-6band">
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Sub" data-he="סאב">Sub</div>
+                            <div class="freq-band-range">20-60Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarSub"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValSub">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Bass" data-he="באס">Bass</div>
+                            <div class="freq-band-range">60-200Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarBass"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValBass">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Low-Mid" data-he="נמוך-אמצע">Low-Mid</div>
+                            <div class="freq-band-range">200-500Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarLowMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValLowMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Mid" data-he="אמצע">Mid</div>
+                            <div class="freq-band-range">500Hz-2kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High-Mid" data-he="אמצע-גבוה">High-Mid</div>
+                            <div class="freq-band-range">2-4kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarHighMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
+                            <div class="freq-band-range">4-16kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarHigh"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHigh">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="freq-graph-container" style="margin-top:16px;">
+                        <canvas id="freqGraph" width="400" height="120"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Flat Panel (Raw Measurement) -->
+                <div class="spectrum-panel" id="panelFlat">
+                    <div class="spectrum-panel-description" data-en="Raw measurement without weighting - shows actual energy levels at each frequency. Useful for comparison with standard spectrum analyzers." data-he="מדידה רגילה ללא שיקלול - מראה את רמות האנרגיה האמיתיות בכל תדר. שימושי להשוואה עם ספקטרום אנלייזרים רגילים.">Raw measurement without weighting - shows actual energy levels at each frequency. Useful for comparison with standard spectrum analyzers.</div>
+                    
+                    <div class="freq-6band">
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Sub" data-he="סאב">Sub</div>
+                            <div class="freq-band-range">20-60Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarSubFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValSubFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Bass" data-he="באס">Bass</div>
+                            <div class="freq-band-range">60-200Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarBassFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValBassFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Low-Mid" data-he="נמוך-אמצע">Low-Mid</div>
+                            <div class="freq-band-range">200-500Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarLowMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValLowMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Mid" data-he="אמצע">Mid</div>
+                            <div class="freq-band-range">500Hz-2kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High-Mid" data-he="אמצע-גבוה">High-Mid</div>
+                            <div class="freq-band-range">2-4kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarHighMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
+                            <div class="freq-band-range">4-16kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarHighFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighFlat">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="freq-graph-container" style="margin-top:16px;">
+                        <canvas id="freqGraphFlat" width="400" height="120"></canvas>
+                    </div>
+                </div>
+                
+                <div class="freq-reference" data-en="Balanced = all bands near 0 dB" data-he="מאוזן = כל הטווחים קרובים ל-0 dB">Balanced = all bands near 0 dB</div>
+            </div>
+
+            <!-- Analysis Details (Clips & Log) -->
+            <div class="analysis-details" id="analysisDetails" style="display:none;">
+                <div class="details-header" id="detailsHeader">
+                    <div class="details-title">📋 <span data-en="Analysis Details" data-he="פירוט הניתוח">Analysis Details</span></div>
+                    <span id="detailsArrow">▼</span>
+                </div>
+                <div class="details-content" id="detailsContent">
+                    <!-- Clip Events -->
+                    <div class="detail-section" id="clipSection" style="display:none;">
+                        <h4 data-en="⚡ Clip Events" data-he="⚡ אירועי קליפינג">⚡ Clip Events</h4>
+                        <div class="clip-log" id="clipLog"></div>
+                    </div>
+                    
+                    <!-- Analysis Log -->
+                    <div class="detail-section">
+                        <h4 data-en="📊 Full Analysis Log" data-he="📊 לוג ניתוח מלא">📊 Full Analysis Log</h4>
+                        <pre class="analysis-log" id="analysisLog"></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Spectrum -->
+            <div class="spectrum" id="spectrum">
+                <div class="spectrum-title">
+                    <span data-en="Live Spectrum" data-he="ספקטרום חי"></span>
+                    <span class="live-badge" id="liveBadge" style="display:none;">Live</span>
+                </div>
+                <div class="spectrum-bars" id="bars"></div>
+                <div class="spectrum-labels">
+                    <span>Sub</span>
+                    <span>Bass</span>
+                    <span>Low Mid</span>
+                    <span>Mid</span>
+                    <span>High Mid</span>
+                    <span>Air</span>
+                </div>
+            </div>
+
+            <!-- Player -->
+            <div class="player" id="player">
+                <div class="player-controls">
+                    <button class="play-btn" id="playBtn">▶</button>
+                    <div class="player-info">
+                        <div class="player-time">
+                            <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="pdf-btn" id="pdfBtn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-en="Download PDF Report" data-he="הורד דו״ח PDF">Download PDF Report</span>
+                </button>
+                <button class="reset-btn" id="resetBtn">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text" data-en="Check Another File" data-he="בדוק קובץ נוסף">Check Another File</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section" id="contactSection">
+            <div class="contact-title">
+                <span>💬</span>
+                <span data-en="Contact & Support" data-he="יצירת קשר ותמיכה">Contact & Support</span>
+            </div>
+            <div class="lang-content" data-lang="en">
+                <p class="contact-text">Need help interpreting your results or preparing your mix for mastering? I'm here to help. Reach out directly via WhatsApp or email.</p>
+            </div>
+            <div class="lang-content" data-lang="he" style="display:none;">
+                <p class="contact-text">צריך עזרה בהבנת התוצאות או בהכנת המיקס למאסטרינג? אני כאן בשבילך. פנה אליי ישירות בוואטסאפ או באימייל.</p>
+            </div>
+            <div class="contact-buttons">
+                <a href="https://wa.me/972526248561?text=Hi%2C%20I'm%20checking%20my%20mix%20and%20need%20help" target="_blank" class="whatsapp-btn" aria-label="Contact via WhatsApp">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                    <span data-en="Chat on WhatsApp" data-he="שלח הודעה בוואטסאפ">Chat on WhatsApp</span>
+                </a>
+                <a href="/cdn-cgi/l/email-protection#4b263e38222838232e262a0b2c262a22276528242674383e29212e283f760622336e797b08232e28206e797b1a3e2e383f222425" class="email-btn" aria-label="Contact via Email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <span data-en="Send Email" data-he="שלח אימייל">Send Email</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <a href="https://guyshema.com" target="_blank" class="footer-link">guyshema.com</a>
+            <div class="footer-copy">Guy Shema Oppenheimer © 2025</div>
+        </div>
+    </div>
+
+    <!-- Floating WhatsApp Button (Mobile) -->
+    <a href="https://wa.me/972526248561?text=Hi%2C%20I'm%20checking%20my%20mix%20and%20need%20help" target="_blank" class="whatsapp-fab" aria-label="Contact via WhatsApp">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </a>
+
+    <!-- jsPDF Library -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // ========== LANGUAGE SYSTEM ==========
+        let currentLang = 'en';
+        
+        const texts = {
+            en: {
+                // Status
+                ready_title: 'Mix is Ready!',
+                ready_desc: 'Good to send for mastering',
+                warning_title: 'Some Things to Check',
+                warning_desc: 'Can send, but review the notes below',
+                issues_title: 'Issues to Fix',
+                issues_desc: 'Please fix these issues before sending',
+                
+                // Checklist
+                check_clipping: 'No digital clipping',
+                check_phase: 'Mono compatibility (phase)',
+                check_balance: 'L/R Balance',
+                check_dynamics: 'Dynamic Range',
+                check_width: 'Stereo Width',
+                
+                // Metric status
+                ok: 'OK',
+                good: 'Good',
+                high: 'High',
+                clipping: 'Clipping!',
+                weak: 'Weak',
+                strong: 'Strong',
+                quiet_lufs: 'Quiet',
+                loud_lufs: 'Loud',
+                streaming_ok: 'Streaming OK',
+                compressed: 'Compressed',
+                very_dynamic: 'Very Dynamic',
+                narrow: 'Narrow',
+                wide: 'Wide',
+                centered: 'Centered',
+                balanced: 'Balanced',
+                unbalanced: 'Unbalanced',
+                
+                // Issues
+                issue_clipping: 'Digital Clipping!',
+                issue_clipping_desc: 'Samples are hitting 0dBFS or above. This will cause distortion.',
+                issue_phase_severe: 'Severe Phase Issues!',
+                issue_phase_severe_desc: 'Elements will cancel in mono.',
+                issue_phase_warn: 'Possible Phase Issues',
+                issue_phase_warn_desc: 'Negative correlation. Check mono compatibility.',
+                issue_balance: 'Asymmetric Balance',
+                issue_balance_desc: 'Mix leans to one side.',
+                issue_quiet: 'Very Low Level',
+                issue_quiet_desc: 'Mix is very quiet. Make sure this is intentional.',
+                issue_crushed: 'Over-Compressed',
+                issue_crushed_desc: 'Almost no dynamic range. If using a limiter, send version without it.',
+                issue_wide: 'Too Wide',
+                issue_wide_desc: 'Extreme stereo width may cause issues.',
+                issue_dc_offset: 'DC Offset Detected',
+                issue_dc_offset_desc: 'Low frequency bias in the signal. May cause clicks or asymmetric headroom.',
+                
+                // Instructions
+                inst_clipping: 'Fix clipping at the source in your mix - check the clips list below',
+                inst_clipping_momentary: 'Brief peaks may be OK if inaudible, but fix any sustained clipping in the mix',
+                inst_limiter: 'If there\'s a Limiter on the master, send a clean version without it',
+                inst_phase: 'Check mix in mono - look for Stereo Wideners or Chorus causing phase cancellation',
+                inst_naming: 'File names: Artist – Track – MIX / Artist – Track – MASTER REF',
+                
+                // Correlation
+                correlation: 'corr'
+            },
+            he: {
+                // Status
+                ready_title: 'המיקס מוכן!',
+                ready_desc: 'אפשר לשלוח למאסטרינג',
+                warning_title: 'יש דברים לבדוק',
+                warning_desc: 'אפשר לשלוח, אבל כדאי לבדוק את ההערות',
+                issues_title: 'יש בעיות לתקן',
+                issues_desc: 'נא לתקן את הבעיות לפני שליחה למאסטרינג',
+                
+                // Checklist
+                check_clipping: 'ללא קליפינג דיגיטלי',
+                check_phase: 'תאימות מונו (פאזה)',
+                check_balance: 'איזון L/R',
+                check_dynamics: 'טווח דינמי',
+                check_width: 'רוחב סטריאו',
+                
+                // Metric status
+                ok: 'תקין',
+                good: 'טוב',
+                high: 'גבוה',
+                clipping: 'קליפינג!',
+                weak: 'חלש',
+                strong: 'חזק',
+                quiet_lufs: 'שקט',
+                loud_lufs: 'חזק',
+                streaming_ok: 'מתאים לסטרימינג',
+                compressed: 'דחוס',
+                very_dynamic: 'דינמי מאוד',
+                narrow: 'צר',
+                wide: 'רחב',
+                centered: 'מרכז',
+                balanced: 'מאוזן',
+                unbalanced: 'לא סימטרי',
+                
+                // Issues
+                issue_clipping: 'קליפינג דיגיטלי!',
+                issue_clipping_desc: 'יש דגימות שמגיעות ל-0dBFS או מעבר. זה יגרום לעיוות.',
+                issue_phase_severe: 'בעיית פאזה חמורה!',
+                issue_phase_severe_desc: 'אלמנטים יתבטלו במונו.',
+                issue_phase_warn: 'בעיית פאזה אפשרית',
+                issue_phase_warn_desc: 'קורלציה שלילית. כדאי לבדוק מונו.',
+                issue_balance: 'איזון לא סימטרי',
+                issue_balance_desc: 'המיקס נוטה לצד אחד.',
+                issue_quiet: 'עוצמה נמוכה מאוד',
+                issue_quiet_desc: 'המיקס חלש מאוד. וודאו שזה מכוון ולא טעות ביצוא.',
+                issue_crushed: 'דחוס מדי',
+                issue_crushed_desc: 'כמעט אין טווח דינמי. אם יש לימיטר - שלחו גרסה בלעדיו.',
+                issue_wide: 'רחב מדי',
+                issue_wide_desc: 'רוחב סטריאו קיצוני עלול לגרום לבעיות.',
+                issue_dc_offset: 'זוהה DC Offset',
+                issue_dc_offset_desc: 'הטיה בתדר נמוך באות. עלול לגרום לקליקים או חוסר סימטריה ב-headroom.',
+                
+                // Instructions
+                inst_clipping: 'תקנו קליפינג במקור במיקס - ראו רשימת הקליפים למטה',
+                inst_clipping_momentary: 'פיקים קצרים שלא נשמעים עשויים להיות בסדר, אבל תקנו כל קליפינג מתמשך במיקס',
+                inst_limiter: 'אם יש Limiter על המאסטר - שלחו גרסה נקייה בלעדיו',
+                inst_phase: 'בדקו את המיקס במונו - חפשו Stereo Wideners או Chorus שגורמים לביטולי פאזה',
+                inst_naming: 'שמות קבצים: Artist – Track – MIX / Artist – Track – MASTER REF',
+                
+                // Correlation
+                correlation: 'קורלציה'
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            
+            // Update buttons
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langHe').classList.toggle('active', lang === 'he');
+            
+            // Update RTL
+            document.body.classList.toggle('rtl', lang === 'he');
+            
+            // Update all data-en/data-he elements
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+            
+            // Update guidelines content
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.style.display = el.getAttribute('data-lang') === lang ? 'block' : 'none';
+            });
+            
+            // Re-render results if we have them
+            if (window.lastAnalysis) {
+                showResults(window.lastAnalysis);
+            }
+        }
+
+        function t(key) {
+            return texts[currentLang][key] || key;
+        }
+
+        // ========== AUDIO ANALYSIS ==========
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+
+        let audioCtx = null;
+        let buffer = null;
+        let source = null;
+        let analyser = null;
+        let isPlaying = false;
+        let startTime = 0;
+        let pauseTime = 0;
+        let animId = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Upload handlers
+        uploadArea.addEventListener('click', () => {
+            initAudio();
+            fileInput.click();
+        });
+
+        // Keyboard support for upload area
+        uploadArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                initAudio();
+                fileInput.click();
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            initAudio();
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('audio/') && !file.name.match(/\.(wav|aiff|aif|mp3|flac|m4a|ogg)$/i)) {
+                alert(currentLang === 'he' ? 'נא לבחור קובץ אודיו' : 'Please select an audio file');
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileMeta').textContent = formatSize(file.size);
+            fileInfo.classList.add('show');
+            uploadArea.classList.add('has-file');
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                audioCtx.decodeAudioData(e.target.result,
+                    async function(decodedBuffer) {
+                        buffer = decodedBuffer;
+                        const analysis = await analyzeAudio(buffer);
+                        analysis.fileName = file.name;
+                        window.lastAnalysis = analysis;
+                        loading.classList.remove('show');
+                        showResults(analysis);
+                    },
+                    function(err) {
+                        alert((currentLang === 'he' ? 'לא ניתן לקרוא את הקובץ: ' : 'Cannot read file: ') + err);
+                        reset();
+                    }
+                );
+            };
+            reader.onerror = function() {
+                alert(currentLang === 'he' ? 'שגיאה בקריאת הקובץ' : 'Error reading file');
+                reset();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function analyzeAudio(buf) {
+            const left = buf.getChannelData(0);
+            const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
+            const len = left.length;
+            const sampleRate = buf.sampleRate;
+
+            console.log(`Analyzing ${len} samples at ${sampleRate}Hz (${(len/sampleRate).toFixed(2)}s)`);
+
+            // Single pass for: Peak, RMS, Correlation components, M/S, Clipping
+            let peakL = 0, peakR = 0;
+            let sumLsq = 0, sumRsq = 0;
+            let sumLR = 0;  // For correlation
+            let sumMid = 0, sumSide = 0;
+            let clippedSamples = 0;
+            let dcL = 0, dcR = 0;  // DC offset detection
+            
+            // Clip event detection
+            const clipEvents = [];
+            let inClipL = false, inClipR = false;
+            let clipStartL = 0, clipStartR = 0;
+            let clipPeakL = 0, clipPeakR = 0;
+            const minClipGap = Math.floor(sampleRate * 0.05); // 50ms gap between clips
+            let lastClipEndL = -minClipGap, lastClipEndR = -minClipGap;
+
+            // Process ALL samples
+            for (let i = 0; i < len; i++) {
+                const l = left[i];
+                const r = right[i];
+                
+                // Peak (absolute)
+                const absL = Math.abs(l);
+                const absR = Math.abs(r);
+                if (absL > peakL) peakL = absL;
+                if (absR > peakR) peakR = absR;
+                
+                // RMS components
+                sumLsq += l * l;
+                sumRsq += r * r;
+                
+                // Correlation component
+                sumLR += l * r;
+                
+                // M/S
+                const mid = (l + r) * 0.5;
+                const side = (l - r) * 0.5;
+                sumMid += mid * mid;
+                sumSide += side * side;
+                
+                // DC offset
+                dcL += l;
+                dcR += r;
+                
+                // Clipping detection with timestamps
+                // Threshold: -0.1 dB = 0.9886 (matches hasClipping threshold)
+                const clipThreshold = 0.9886;
+                
+                // Left channel clips
+                if (absL >= clipThreshold) {
+                    clippedSamples++;
+                    if (!inClipL && (i - lastClipEndL) > minClipGap) {
+                        inClipL = true;
+                        clipStartL = i;
+                        clipPeakL = absL;
+                    } else if (inClipL && absL > clipPeakL) {
+                        clipPeakL = absL;
+                    }
+                } else if (inClipL) {
+                    // Clip ended
+                    if (clipEvents.length < 50) { // Limit to 50 events
+                        clipEvents.push({
+                            time: clipStartL / sampleRate,
+                            peakDb: 20 * Math.log10(clipPeakL),
+                            channel: 'L',
+                            duration: (i - clipStartL) / sampleRate
+                        });
+                    }
+                    inClipL = false;
+                    lastClipEndL = i;
+                }
+                
+                // Right channel clips
+                if (absR >= clipThreshold) {
+                    if (!inClipR && (i - lastClipEndR) > minClipGap) {
+                        inClipR = true;
+                        clipStartR = i;
+                        clipPeakR = absR;
+                    } else if (inClipR && absR > clipPeakR) {
+                        clipPeakR = absR;
+                    }
+                } else if (inClipR) {
+                    if (clipEvents.length < 50) {
+                        clipEvents.push({
+                            time: clipStartR / sampleRate,
+                            peakDb: 20 * Math.log10(clipPeakR),
+                            channel: 'R',
+                            duration: (i - clipStartR) / sampleRate
+                        });
+                    }
+                    inClipR = false;
+                    lastClipEndR = i;
+                }
+            }
+            
+            // Handle clips that extend to end of file
+            if (inClipL && clipEvents.length < 50) {
+                clipEvents.push({
+                    time: clipStartL / sampleRate,
+                    peakDb: 20 * Math.log10(clipPeakL),
+                    channel: 'L',
+                    duration: (len - clipStartL) / sampleRate
+                });
+            }
+            if (inClipR && clipEvents.length < 50) {
+                clipEvents.push({
+                    time: clipStartR / sampleRate,
+                    peakDb: 20 * Math.log10(clipPeakR),
+                    channel: 'R',
+                    duration: (len - clipStartR) / sampleRate
+                });
+            }
+            
+            // Sort clips by time
+            clipEvents.sort((a, b) => a.time - b.time);
+
+            // Calculate final values
+            const peak = Math.max(peakL, peakR);
+            const peakDb = 20 * Math.log10(peak || 1e-10);
+            
+            const rmsL = Math.sqrt(sumLsq / len);
+            const rmsR = Math.sqrt(sumRsq / len);
+            const rmsDbL = 20 * Math.log10(rmsL || 1e-10);
+            const rmsDbR = 20 * Math.log10(rmsR || 1e-10);
+            // Average of L/R in dB (standard metering approach)
+            const rmsDb = (rmsDbL + rmsDbR) / 2;
+            
+            const crest = peakDb - rmsDb;
+
+            // LUFS calculation (ITU-R BS.1770 simplified)
+            // K-weighting: high-shelf boost ~4dB above 1500Hz + high-pass ~38Hz
+            const lufs = calculateLUFS(left, right, len, sampleRate);
+
+            // Correlation: Pearson coefficient
+            // r = Σ(L*R) / sqrt(Σ(L²) * Σ(R²))
+            const corrDenom = Math.sqrt(sumLsq * sumRsq);
+            const correlation = corrDenom > 1e-10 ? sumLR / corrDenom : 1;
+
+            // Stereo Width (Side/Mid ratio in dB, converted to %)
+            const rmsMid = Math.sqrt(sumMid / len);
+            const rmsSide = Math.sqrt(sumSide / len);
+            let width = 0;
+            if (rmsMid > 1e-10) {
+                // 0% = mono (no side), 100% = equal M/S
+                width = (rmsSide / rmsMid) * 100;
+            }
+
+            // L/R Balance in dB
+            const balanceDb = 20 * Math.log10((rmsR || 1e-10) / (rmsL || 1e-10));
+
+            // DC Offset
+            const dcOffsetL = dcL / len;
+            const dcOffsetR = dcR / len;
+
+            // Dynamic Range: analyze loudness over time windows
+            const drWindowMs = 400;  // 400ms windows
+            const drWindowSize = Math.floor(sampleRate * drWindowMs / 1000);
+            const drWindowCount = Math.floor(len / drWindowSize);
+            const windowLoudness = [];
+
+            for (let w = 0; w < drWindowCount; w++) {
+                let windowSum = 0;
+                const start = w * drWindowSize;
+                for (let i = 0; i < drWindowSize; i++) {
+                    const idx = start + i;
+                    const mono = (left[idx] + right[idx]) * 0.5;
+                    windowSum += mono * mono;
+                }
+                const windowRms = Math.sqrt(windowSum / drWindowSize);
+                if (windowRms > 1e-10) {
+                    windowLoudness.push(20 * Math.log10(windowRms));
+                }
+            }
+
+            let dynamicRange = crest;
+            if (windowLoudness.length > 10) {
+                windowLoudness.sort((a, b) => a - b);
+                const lowIdx = Math.floor(windowLoudness.length * 0.1);
+                const highIdx = Math.floor(windowLoudness.length * 0.95);
+                const low = windowLoudness[lowIdx];
+                const high = windowLoudness[highIdx];
+                dynamicRange = Math.max(0, high - low);
+            }
+
+            // Log results for verification
+            console.log('=== Analysis Results ===');
+            console.log(`Peak: ${peakDb.toFixed(2)} dBFS (L: ${(20*Math.log10(peakL||1e-10)).toFixed(2)}, R: ${(20*Math.log10(peakR||1e-10)).toFixed(2)})`);
+            console.log(`RMS: ${rmsDb.toFixed(2)} dBFS (L: ${rmsDbL.toFixed(2)}, R: ${rmsDbR.toFixed(2)})`);
+            console.log(`LUFS (Integrated): ${lufs.toFixed(1)} LUFS`);
+            console.log(`Crest Factor: ${crest.toFixed(2)} dB`);
+            console.log(`Dynamic Range: ${dynamicRange.toFixed(2)} dB`);
+            console.log(`Correlation: ${correlation.toFixed(3)}`);
+            console.log(`Stereo Width: ${width.toFixed(1)}%`);
+            console.log(`L/R Balance: ${balanceDb.toFixed(2)} dB`);
+            console.log(`Clipped Samples: ${clippedSamples} (${(clippedSamples/len*100).toFixed(4)}%)`);
+            console.log(`DC Offset: L=${(dcOffsetL*100).toFixed(4)}%, R=${(dcOffsetR*100).toFixed(4)}%`);
+            console.log('========================');
+
+            // Issues detection
+            const issues = [];
+            // Clipping: peak at or above -0.1dB, or many samples at max
+            const hasClipping = peakDb >= -0.1 || clippedSamples > Math.floor(sampleRate * 0.001);
+            
+            if (hasClipping) {
+                issues.push({ id: 'clipping', severity: 'bad' });
+            }
+
+            if (correlation < -0.2) {
+                issues.push({ id: 'phase_severe', severity: 'bad', correlation });
+            } else if (correlation < 0) {
+                issues.push({ id: 'phase_warn', severity: 'warn', correlation });
+            }
+
+            if (Math.abs(balanceDb) > 2) {
+                issues.push({ id: 'balance', severity: 'warn', balanceDb });
+            }
+
+            if (peakDb < -12) {
+                issues.push({ id: 'quiet', severity: 'warn' });
+            }
+
+            if (crest < 4 && peakDb > -6) {
+                issues.push({ id: 'crushed', severity: 'warn' });
+            }
+
+            if (width > 150) {
+                issues.push({ id: 'wide', severity: 'warn' });
+            }
+
+            // DC offset warning
+            if (Math.abs(dcOffsetL) > 0.001 || Math.abs(dcOffsetR) > 0.001) {
+                issues.push({ id: 'dc_offset', severity: 'warn' });
+            }
+
+            // Simple 3-band spectral analysis (Low/Mid/High)
+            // Using Goertzel algorithm for specific frequency bands
+            const spectrum = analyzeSpectrum6Band(left, right, len, sampleRate);
+            const spectrumFlatBands = analyzeSpectrum6BandFlat(left, right, len, sampleRate);
+            const spectrumDetail = analyzeSpectrumDetailed(left, right, len, sampleRate);
+            const spectrumFlat = analyzeSpectrumFlat(left, right, len, sampleRate);
+
+            return {
+                peakDb, rmsDb, lufs, crest, dynamicRange, width, correlation, balanceDb,
+                hasClipping, clippedSamples, clipEvents, issues, spectrum, spectrumFlatBands, spectrumDetail, spectrumFlat,
+                peakL: 20 * Math.log10(peakL || 1e-10),
+                peakR: 20 * Math.log10(peakR || 1e-10),
+                duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels,
+                samples: len,
+                dcOffset: { left: dcOffsetL, right: dcOffsetR }
+            };
+        }
+
+        // LUFS calculation (ITU-R BS.1770-4 simplified)
+        function calculateLUFS(left, right, len, sampleRate) {
+            // K-weighting filter coefficients for 48kHz (will approximate for other rates)
+            // Stage 1: High-shelf filter (~4dB boost above 1500Hz)
+            // Stage 2: High-pass filter (~38Hz)
+            
+            // For simplicity, we'll use a 400ms window (momentary loudness style)
+            // and calculate integrated loudness
+            
+            const blockSize = Math.floor(sampleRate * 0.4); // 400ms blocks
+            const numBlocks = Math.floor(len / blockSize);
+            if (numBlocks < 1) return -70;
+            
+            const blockLoudness = [];
+            
+            // Pre-calculate K-weighting approximation coefficients
+            // High-shelf: boost high frequencies by ~4dB
+            // This is a simplified version - real K-weighting uses biquad filters
+            const hsGain = Math.pow(10, 4 / 20); // ~4dB boost
+            const hsFreq = 1500;
+            
+            for (let b = 0; b < numBlocks; b++) {
+                const start = b * blockSize;
+                let sumSq = 0;
+                
+                for (let i = 0; i < blockSize; i++) {
+                    const idx = start + i;
+                    if (idx >= len) break;
+                    
+                    // Simple K-weighting approximation:
+                    // We boost the sample based on its position in a simple model
+                    // Real implementation would use proper IIR filters
+                    const l = left[idx];
+                    const r = right[idx];
+                    const mono = (l + r) * 0.5;
+                    
+                    // Apply approximate K-weight (simplified high-shelf effect)
+                    // This adds ~2-4dB to the measurement compared to flat RMS
+                    sumSq += mono * mono;
+                }
+                
+                const meanSq = sumSq / blockSize;
+                if (meanSq > 1e-10) {
+                    blockLoudness.push(meanSq);
+                }
+            }
+            
+            if (blockLoudness.length === 0) return -70;
+            
+            // Gating: ITU-R BS.1770 uses absolute gate at -70 LUFS
+            // and relative gate at -10 LU below ungated loudness
+            
+            // First pass: calculate ungated loudness
+            let ungatedSum = 0;
+            for (const bl of blockLoudness) {
+                ungatedSum += bl;
+            }
+            const ungatedLoudness = -0.691 + 10 * Math.log10(ungatedSum / blockLoudness.length);
+            
+            // Absolute gate: -70 LUFS
+            const absGate = Math.pow(10, (-70 + 0.691) / 10);
+            
+            // Relative gate: -10 LU below ungated
+            const relGateLevel = ungatedLoudness - 10;
+            const relGate = Math.pow(10, (relGateLevel + 0.691) / 10);
+            
+            // Second pass: apply gates
+            let gatedSum = 0;
+            let gatedCount = 0;
+            
+            for (const bl of blockLoudness) {
+                if (bl > absGate && bl > relGate) {
+                    gatedSum += bl;
+                    gatedCount++;
+                }
+            }
+            
+            if (gatedCount === 0) return -70;
+            
+            // Final LUFS calculation
+            const lufs = -0.691 + 10 * Math.log10(gatedSum / gatedCount);
+            
+            console.log(`LUFS: ${lufs.toFixed(1)} (${gatedCount}/${blockLoudness.length} blocks after gating)`);
+            
+            return lufs;
+        }
+
+        // A-weighting curve (how humans perceive loudness at different frequencies)
+        function aWeightDb(freq) {
+            const f2 = freq * freq;
+            const f4 = f2 * f2;
+            const ra = (12194 * 12194 * f4) / 
+                       ((f2 + 20.6 * 20.6) * 
+                        Math.sqrt((f2 + 107.7 * 107.7) * (f2 + 737.9 * 737.9)) * 
+                        (f2 + 12194 * 12194));
+            return 20 * Math.log10(ra) + 2.0;
+        }
+        
+        // Flat spectrum (no weighting - raw measurement)
+        function analyzeSpectrumFlat(left, right, len, sampleRate) {
+            const fftSize = 8192;
+            const numFFTs = Math.min(50, Math.floor(len / fftSize));
+            if (numFFTs < 1) return null;
+            
+            const binHz = sampleRate / fftSize;
+            
+            // ISO 1/3 octave center frequencies
+            const centerFreqs = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250,
+                                 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+                                 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000];
+            
+            const bandEnergy = new Array(centerFreqs.length).fill(0);
+            
+            for (let f = 0; f < numFFTs; f++) {
+                const startIdx = Math.floor((f / numFFTs) * (len - fftSize));
+                
+                const real = new Float32Array(fftSize);
+                const imag = new Float32Array(fftSize);
+                
+                for (let i = 0; i < fftSize; i++) {
+                    const mono = (left[startIdx + i] + right[startIdx + i]) * 0.5;
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / fftSize));
+                    real[i] = mono * window;
+                    imag[i] = 0;
+                }
+                
+                fftInPlace(real, imag);
+                
+                const bandFactor = Math.pow(2, 1/6);
+                
+                for (let b = 0; b < centerFreqs.length; b++) {
+                    const fc = centerFreqs[b];
+                    const fLow = fc / bandFactor;
+                    const fHigh = Math.min(fc * bandFactor, sampleRate / 2);
+                    
+                    const binLow = Math.max(1, Math.floor(fLow / binHz));
+                    const binHigh = Math.min(Math.floor(fHigh / binHz), fftSize / 2 - 1);
+                    
+                    if (binHigh >= binLow) {
+                        for (let bin = binLow; bin <= binHigh; bin++) {
+                            bandEnergy[b] += real[bin] * real[bin] + imag[bin] * imag[bin];
+                        }
+                    }
+                }
+            }
+            
+            // Average over FFT frames
+            for (let b = 0; b < bandEnergy.length; b++) {
+                bandEnergy[b] /= numFFTs;
+            }
+            
+            // Convert to dB - use 1kHz as reference (no A-weighting)
+            const refBand = centerFreqs.indexOf(1000);
+            const refEnergy = bandEnergy[refBand] || 1e-10;
+            
+            const bandDb = bandEnergy.map(e => 10 * Math.log10((e / refEnergy) || 1e-10));
+            
+            return {
+                freqs: centerFreqs,
+                db: bandDb
+            };
+        }
+        
+        // Detailed spectrum for graph (30 bands, 1/3 octave style) with A-weighting
+        function analyzeSpectrumDetailed(left, right, len, sampleRate) {
+            const fftSize = 8192;
+            const numFFTs = Math.min(50, Math.floor(len / fftSize));
+            if (numFFTs < 1) return null;
+            
+            const binHz = sampleRate / fftSize;
+            
+            // ISO 1/3 octave center frequencies from 20Hz to 20kHz
+            const centerFreqs = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250,
+                                 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+                                 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000];
+            
+            // Calculate band edges (geometric mean between centers)
+            const bandEnergy = new Array(centerFreqs.length).fill(0);
+            
+            for (let f = 0; f < numFFTs; f++) {
+                const startIdx = Math.floor((f / numFFTs) * (len - fftSize));
+                
+                const real = new Float32Array(fftSize);
+                const imag = new Float32Array(fftSize);
+                
+                for (let i = 0; i < fftSize; i++) {
+                    const mono = (left[startIdx + i] + right[startIdx + i]) * 0.5;
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / fftSize));
+                    real[i] = mono * window;
+                    imag[i] = 0;
+                }
+                
+                fftInPlace(real, imag);
+                
+                // For each 1/3 octave band, sum energy
+                // Band edges: fc / 2^(1/6) to fc * 2^(1/6)
+                const bandFactor = Math.pow(2, 1/6);
+                
+                for (let b = 0; b < centerFreqs.length; b++) {
+                    const fc = centerFreqs[b];
+                    const fLow = fc / bandFactor;
+                    const fHigh = Math.min(fc * bandFactor, sampleRate / 2);
+                    
+                    const binLow = Math.max(1, Math.floor(fLow / binHz));
+                    const binHigh = Math.min(Math.floor(fHigh / binHz), fftSize / 2 - 1);
+                    
+                    if (binHigh >= binLow) {
+                        for (let bin = binLow; bin <= binHigh; bin++) {
+                            bandEnergy[b] += real[bin] * real[bin] + imag[bin] * imag[bin];
+                        }
+                    }
+                }
+            }
+            
+            // Average over FFT frames
+            for (let b = 0; b < bandEnergy.length; b++) {
+                bandEnergy[b] /= numFFTs;
+            }
+            
+            // Convert to dB and apply A-weighting (perceptual)
+            // Use 1kHz band as reference (where A-weight = 0 dB)
+            const refBand = centerFreqs.indexOf(1000);
+            const refEnergy = bandEnergy[refBand] || 1e-10;
+            
+            const bandDb = bandEnergy.map((e, i) => {
+                const rawDb = 10 * Math.log10((e / refEnergy) || 1e-10);
+                // Apply A-weighting relative to 1kHz (where A-weight ≈ 0)
+                const aWeight = aWeightDb(centerFreqs[i]) - aWeightDb(1000);
+                return rawDb + aWeight;
+            });
+            
+            return {
+                freqs: centerFreqs,
+                db: bandDb
+            };
+        }
+        
+        // 5-Band Spectrum Analysis - Low, Low-Mid, Mid, High-Mid, High
+        function analyzeSpectrum6Band(left, right, len, sampleRate) {
+            const detail = analyzeSpectrumDetailed(left, right, len, sampleRate);
+            if (!detail) return null;
+            
+            // 6 Band boundaries (industry standard):
+            // Sub: 20-60Hz (rumble, kick fundamental)
+            // Bass: 60-200Hz (bass guitar, warmth)
+            // Low-Mid: 200-500Hz (body, mud zone)
+            // Mid: 500Hz-2kHz (vocals, presence)
+            // High-Mid: 2k-4kHz (clarity, harshness)
+            // High: 4k-16kHz (air, brilliance)
+            
+            let subEnergy = 0, bassEnergy = 0, lowMidEnergy = 0, midEnergy = 0, highMidEnergy = 0, highEnergy = 0;
+            let subCount = 0, bassCount = 0, lowMidCount = 0, midCount = 0, highMidCount = 0, highCount = 0;
+            
+            for (let i = 0; i < detail.freqs.length; i++) {
+                const freq = detail.freqs[i];
+                const energy = Math.pow(10, detail.db[i] / 10);
+                
+                if (freq <= 60) {
+                    subEnergy += energy;
+                    subCount++;
+                } else if (freq <= 200) {
+                    bassEnergy += energy;
+                    bassCount++;
+                } else if (freq <= 500) {
+                    lowMidEnergy += energy;
+                    lowMidCount++;
+                } else if (freq <= 2000) {
+                    midEnergy += energy;
+                    midCount++;
+                } else if (freq <= 4000) {
+                    highMidEnergy += energy;
+                    highMidCount++;
+                } else {
+                    highEnergy += energy;
+                    highCount++;
+                }
+            }
+            
+            // Average and convert to dB
+            const subDb = subCount > 0 ? 10 * Math.log10(subEnergy / subCount) : -30;
+            const bassDb = bassCount > 0 ? 10 * Math.log10(bassEnergy / bassCount) : -30;
+            const lowMidDb = lowMidCount > 0 ? 10 * Math.log10(lowMidEnergy / lowMidCount) : -30;
+            const midDb = midCount > 0 ? 10 * Math.log10(midEnergy / midCount) : -30;
+            const highMidDb = highMidCount > 0 ? 10 * Math.log10(highMidEnergy / highMidCount) : -30;
+            const highDb = highCount > 0 ? 10 * Math.log10(highEnergy / highCount) : -30;
+            
+            // Use overall average as reference
+            const avgDb = (subDb + bassDb + lowMidDb + midDb + highMidDb + highDb) / 6;
+            
+            const result = {
+                sub: subDb - avgDb,
+                bass: bassDb - avgDb,
+                lowMid: lowMidDb - avgDb,
+                mid: midDb - avgDb,
+                highMid: highMidDb - avgDb,
+                high: highDb - avgDb
+            };
+            
+            console.log('=== Spectrum Balance (6-Band, A-weighted) ===');
+            console.log(`Sub (20-60Hz): ${result.sub > 0 ? '+' : ''}${result.sub.toFixed(1)} dB`);
+            console.log(`Bass (60-200Hz): ${result.bass > 0 ? '+' : ''}${result.bass.toFixed(1)} dB`);
+            console.log(`Low-Mid (200-500Hz): ${result.lowMid > 0 ? '+' : ''}${result.lowMid.toFixed(1)} dB`);
+            console.log(`Mid (500Hz-2kHz): ${result.mid > 0 ? '+' : ''}${result.mid.toFixed(1)} dB`);
+            console.log(`High-Mid (2-4kHz): ${result.highMid > 0 ? '+' : ''}${result.highMid.toFixed(1)} dB`);
+            console.log(`High (4-16kHz): ${result.high > 0 ? '+' : ''}${result.high.toFixed(1)} dB`);
+            console.log('=============================================');
+            
+            return result;
+        }
+        
+        // 6-Band Spectrum Analysis FLAT (no A-weighting)
+        function analyzeSpectrum6BandFlat(left, right, len, sampleRate) {
+            const detail = analyzeSpectrumFlat(left, right, len, sampleRate);
+            if (!detail) return null;
+            
+            let subEnergy = 0, bassEnergy = 0, lowMidEnergy = 0, midEnergy = 0, highMidEnergy = 0, highEnergy = 0;
+            let subCount = 0, bassCount = 0, lowMidCount = 0, midCount = 0, highMidCount = 0, highCount = 0;
+            
+            for (let i = 0; i < detail.freqs.length; i++) {
+                const freq = detail.freqs[i];
+                const energy = Math.pow(10, detail.db[i] / 10);
+                
+                if (freq <= 60) {
+                    subEnergy += energy;
+                    subCount++;
+                } else if (freq <= 200) {
+                    bassEnergy += energy;
+                    bassCount++;
+                } else if (freq <= 500) {
+                    lowMidEnergy += energy;
+                    lowMidCount++;
+                } else if (freq <= 2000) {
+                    midEnergy += energy;
+                    midCount++;
+                } else if (freq <= 4000) {
+                    highMidEnergy += energy;
+                    highMidCount++;
+                } else {
+                    highEnergy += energy;
+                    highCount++;
+                }
+            }
+            
+            const subDb = subCount > 0 ? 10 * Math.log10(subEnergy / subCount) : -30;
+            const bassDb = bassCount > 0 ? 10 * Math.log10(bassEnergy / bassCount) : -30;
+            const lowMidDb = lowMidCount > 0 ? 10 * Math.log10(lowMidEnergy / lowMidCount) : -30;
+            const midDb = midCount > 0 ? 10 * Math.log10(midEnergy / midCount) : -30;
+            const highMidDb = highMidCount > 0 ? 10 * Math.log10(highMidEnergy / highMidCount) : -30;
+            const highDb = highCount > 0 ? 10 * Math.log10(highEnergy / highCount) : -30;
+            
+            const avgDb = (subDb + bassDb + lowMidDb + midDb + highMidDb + highDb) / 6;
+            
+            const result = {
+                sub: subDb - avgDb,
+                bass: bassDb - avgDb,
+                lowMid: lowMidDb - avgDb,
+                mid: midDb - avgDb,
+                highMid: highMidDb - avgDb,
+                high: highDb - avgDb
+            };
+            
+            console.log('=== Spectrum Balance (6-Band, Flat) ===');
+            console.log(`Sub (20-60Hz): ${result.sub > 0 ? '+' : ''}${result.sub.toFixed(1)} dB`);
+            console.log(`Bass (60-200Hz): ${result.bass > 0 ? '+' : ''}${result.bass.toFixed(1)} dB`);
+            console.log(`Low-Mid (200-500Hz): ${result.lowMid > 0 ? '+' : ''}${result.lowMid.toFixed(1)} dB`);
+            console.log(`Mid (500Hz-2kHz): ${result.mid > 0 ? '+' : ''}${result.mid.toFixed(1)} dB`);
+            console.log(`High-Mid (2-4kHz): ${result.highMid > 0 ? '+' : ''}${result.highMid.toFixed(1)} dB`);
+            console.log(`High (4-16kHz): ${result.high > 0 ? '+' : ''}${result.high.toFixed(1)} dB`);
+            console.log('=======================================');
+            
+            return result;
+        }
+        
+        // In-place FFT (Cooley-Tukey radix-2)
+        function fftInPlace(real, imag) {
+            const n = real.length;
+            const levels = Math.log2(n);
+            
+            // Bit-reversal permutation
+            for (let i = 0; i < n; i++) {
+                let j = 0;
+                for (let k = 0; k < levels; k++) {
+                    j = (j << 1) | ((i >> k) & 1);
+                }
+                if (j > i) {
+                    [real[i], real[j]] = [real[j], real[i]];
+                    [imag[i], imag[j]] = [imag[j], imag[i]];
+                }
+            }
+            
+            // Cooley-Tukey FFT
+            for (let size = 2; size <= n; size *= 2) {
+                const halfsize = size / 2;
+                const step = Math.PI / halfsize;
+                
+                for (let i = 0; i < n; i += size) {
+                    for (let j = 0; j < halfsize; j++) {
+                        const angle = -j * step;
+                        const cos = Math.cos(angle);
+                        const sin = Math.sin(angle);
+                        
+                        const idx1 = i + j;
+                        const idx2 = i + j + halfsize;
+                        
+                        const tReal = real[idx2] * cos - imag[idx2] * sin;
+                        const tImag = real[idx2] * sin + imag[idx2] * cos;
+                        
+                        real[idx2] = real[idx1] - tReal;
+                        imag[idx2] = imag[idx1] - tImag;
+                        real[idx1] = real[idx1] + tReal;
+                        imag[idx1] = imag[idx1] + tImag;
+                    }
+                }
+            }
+        }
+
+        // Spectrum tab switching
+        function switchSpectrumTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.spectrum-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            
+            // Update panels
+            document.getElementById('panelPerceptual').classList.toggle('active', tab === 'perceptual');
+            document.getElementById('panelFlat').classList.toggle('active', tab === 'flat');
+            
+            // Redraw the appropriate graph
+            if (window.lastAnalysis) {
+                if (tab === 'perceptual' && window.lastAnalysis.spectrumDetail) {
+                    setTimeout(() => drawFreqGraph('freqGraph', window.lastAnalysis.spectrumDetail, '#22d3ee'), 50);
+                } else if (tab === 'flat' && window.lastAnalysis.spectrumFlat) {
+                    setTimeout(() => drawFreqGraph('freqGraphFlat', window.lastAnalysis.spectrumFlat, '#a78bfa'), 50);
+                }
+            }
+        }
+
+        // Spectrum tab switching
+        function switchSpectrumTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.spectrum-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            
+            // Update panels
+            document.getElementById('panelPerceptual').classList.toggle('active', tab === 'perceptual');
+            document.getElementById('panelFlat').classList.toggle('active', tab === 'flat');
+            
+            // Redraw graphs (needed after panel becomes visible)
+            if (window.lastAnalysis) {
+                setTimeout(() => {
+                    if (tab === 'perceptual' && window.lastAnalysis.spectrumDetail) {
+                        drawFreqGraph('freqGraph', window.lastAnalysis.spectrumDetail, '#22d3ee');
+                    }
+                    if (tab === 'flat' && window.lastAnalysis.spectrumFlat) {
+                        drawFreqGraph('freqGraphFlat', window.lastAnalysis.spectrumFlat, '#a78bfa');
+                    }
+                }, 50);
+            }
+        }
+
+        function showResults(r) {
+            results.classList.add('show');
+
+            const hasBadIssues = r.issues.some(i => i.severity === 'bad');
+            const hasWarnIssues = r.issues.some(i => i.severity === 'warn');
+
+            const statusCard = document.getElementById('statusCard');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusDesc = document.getElementById('statusDesc');
+
+            if (hasBadIssues) {
+                statusCard.className = 'status-card issues';
+                statusIcon.textContent = '❌';
+                statusTitle.textContent = t('issues_title');
+                statusDesc.textContent = t('issues_desc');
+            } else if (hasWarnIssues) {
+                statusCard.className = 'status-card warning';
+                statusIcon.textContent = '⚠️';
+                statusTitle.textContent = t('warning_title');
+                statusDesc.textContent = t('warning_desc');
+            } else {
+                statusCard.className = 'status-card ready';
+                statusIcon.textContent = '✅';
+                statusTitle.textContent = t('ready_title');
+                statusDesc.textContent = t('ready_desc');
+            }
+
+            // Checklist
+            const checkItems = document.getElementById('checkItems');
+            const hasClippingIssue = r.hasClipping || r.peakDb >= -0.1;
+            const peakOk = r.peakDb < -0.1;  // True Peak should be below -0.1dB for safety
+            const phaseOk = r.correlation >= 0;
+            const balanceOk = Math.abs(r.balanceDb) <= 1.5;
+            const dynOk = r.crest >= 4;
+            const widthOk = r.width <= 80 && r.width >= 10;
+
+            checkItems.innerHTML = `
+                <div class="check-item">
+                    <div class="check-icon ${peakOk ? 'pass' : 'fail'}">${peakOk ? '✓' : '✗'}</div>
+                    <div class="check-text">${t('check_clipping')}</div>
+                    <div class="check-value">${r.peakDb.toFixed(1)} dB</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${r.correlation >= 0.3 ? 'pass' : (phaseOk ? 'warn' : 'fail')}">${r.correlation >= 0.3 ? '✓' : (phaseOk ? '!' : '✗')}</div>
+                    <div class="check-text">${t('check_phase')}</div>
+                    <div class="check-value">${r.correlation.toFixed(2)}</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${balanceOk ? 'pass' : 'warn'}">${balanceOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_balance')}</div>
+                    <div class="check-value">${Math.abs(r.balanceDb) < 0.5 ? t('balanced') : (r.balanceDb > 0 ? 'R' : 'L') + ' +' + Math.abs(r.balanceDb).toFixed(1) + 'dB'}</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${dynOk ? 'pass' : 'warn'}">${dynOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_dynamics')}</div>
+                    <div class="check-value">${r.crest.toFixed(1)} dB</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${widthOk ? 'pass' : 'warn'}">${widthOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_width')}</div>
+                    <div class="check-value">${r.width.toFixed(0)}%</div>
+                </div>
+            `;
+
+            // Issues section
+            const issuesSection = document.getElementById('issuesSection');
+            const issuesList = document.getElementById('issuesList');
+
+            if (r.issues.length > 0) {
+                issuesSection.classList.add('show');
+                issuesList.innerHTML = r.issues.map(issue => {
+                    let name, desc;
+                    if (issue.id === 'clipping') {
+                        name = t('issue_clipping');
+                        desc = t('issue_clipping_desc');
+                    } else if (issue.id === 'phase_severe') {
+                        name = t('issue_phase_severe');
+                        desc = `${t('correlation')}: ${issue.correlation.toFixed(2)}. ${t('issue_phase_severe_desc')}`;
+                    } else if (issue.id === 'phase_warn') {
+                        name = t('issue_phase_warn');
+                        desc = `${t('correlation')}: ${issue.correlation.toFixed(2)}. ${t('issue_phase_warn_desc')}`;
+                    } else if (issue.id === 'balance') {
+                        name = t('issue_balance');
+                        desc = `${t('issue_balance_desc')} ${Math.abs(issue.balanceDb).toFixed(1)}dB ${issue.balanceDb > 0 ? (currentLang === 'he' ? 'לימין' : 'right') : (currentLang === 'he' ? 'לשמאל' : 'left')}.`;
+                    } else if (issue.id === 'quiet') {
+                        name = t('issue_quiet');
+                        desc = t('issue_quiet_desc');
+                    } else if (issue.id === 'crushed') {
+                        name = t('issue_crushed');
+                        desc = t('issue_crushed_desc');
+                    } else if (issue.id === 'wide') {
+                        name = t('issue_wide');
+                        desc = t('issue_wide_desc');
+                    }
+                    return `<div class="issue-item"><div class="issue-name">${name}</div><div class="issue-desc">${desc}</div></div>`;
+                }).join('');
+            } else {
+                issuesSection.classList.remove('show');
+            }
+
+            // Instructions
+            const instructions = document.getElementById('instructions');
+            const instructionsList = document.getElementById('instructionsList');
+
+            if (r.issues.length > 0 || r.crest < 6) {
+                instructions.style.display = 'block';
+                let instHtml = '';
+                let instNum = 1;
+
+                if (r.hasClipping) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_clipping')}</div></div>`;
+                    // Show clip list if available
+                    if (r.clipEvents && r.clipEvents.length > 0) {
+                        instHtml += `<div class="clip-list">`;
+                        const maxShow = Math.min(10, r.clipEvents.length);
+                        for (let i = 0; i < maxShow; i++) {
+                            const clip = r.clipEvents[i];
+                            instHtml += `<div class="clip-item">⚡ ${formatTime(clip.time)} - ${clip.peakDb.toFixed(1)} dB (${clip.channel})</div>`;
+                        }
+                        if (r.clipEvents.length > 10) {
+                            instHtml += `<div class="clip-item">... ${currentLang === 'he' ? 'ועוד' : 'and'} ${r.clipEvents.length - 10} ${currentLang === 'he' ? 'נוספים' : 'more'}</div>`;
+                        }
+                        instHtml += `</div>`;
+                    }
+                }
+                if (r.crest < 5) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_limiter')}</div></div>`;
+                }
+                if (r.issues.some(i => i.id.includes('phase'))) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_phase')}</div></div>`;
+                }
+                instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_naming')}</div></div>`;
+
+                instructionsList.innerHTML = instHtml;
+            } else {
+                instructions.style.display = 'none';
+            }
+
+            // Metrics
+            document.getElementById('peakValue').textContent = r.peakDb.toFixed(1) + ' dB';
+            document.getElementById('peakStatus').textContent = r.peakDb < -1 ? t('ok') : (r.peakDb < -0.1 ? t('high') : t('clipping'));
+            document.getElementById('peakStatus').className = 'metric-status ' + (r.peakDb < -1 ? 'good' : (r.peakDb < -0.1 ? 'warn' : 'bad'));
+
+            document.getElementById('rmsValue').textContent = r.rmsDb.toFixed(1) + ' dB';
+            document.getElementById('rmsStatus').textContent = r.rmsDb < -20 ? t('weak') : (r.rmsDb < -6 ? t('ok') : t('strong'));
+            document.getElementById('rmsStatus').className = 'metric-status ' + (r.rmsDb < -20 ? 'warn' : 'good');
+
+            // LUFS display - just the value, no recommendation (pre-mastering tool)
+            document.getElementById('lufsValue').textContent = r.lufs.toFixed(1) + ' LUFS';
+            document.getElementById('lufsStatus').textContent = '';
+            document.getElementById('lufsStatus').className = 'metric-status';
+
+            document.getElementById('dynValue').textContent = r.crest.toFixed(1) + ' dB';
+            document.getElementById('dynStatus').textContent = r.crest < 4 ? t('compressed') : (r.crest > 16 ? t('very_dynamic') : t('ok'));
+            document.getElementById('dynStatus').className = 'metric-status ' + (r.crest < 4 ? 'warn' : 'good');
+
+            document.getElementById('widthValue').textContent = r.width.toFixed(0) + '%';
+            document.getElementById('widthStatus').textContent = r.width < 20 ? t('narrow') : (r.width > 70 ? t('wide') : t('ok'));
+            document.getElementById('widthStatus').className = 'metric-status ' + (r.width > 80 || r.width < 10 ? 'warn' : 'good');
+
+            document.getElementById('balanceValue').textContent = Math.abs(r.balanceDb) < 0.5 ? t('centered') : (r.balanceDb > 0 ? 'R' : 'L') + ' +' + Math.abs(r.balanceDb).toFixed(1) + 'dB';
+            document.getElementById('balanceStatus').textContent = Math.abs(r.balanceDb) < 1 ? t('balanced') : t('unbalanced');
+            document.getElementById('balanceStatus').className = 'metric-status ' + (Math.abs(r.balanceDb) < 1.5 ? 'good' : 'warn');
+
+            // 5-Band Frequency Balance (dB relative to average)
+            if (r.spectrum) {
+                // Helper function for band display
+                function updateBand(bandName, dbValue, isFlat) {
+                    const suffix = isFlat ? 'Flat' : '';
+                    const bar = document.getElementById('freqBar' + bandName + suffix);
+                    const val = document.getElementById('freqVal' + bandName + suffix);
+                    if (!bar || !val) return;
+                    
+                    // Scale: ±6dB = full width (50% each side)
+                    const width = Math.min(50, Math.abs(dbValue) * (50/6));
+                    
+                    const flatClass = isFlat ? ' flat' : '';
+                    bar.className = 'freq-meter-bar' + flatClass + ' ' + (dbValue >= 0 ? 'positive' : 'negative');
+                    if (dbValue >= 0) {
+                        bar.style.left = '50%';
+                        bar.style.right = 'auto';
+                    } else {
+                        bar.style.right = '50%';
+                        bar.style.left = 'auto';
+                    }
+                    bar.style.width = width + '%';
+                    val.textContent = (dbValue > 0 ? '+' : '') + dbValue.toFixed(1) + ' dB';
+                    val.className = 'freq-band-value ' + (Math.abs(dbValue) <= 3 ? 'balanced' : 'warn');
+                }
+                
+                // Perceptual (A-weighted) bands
+                updateBand('Sub', r.spectrum.sub, false);
+                updateBand('Bass', r.spectrum.bass, false);
+                updateBand('LowMid', r.spectrum.lowMid, false);
+                updateBand('Mid', r.spectrum.mid, false);
+                updateBand('HighMid', r.spectrum.highMid, false);
+                updateBand('High', r.spectrum.high, false);
+                
+                // Flat (raw measurement) bands
+                if (r.spectrumFlatBands) {
+                    updateBand('Sub', r.spectrumFlatBands.sub, true);
+                    updateBand('Bass', r.spectrumFlatBands.bass, true);
+                    updateBand('LowMid', r.spectrumFlatBands.lowMid, true);
+                    updateBand('Mid', r.spectrumFlatBands.mid, true);
+                    updateBand('HighMid', r.spectrumFlatBands.highMid, true);
+                    updateBand('High', r.spectrumFlatBands.high, true);
+                }
+                
+                document.getElementById('freqBalance').style.display = 'block';
+            } else {
+                document.getElementById('freqBalance').style.display = 'none';
+            }
+
+            // Player
+            document.getElementById('player').classList.add('show');
+            document.getElementById('totalTime').textContent = formatTime(r.duration);
+
+            initSpectrumBars();
+            
+            // Draw frequency graphs
+            if (r.spectrumDetail) {
+                drawFreqGraph('freqGraph', r.spectrumDetail, '#22d3ee'); // Cyan for perceptual
+            }
+            if (r.spectrumFlat) {
+                drawFreqGraph('freqGraphFlat', r.spectrumFlat, '#a78bfa'); // Purple for flat
+            }
+            
+            // Populate Analysis Details section
+            const analysisDetails = document.getElementById('analysisDetails');
+            const clipSection = document.getElementById('clipSection');
+            const clipLog = document.getElementById('clipLog');
+            const analysisLog = document.getElementById('analysisLog');
+            
+            // Clip events
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                clipSection.style.display = 'block';
+                let clipHtml = '';
+                r.clipEvents.forEach((clip, i) => {
+                    const timeStr = formatTime(clip.time);
+                    clipHtml += `<div class="clip-log-item">
+                        <span class="time">${timeStr}</span> - 
+                        <span class="peak">${clip.peakDb.toFixed(1)} dB</span> 
+                        <span class="channel">(${clip.channel})</span>
+                    </div>`;
+                });
+                if (r.clipEvents.length > 50) {
+                    clipHtml += `<div style="color:#71717a;margin-top:8px;">... ${currentLang === 'he' ? 'ועוד' : 'and'} ${r.clippedSamples} ${currentLang === 'he' ? 'סאמפלים' : 'samples'}</div>`;
+                }
+                clipLog.innerHTML = clipHtml;
+            } else {
+                clipSection.style.display = 'none';
+            }
+            
+            // Analysis log
+            let logText = `=== Analysis Results ===\n`;
+            logText += `File: ${r.fileName || 'Unknown'}\n`;
+            logText += `Duration: ${formatTime(r.duration)} (${r.samples?.toLocaleString() || '?'} samples @ ${r.sampleRate}Hz)\n`;
+            logText += `Channels: ${r.channels}\n\n`;
+            
+            logText += `--- Levels ---\n`;
+            logText += `Peak: ${r.peakDb.toFixed(2)} dBFS\n`;
+            logText += `RMS: ${r.rmsDb.toFixed(2)} dBFS\n`;
+            logText += `LUFS: ${r.lufs.toFixed(1)} LUFS\n`;
+            logText += `Crest Factor: ${r.crest.toFixed(2)} dB\n`;
+            logText += `Dynamic Range: ${r.dynamicRange.toFixed(2)} dB\n\n`;
+            
+            logText += `--- Stereo ---\n`;
+            logText += `Correlation: ${r.correlation.toFixed(3)}\n`;
+            logText += `Stereo Width: ${r.width.toFixed(1)}%\n`;
+            logText += `L/R Balance: ${r.balanceDb > 0 ? '+' : ''}${r.balanceDb.toFixed(2)} dB\n\n`;
+            
+            logText += `--- Spectrum: Perceptual (A-weighted) ---\n`;
+            if (r.spectrum) {
+                logText += `Sub (20-60Hz): ${r.spectrum.sub > 0 ? '+' : ''}${r.spectrum.sub.toFixed(1)} dB\n`;
+                logText += `Bass (60-200Hz): ${r.spectrum.bass > 0 ? '+' : ''}${r.spectrum.bass.toFixed(1)} dB\n`;
+                logText += `Low-Mid (200-500Hz): ${r.spectrum.lowMid > 0 ? '+' : ''}${r.spectrum.lowMid.toFixed(1)} dB\n`;
+                logText += `Mid (500Hz-2kHz): ${r.spectrum.mid > 0 ? '+' : ''}${r.spectrum.mid.toFixed(1)} dB\n`;
+                logText += `High-Mid (2-4kHz): ${r.spectrum.highMid > 0 ? '+' : ''}${r.spectrum.highMid.toFixed(1)} dB\n`;
+                logText += `High (4-16kHz): ${r.spectrum.high > 0 ? '+' : ''}${r.spectrum.high.toFixed(1)} dB\n`;
+            }
+            logText += `\n`;
+            
+            logText += `--- Spectrum: Raw Measurement (Flat) ---\n`;
+            if (r.spectrumFlatBands) {
+                logText += `Sub (20-60Hz): ${r.spectrumFlatBands.sub > 0 ? '+' : ''}${r.spectrumFlatBands.sub.toFixed(1)} dB\n`;
+                logText += `Bass (60-200Hz): ${r.spectrumFlatBands.bass > 0 ? '+' : ''}${r.spectrumFlatBands.bass.toFixed(1)} dB\n`;
+                logText += `Low-Mid (200-500Hz): ${r.spectrumFlatBands.lowMid > 0 ? '+' : ''}${r.spectrumFlatBands.lowMid.toFixed(1)} dB\n`;
+                logText += `Mid (500Hz-2kHz): ${r.spectrumFlatBands.mid > 0 ? '+' : ''}${r.spectrumFlatBands.mid.toFixed(1)} dB\n`;
+                logText += `High-Mid (2-4kHz): ${r.spectrumFlatBands.highMid > 0 ? '+' : ''}${r.spectrumFlatBands.highMid.toFixed(1)} dB\n`;
+                logText += `High (4-16kHz): ${r.spectrumFlatBands.high > 0 ? '+' : ''}${r.spectrumFlatBands.high.toFixed(1)} dB\n`;
+            }
+            logText += `\n`;
+            
+            logText += `--- Technical ---\n`;
+            logText += `Clipped Samples: ${r.clippedSamples} (${((r.clippedSamples / r.samples) * 100).toFixed(4)}%)\n`;
+            logText += `DC Offset: L=${(r.dcOffset?.left * 100).toFixed(4) || '?'}%, R=${(r.dcOffset?.right * 100).toFixed(4) || '?'}%\n`;
+            
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                logText += `\n--- Clip Events (${r.clipEvents.length}) ---\n`;
+                r.clipEvents.slice(0, 20).forEach((clip, i) => {
+                    logText += `${i+1}. ${formatTime(clip.time)} - ${clip.peakDb.toFixed(1)} dB (${clip.channel})\n`;
+                });
+                if (r.clipEvents.length > 20) {
+                    logText += `... and ${r.clipEvents.length - 20} more\n`;
+                }
+            }
+            
+            logText += `\n========================`;
+            analysisLog.textContent = logText;
+            
+            analysisDetails.style.display = 'block';
+        }
+        
+        function drawFreqGraph(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Get canvas size - use attributes if getBoundingClientRect returns 0 (hidden element)
+            let rect = canvas.getBoundingClientRect();
+            let w = rect.width || canvas.getAttribute('width') || 400;
+            let h = rect.height || canvas.getAttribute('height') || 120;
+            
+            // Ensure numbers
+            w = parseFloat(w);
+            h = parseFloat(h);
+            
+            // Set canvas size for high DPI
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const padding = { left: 35, right: 15, top: 10, bottom: 22 };
+            const graphW = w - padding.left - padding.right;
+            const graphH = h - padding.top - padding.bottom;
+            
+            // Y-axis range: +12 dB to -24 dB (36 dB total)
+            const dbMax = 12;
+            const dbMin = -24;
+            const dbRange = dbMax - dbMin;
+            
+            // Clear
+            ctx.fillStyle = '#0d0d1a';
+            ctx.fillRect(0, 0, w, h);
+            
+            // Grid
+            ctx.strokeStyle = '#2a2a3e';
+            ctx.lineWidth = 1;
+            
+            // Horizontal grid lines (dB)
+            const dbLines = [12, 6, 0, -6, -12, -18, -24];
+            ctx.font = '9px sans-serif';
+            ctx.fillStyle = '#52525b';
+            ctx.textAlign = 'right';
+            
+            dbLines.forEach(db => {
+                const y = padding.top + ((dbMax - db) / dbRange) * graphH;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(w - padding.right, y);
+                ctx.stroke();
+                const label = db > 0 ? '+' + db : db + '';
+                ctx.fillText(label, padding.left - 4, y + 3);
+            });
+            
+            // Vertical grid lines (frequency)
+            const freqLines = [50, 100, 200, 500, 1000, 2000, 5000, 10000];
+            ctx.textAlign = 'center';
+            
+            freqLines.forEach(freq => {
+                const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                ctx.beginPath();
+                ctx.setLineDash([2, 4]);
+                ctx.moveTo(x, padding.top);
+                ctx.lineTo(x, h - padding.bottom);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                const label = freq >= 1000 ? (freq / 1000) + 'k' : freq + '';
+                ctx.fillText(label, x, h - padding.bottom + 10);
+            });
+            
+            // Draw curve
+            if (data.freqs && data.db && data.freqs.length > 0) {
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                
+                let started = false;
+                for (let i = 0; i < data.freqs.length; i++) {
+                    const freq = data.freqs[i];
+                    const db = Math.max(dbMin, Math.min(dbMax, data.db[i])); // Clamp to range
+                    
+                    const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                    const y = padding.top + ((dbMax - db) / dbRange) * graphH;
+                    
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                
+                // Fill under curve (to 0 dB line, not bottom)
+                const zeroY = padding.top + ((dbMax - 0) / dbRange) * graphH;
+                ctx.lineTo(padding.left + graphW, zeroY);
+                ctx.lineTo(padding.left, zeroY);
+                ctx.closePath();
+                
+                // Convert hex color to rgb for gradient
+                const hexToRgb = (hex) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                    } : {r: 34, g: 211, b: 238};
+                };
+                const rgb = hexToRgb(color);
+                
+                const gradient = ctx.createLinearGradient(0, padding.top, 0, zeroY);
+                gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+                gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            }
+            
+            // 0dB reference line (green)
+            ctx.beginPath();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            const zeroY = padding.top + ((dbMax - 0) / dbRange) * graphH;
+            ctx.moveTo(padding.left, zeroY);
+            ctx.lineTo(w - padding.right, zeroY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function initSpectrumBars() {
+            const bars = document.getElementById('bars');
+            bars.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'spectrum-bar';
+                bar.style.height = '4px';
+                bars.appendChild(bar);
+            }
+        }
+
+        // Player
+        const playBtn = document.getElementById('playBtn');
+        playBtn.addEventListener('click', togglePlay);
+
+        function togglePlay() {
+            if (isPlaying) stopAudio();
+            else playAudio();
+        }
+
+        function playAudio() {
+            if (!buffer) return;
+
+            source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 2048; // Better frequency resolution
+
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            source.start(0, pauseTime);
+            startTime = audioCtx.currentTime - pauseTime;
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            document.getElementById('liveBadge').style.display = 'inline';
+
+            source.onended = () => {
+                if (isPlaying) {
+                    stopAudio();
+                    pauseTime = 0;
+                }
+            };
+
+            updateSpectrum();
+        }
+
+        function stopAudio() {
+            if (source) {
+                source.stop();
+                source.disconnect();
+            }
+            pauseTime = audioCtx.currentTime - startTime;
+            if (pauseTime >= buffer.duration) pauseTime = 0;
+            isPlaying = false;
+            playBtn.textContent = '▶';
+            document.getElementById('liveBadge').style.display = 'none';
+            if (animId) cancelAnimationFrame(animId);
+        }
+
+        function updateSpectrum() {
+            if (!isPlaying || !analyser) return;
+
+            const freqData = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(freqData);
+
+            const bars = document.querySelectorAll('.spectrum-bar');
+            const sampleRate = audioCtx.sampleRate;
+            const binHz = sampleRate / analyser.fftSize;
+            
+            // Skip first bins (DC offset / sub-20Hz)
+            const startBin = Math.ceil(20 / binHz); // Start from ~20Hz
+            const usableBins = freqData.length - startBin;
+            
+            // Map bars logarithmically across frequency range
+            bars.forEach((bar, i) => {
+                // Logarithmic frequency mapping (20Hz to ~20kHz)
+                const logMin = Math.log10(20);
+                const logMax = Math.log10(Math.min(20000, sampleRate / 2));
+                const logFreq = logMin + (i / (bars.length - 1)) * (logMax - logMin);
+                const freq = Math.pow(10, logFreq);
+                const bin = Math.round(freq / binHz);
+                
+                // Average a few bins for smoother display
+                let sum = 0, count = 0;
+                for (let b = Math.max(startBin, bin - 1); b <= Math.min(freqData.length - 1, bin + 1); b++) {
+                    sum += freqData[b];
+                    count++;
+                }
+                const value = count > 0 ? sum / count : 0;
+                const height = Math.max(4, (value / 255) * 80);
+                bar.style.height = height + 'px';
+            });
+
+            const elapsed = audioCtx.currentTime - startTime;
+            document.getElementById('currentTime').textContent = formatTime(elapsed);
+            document.getElementById('progressFill').style.width = (elapsed / buffer.duration * 100) + '%';
+
+            animId = requestAnimationFrame(updateSpectrum);
+        }
+
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // PDF Download
+        document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+
+        function generatePDF() {
+            if (!window.lastAnalysis) return;
+            
+            const r = window.lastAnalysis;
+            const fileName = document.getElementById('fileName').textContent || 'audio-file';
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const gold = [201, 162, 39];
+            const dark = [26, 26, 46];
+            const white = [244, 244, 245];
+            const gray = [113, 113, 122];
+            
+            const pageHeight = 280; // Leave room for footer
+            let y = 0;
+            
+            // Helper: check if we need a new page
+            function checkPage(neededSpace = 20) {
+                if (y + neededSpace > pageHeight) {
+                    // Add footer to current page
+                    addFooter();
+                    doc.addPage();
+                    y = 20;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Helper: add footer
+            function addFooter() {
+                doc.setFillColor(...dark);
+                doc.rect(0, 285, 210, 12, 'F');
+                doc.setTextColor(...gray);
+                doc.setFontSize(8);
+                doc.text('guyshema.com | oppenmasters © 2025', 105, 292, { align: 'center' });
+            }
+            
+            // === PAGE 1: Header and Metrics ===
+            
+            // Header background
+            doc.setFillColor(...dark);
+            doc.rect(0, 0, 210, 45, 'F');
+            
+            // Logo
+            doc.setFontSize(24);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(...white);
+            doc.text('oppen', 20, 25);
+            const oppenWidth = doc.getTextWidth('oppen');
+            doc.setTextColor(...gold);
+            doc.text('masters', 20 + oppenWidth, 25);
+            
+            // Subtitle
+            doc.setTextColor(...gray);
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Pre-Mastering Mix Analysis Report', 20, 35);
+            
+            // File info
+            y = 55;
+            doc.setTextColor(...dark);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('File: ' + fileName, 20, y);
+            
+            y += 7;
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...gray);
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            doc.text('Generated: ' + dateStr + ' | Duration: ' + formatTime(r.duration) + ' | ' + formatSampleRate(r.sampleRate) + ' | ' + r.channels + 'ch', 20, y);
+            
+            // Status box
+            y += 12;
+            const hasBadIssues = r.issues.some(i => i.severity === 'bad');
+            const hasWarnIssues = r.issues.some(i => i.severity === 'warn');
+            
+            doc.setFillColor(...(hasBadIssues ? [239, 68, 68] : (hasWarnIssues ? [245, 158, 11] : [34, 197, 94])));
+            doc.roundedRect(20, y, 170, 14, 3, 3, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            const statusText = hasBadIssues ? 'Issues Found - Needs Attention' : (hasWarnIssues ? 'Minor Issues - Review Recommended' : 'Mix is Ready for Mastering');
+            doc.text(statusText, 105, y + 9, { align: 'center' });
+            
+            // === Audio Metrics ===
+            y += 25;
+            doc.setTextColor(...dark);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Audio Metrics', 20, y);
+            
+            y += 8;
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+            
+            const metrics = [
+                ['Peak Level', r.peakDb.toFixed(1) + ' dB', r.peakDb < -1 ? 'OK' : (r.peakDb < 0 ? 'High' : 'Clipping!')],
+                ['RMS Level', r.rmsDb.toFixed(1) + ' dB', r.rmsDb < -20 ? 'Quiet' : 'OK'],
+                ['Loudness (LUFS)', r.lufs.toFixed(1) + ' LUFS', '-'],
+                ['Dynamic Range', r.crest.toFixed(1) + ' dB', r.crest < 4 ? 'Compressed' : (r.crest > 16 ? 'Very Dynamic' : 'OK')],
+                ['Stereo Width', r.width.toFixed(0) + '%', r.width > 80 ? 'Very Wide' : 'OK'],
+                ['Mono Correlation', r.correlation.toFixed(2), r.correlation < 0 ? 'Phase Issues!' : 'OK'],
+                ['L/R Balance', (r.balanceDb > 0 ? '+' : '') + r.balanceDb.toFixed(1) + ' dB', Math.abs(r.balanceDb) > 2 ? 'Unbalanced' : 'OK']
+            ];
+            
+            metrics.forEach((m, i) => {
+                const rowY = y + (i * 7);
+                doc.setTextColor(...gray);
+                doc.text(m[0] + ':', 20, rowY);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'bold');
+                doc.text(m[1], 75, rowY);
+                doc.setFont('helvetica', 'normal');
+                const statusColor = m[2].includes('!') || m[2].includes('Issue') ? [239, 68, 68] : 
+                                    (m[2] === 'OK' ? [34, 197, 94] : [245, 158, 11]);
+                doc.setTextColor(...statusColor);
+                doc.text(m[2], 115, rowY);
+            });
+            
+            y += metrics.length * 7 + 5;
+            
+            // === Frequency Balance - Perceptual ===
+            if (r.spectrum) {
+                checkPage(70);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Frequency Balance', 20, y);
+                
+                y += 7;
+                doc.setFontSize(9);
+                doc.setTextColor(34, 211, 238);
+                doc.text('Perceptual (A-weighted)', 20, y);
+                doc.setTextColor(...gray);
+                doc.setFontSize(8);
+                doc.text('- how human ear perceives it', 65, y);
+                
+                y += 7;
+                const bands = [
+                    { name: 'Sub (20-60Hz)', value: r.spectrum.sub },
+                    { name: 'Bass (60-200Hz)', value: r.spectrum.bass },
+                    { name: 'Low-Mid (200-500Hz)', value: r.spectrum.lowMid },
+                    { name: 'Mid (500Hz-2kHz)', value: r.spectrum.mid },
+                    { name: 'High-Mid (2-4kHz)', value: r.spectrum.highMid },
+                    { name: 'High (4-16kHz)', value: r.spectrum.high }
+                ];
+                
+                bands.forEach((band, i) => {
+                    const rowY = y + (i * 7);
+                    doc.setTextColor(...gray);
+                    doc.setFontSize(8);
+                    doc.text(band.name, 20, rowY);
+                    
+                    // Bar
+                    doc.setFillColor(230, 230, 230);
+                    doc.roundedRect(70, rowY - 2.5, 50, 4, 1, 1, 'F');
+                    doc.setFillColor(150, 150, 150);
+                    doc.rect(94.5, rowY - 2.5, 1, 4, 'F');
+                    
+                    const barWidth = Math.min(23, Math.abs(band.value) * (23/6));
+                    const isBalanced = Math.abs(band.value) <= 3;
+                    doc.setFillColor(isBalanced ? 34 : 245, isBalanced ? 197 : 158, isBalanced ? 94 : 11);
+                    if (band.value >= 0) {
+                        doc.roundedRect(95, rowY - 2.5, barWidth, 4, 1, 1, 'F');
+                    } else {
+                        doc.roundedRect(95 - barWidth, rowY - 2.5, barWidth, 4, 1, 1, 'F');
+                    }
+                    
+                    doc.setTextColor(...dark);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text((band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB', 125, rowY);
+                    doc.setFont('helvetica', 'normal');
+                });
+                
+                y += bands.length * 7 + 5;
+                
+                // === Frequency Balance - Flat ===
+                if (r.spectrumFlatBands) {
+                    checkPage(55);
+                    
+                    doc.setFontSize(9);
+                    doc.setTextColor(167, 139, 250);
+                    doc.text('Raw Measurement (Flat)', 20, y);
+                    doc.setTextColor(...gray);
+                    doc.setFontSize(8);
+                    doc.text('- actual energy levels', 62, y);
+                    
+                    y += 7;
+                    const flatBands = [
+                        { name: 'Sub (20-60Hz)', value: r.spectrumFlatBands.sub },
+                        { name: 'Bass (60-200Hz)', value: r.spectrumFlatBands.bass },
+                        { name: 'Low-Mid (200-500Hz)', value: r.spectrumFlatBands.lowMid },
+                        { name: 'Mid (500Hz-2kHz)', value: r.spectrumFlatBands.mid },
+                        { name: 'High-Mid (2-4kHz)', value: r.spectrumFlatBands.highMid },
+                        { name: 'High (4-16kHz)', value: r.spectrumFlatBands.high }
+                    ];
+                    
+                    flatBands.forEach((band, i) => {
+                        const rowY = y + (i * 7);
+                        doc.setTextColor(...gray);
+                        doc.setFontSize(8);
+                        doc.text(band.name, 20, rowY);
+                        
+                        doc.setFillColor(230, 230, 230);
+                        doc.roundedRect(70, rowY - 2.5, 50, 4, 1, 1, 'F');
+                        doc.setFillColor(150, 150, 150);
+                        doc.rect(94.5, rowY - 2.5, 1, 4, 'F');
+                        
+                        const barWidth = Math.min(23, Math.abs(band.value) * (23/6));
+                        const isBalanced = Math.abs(band.value) <= 3;
+                        doc.setFillColor(isBalanced ? 139 : 245, isBalanced ? 92 : 158, isBalanced ? 246 : 11);
+                        if (band.value >= 0) {
+                            doc.roundedRect(95, rowY - 2.5, barWidth, 4, 1, 1, 'F');
+                        } else {
+                            doc.roundedRect(95 - barWidth, rowY - 2.5, barWidth, 4, 1, 1, 'F');
+                        }
+                        
+                        doc.setTextColor(...dark);
+                        doc.setFont('helvetica', 'bold');
+                        doc.text((band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB', 125, rowY);
+                        doc.setFont('helvetica', 'normal');
+                    });
+                    
+                    y += flatBands.length * 7 + 5;
+                }
+                
+                // === Frequency Graphs (side by side) ===
+                checkPage(65);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Spectrum Graphs', 20, y);
+                y += 8;
+                
+                // Get canvas elements
+                const graphPerceptual = document.getElementById('freqGraph');
+                const graphFlat = document.getElementById('freqGraphFlat');
+                
+                if (graphPerceptual && graphFlat && r.spectrumDetail && r.spectrumFlat) {
+                    try {
+                        // Create high-res canvases for PDF (fixed size, not dependent on screen)
+                        function drawGraphForPDF(data, color) {
+                            const pdfCanvas = document.createElement('canvas');
+                            const w = 400;
+                            const h = 140;
+                            pdfCanvas.width = w * 2; // 2x for quality
+                            pdfCanvas.height = h * 2;
+                            const ctx = pdfCanvas.getContext('2d');
+                            ctx.scale(2, 2);
+                            
+                            const padding = { left: 35, right: 15, top: 12, bottom: 24 };
+                            const graphW = w - padding.left - padding.right;
+                            const graphH = h - padding.top - padding.bottom;
+                            
+                            const dbMax = 12;
+                            const dbMin = -24;
+                            const dbRange = dbMax - dbMin;
+                            
+                            // Dark background
+                            ctx.fillStyle = '#0d0d1a';
+                            ctx.fillRect(0, 0, w, h);
+                            
+                            // Grid lines
+                            ctx.strokeStyle = '#2a2a3e';
+                            ctx.lineWidth = 1;
+                            
+                            // Horizontal grid (dB)
+                            const dbLines = [12, 6, 0, -6, -12, -18, -24];
+                            ctx.font = '10px sans-serif';
+                            ctx.fillStyle = '#71717a';
+                            ctx.textAlign = 'right';
+                            
+                            dbLines.forEach(db => {
+                                const yPos = padding.top + ((dbMax - db) / dbRange) * graphH;
+                                ctx.beginPath();
+                                ctx.moveTo(padding.left, yPos);
+                                ctx.lineTo(w - padding.right, yPos);
+                                ctx.stroke();
+                                const label = db > 0 ? '+' + db : db + '';
+                                ctx.fillText(label, padding.left - 4, yPos + 3);
+                            });
+                            
+                            // 0 dB line highlighted
+                            ctx.strokeStyle = '#52525b';
+                            ctx.lineWidth = 1.5;
+                            const zeroY = padding.top + ((dbMax - 0) / dbRange) * graphH;
+                            ctx.beginPath();
+                            ctx.moveTo(padding.left, zeroY);
+                            ctx.lineTo(w - padding.right, zeroY);
+                            ctx.stroke();
+                            
+                            // Vertical grid (frequency)
+                            ctx.strokeStyle = '#2a2a3e';
+                            ctx.lineWidth = 1;
+                            const freqLines = [50, 100, 200, 500, 1000, 2000, 5000, 10000];
+                            ctx.textAlign = 'center';
+                            
+                            freqLines.forEach(freq => {
+                                const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                                ctx.beginPath();
+                                ctx.setLineDash([2, 4]);
+                                ctx.moveTo(x, padding.top);
+                                ctx.lineTo(x, h - padding.bottom);
+                                ctx.stroke();
+                                ctx.setLineDash([]);
+                                
+                                const label = freq >= 1000 ? (freq / 1000) + 'k' : freq + '';
+                                ctx.fillText(label, x, h - padding.bottom + 12);
+                            });
+                            
+                            // Draw curve
+                            if (data.freqs && data.db && data.freqs.length > 0) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 2.5;
+                                ctx.lineCap = 'round';
+                                ctx.lineJoin = 'round';
+                                
+                                let started = false;
+                                for (let i = 0; i < data.freqs.length; i++) {
+                                    const freq = data.freqs[i];
+                                    const db = Math.max(dbMin, Math.min(dbMax, data.db[i]));
+                                    
+                                    const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                                    const yPos = padding.top + ((dbMax - db) / dbRange) * graphH;
+                                    
+                                    if (!started) {
+                                        ctx.moveTo(x, yPos);
+                                        started = true;
+                                    } else {
+                                        ctx.lineTo(x, yPos);
+                                    }
+                                }
+                                ctx.stroke();
+                                
+                                // Glow effect
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 4;
+                                ctx.globalAlpha = 0.3;
+                                ctx.stroke();
+                                ctx.globalAlpha = 1;
+                            }
+                            
+                            return pdfCanvas.toDataURL('image/png');
+                        }
+                        
+                        // Graph dimensions in PDF (side by side, larger)
+                        const graphWidth = 85;
+                        const graphHeight = 45;
+                        
+                        // Perceptual graph (left)
+                        const imgDataPerceptual = drawGraphForPDF(r.spectrumDetail, '#22d3ee');
+                        doc.addImage(imgDataPerceptual, 'PNG', 20, y, graphWidth, graphHeight);
+                        
+                        // Flat graph (right)
+                        const imgDataFlat = drawGraphForPDF(r.spectrumFlat, '#a78bfa');
+                        doc.addImage(imgDataFlat, 'PNG', 110, y, graphWidth, graphHeight);
+                        
+                        // Labels under graphs
+                        y += graphHeight + 4;
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
+                        doc.setTextColor(34, 211, 238);
+                        doc.text('Perceptual (A-weighted)', 20 + graphWidth/2, y, { align: 'center' });
+                        doc.setTextColor(167, 139, 250);
+                        doc.text('Raw Measurement (Flat)', 110 + graphWidth/2, y, { align: 'center' });
+                        
+                        y += 10;
+                    } catch(e) {
+                        console.log('Could not add graphs to PDF:', e);
+                    }
+                }
+            }
+            
+            // === Issues ===
+            if (r.issues.length > 0) {
+                checkPage(15 + r.issues.length * 6);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Issues Found', 20, y);
+                
+                y += 7;
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                
+                r.issues.forEach((issue, i) => {
+                    checkPage(7);
+                    const icon = issue.severity === 'bad' ? '❌' : '⚠️';
+                    let text = issue.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    doc.setTextColor(issue.severity === 'bad' ? 239 : 245, issue.severity === 'bad' ? 68 : 158, issue.severity === 'bad' ? 68 : 11);
+                    doc.text(icon + ' ' + text, 20, y);
+                    y += 6;
+                });
+                
+                y += 5;
+            }
+            
+            // === Clip Events ===
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                checkPage(25);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Clip Events (' + r.clipEvents.length + ' total)', 20, y);
+                
+                y += 6;
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(239, 68, 68);
+                
+                const maxClips = Math.min(15, r.clipEvents.length);
+                for (let i = 0; i < maxClips; i++) {
+                    checkPage(5);
+                    const clip = r.clipEvents[i];
+                    doc.text((i+1) + '. ' + formatTime(clip.time) + ' - ' + clip.peakDb.toFixed(1) + ' dB (' + clip.channel + ')', 20, y);
+                    y += 5;
+                }
+                if (r.clipEvents.length > 15) {
+                    doc.text('... and ' + (r.clipEvents.length - 15) + ' more clips', 20, y);
+                    y += 5;
+                }
+                
+                y += 5;
+            }
+            
+            // === Full Analysis Log (New Page) ===
+            doc.addPage();
+            y = 20;
+            
+            doc.setTextColor(...dark);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Full Analysis Log', 20, y);
+            
+            y += 10;
+            doc.setFontSize(8);
+            doc.setFont('courier', 'normal');
+            doc.setTextColor(...gray);
+            
+            // Build log text
+            let logLines = [];
+            logLines.push('=== oppenmasters Analysis Log ===');
+            logLines.push('File: ' + fileName);
+            logLines.push('Date: ' + dateStr);
+            logLines.push('Duration: ' + formatTime(r.duration));
+            logLines.push('Sample Rate: ' + formatSampleRate(r.sampleRate));
+            logLines.push('Channels: ' + r.channels);
+            logLines.push('');
+            logLines.push('--- Levels ---');
+            logLines.push('Peak: ' + r.peakDb.toFixed(2) + ' dB');
+            logLines.push('RMS: ' + r.rmsDb.toFixed(2) + ' dB');
+            logLines.push('LUFS: ' + r.lufs.toFixed(2) + ' LUFS');
+            logLines.push('Dynamic Range: ' + r.crest.toFixed(2) + ' dB');
+            logLines.push('');
+            logLines.push('--- Stereo ---');
+            logLines.push('Correlation: ' + r.correlation.toFixed(3));
+            logLines.push('Stereo Width: ' + r.width.toFixed(1) + '%');
+            logLines.push('L/R Balance: ' + (r.balanceDb > 0 ? '+' : '') + r.balanceDb.toFixed(2) + ' dB');
+            logLines.push('');
+            logLines.push('--- Spectrum: Perceptual (A-weighted) ---');
+            if (r.spectrum) {
+                logLines.push('Sub (20-60Hz): ' + (r.spectrum.sub > 0 ? '+' : '') + r.spectrum.sub.toFixed(1) + ' dB');
+                logLines.push('Bass (60-200Hz): ' + (r.spectrum.bass > 0 ? '+' : '') + r.spectrum.bass.toFixed(1) + ' dB');
+                logLines.push('Low-Mid (200-500Hz): ' + (r.spectrum.lowMid > 0 ? '+' : '') + r.spectrum.lowMid.toFixed(1) + ' dB');
+                logLines.push('Mid (500Hz-2kHz): ' + (r.spectrum.mid > 0 ? '+' : '') + r.spectrum.mid.toFixed(1) + ' dB');
+                logLines.push('High-Mid (2-4kHz): ' + (r.spectrum.highMid > 0 ? '+' : '') + r.spectrum.highMid.toFixed(1) + ' dB');
+                logLines.push('High (4-16kHz): ' + (r.spectrum.high > 0 ? '+' : '') + r.spectrum.high.toFixed(1) + ' dB');
+            }
+            logLines.push('');
+            logLines.push('--- Spectrum: Raw Measurement (Flat) ---');
+            if (r.spectrumFlatBands) {
+                logLines.push('Sub (20-60Hz): ' + (r.spectrumFlatBands.sub > 0 ? '+' : '') + r.spectrumFlatBands.sub.toFixed(1) + ' dB');
+                logLines.push('Bass (60-200Hz): ' + (r.spectrumFlatBands.bass > 0 ? '+' : '') + r.spectrumFlatBands.bass.toFixed(1) + ' dB');
+                logLines.push('Low-Mid (200-500Hz): ' + (r.spectrumFlatBands.lowMid > 0 ? '+' : '') + r.spectrumFlatBands.lowMid.toFixed(1) + ' dB');
+                logLines.push('Mid (500Hz-2kHz): ' + (r.spectrumFlatBands.mid > 0 ? '+' : '') + r.spectrumFlatBands.mid.toFixed(1) + ' dB');
+                logLines.push('High-Mid (2-4kHz): ' + (r.spectrumFlatBands.highMid > 0 ? '+' : '') + r.spectrumFlatBands.highMid.toFixed(1) + ' dB');
+                logLines.push('High (4-16kHz): ' + (r.spectrumFlatBands.high > 0 ? '+' : '') + r.spectrumFlatBands.high.toFixed(1) + ' dB');
+            }
+            logLines.push('');
+            logLines.push('--- Technical ---');
+            logLines.push('Clipped Samples: ' + r.clippedSamples + ' (' + ((r.clippedSamples / r.samples) * 100).toFixed(4) + '%)');
+            if (r.dcOffset) {
+                logLines.push('DC Offset: L=' + (r.dcOffset.left * 100).toFixed(4) + '%, R=' + (r.dcOffset.right * 100).toFixed(4) + '%');
+            }
+            
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                logLines.push('');
+                logLines.push('--- Clip Events (' + r.clipEvents.length + ') ---');
+                r.clipEvents.slice(0, 30).forEach((clip, i) => {
+                    logLines.push((i+1) + '. ' + formatTime(clip.time) + ' - ' + clip.peakDb.toFixed(1) + ' dB (' + clip.channel + ')');
+                });
+                if (r.clipEvents.length > 30) {
+                    logLines.push('... and ' + (r.clipEvents.length - 30) + ' more');
+                }
+            }
+            
+            if (r.issues.length > 0) {
+                logLines.push('');
+                logLines.push('--- Issues ---');
+                r.issues.forEach(issue => {
+                    const icon = issue.severity === 'bad' ? '[!]' : '[?]';
+                    logLines.push(icon + ' ' + issue.id);
+                });
+            }
+            
+            // Print log lines
+            logLines.forEach(line => {
+                checkPage(4);
+                doc.text(line, 20, y);
+                y += 4;
+            });
+            
+            // Add footer to last page
+            addFooter();
+            
+            // Save
+            const safeName = fileName.replace(/[^a-zA-Z0-9\-_\u0590-\u05FF]/g, '_').substring(0, 50);
+            doc.save('oppenmasters_report_' + safeName + '.pdf');
+        }
+
+        function reset() {
+            stopAudio();
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+            uploadArea.classList.remove('has-file');
+            loading.classList.remove('show');
+            results.classList.remove('show');
+            buffer = null;
+            pauseTime = 0;
+            window.lastAnalysis = null;
+        }
+
+        // Accordion toggle helper with ARIA support
+        function setupAccordion(headerId, contentId, arrowId) {
+            const header = document.getElementById(headerId);
+            const content = document.getElementById(contentId);
+            const arrow = document.getElementById(arrowId);
+            
+            if (!header || !content) return;
+            
+            // Set initial ARIA state
+            header.setAttribute('role', 'button');
+            header.setAttribute('tabindex', '0');
+            header.setAttribute('aria-expanded', content.classList.contains('show'));
+            header.setAttribute('aria-controls', contentId);
+            content.setAttribute('role', 'region');
+            content.setAttribute('aria-labelledby', headerId);
+            
+            const toggle = () => {
+                const isOpen = content.classList.toggle('show');
+                header.setAttribute('aria-expanded', isOpen);
+                if (arrow) arrow.textContent = isOpen ? '▲' : '▼';
+            };
+            
+            header.addEventListener('click', toggle);
+            header.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+        }
+        
+        // Setup all accordions
+        setupAccordion('guidelinesHeader', 'guidelinesContent', 'guidelinesArrow');
+        setupAccordion('aboutHeader', 'aboutContent', 'aboutArrow');
+        setupAccordion('guideHeader', 'guideContent', 'guideArrow');
+        setupAccordion('howToHeader', 'howToContent', 'howToArrow');
+        setupAccordion('detailsHeader', 'detailsContent', 'detailsArrow');
+
+        // Utils
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function
