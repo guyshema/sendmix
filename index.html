@@ -977,13 +977,13 @@
         <!-- Footer -->
         <div class="footer">
             <a href="https://guyshema.com" target="_blank">guyshema.com</a><br>
-            <a href="mailto:musicshema@gmail.com">musicshema@gmail.com</a><br>
+            <a href="/cdn-cgi/l/email-protection#9ef3ebedf7fdedf6fbf3ffdef9f3fff7f2b0fdf1f3"><span class="__cf_email__" data-cfemail="ed80989e848e9e8588808cad8a808c8481c38e8280">[email&#160;protected]</span></a><br>
             Guy Shema Oppenheimer © 2025
         </div>
     </div>
 
     <!-- jsPDF Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <script>
         // ========== LANGUAGE SYSTEM ==========
@@ -1256,134 +1256,105 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Real FFT-based spectrum analysis
+        // Real FFT-based spectrum analysis using proper averaging
         async function analyzeSpectrum(buf) {
             const sampleRate = buf.sampleRate;
             const left = buf.getChannelData(0);
             const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
             const len = buf.length;
             
-            const fftSize = 4096;
-            const numWindows = Math.max(1, Math.min(100, Math.floor(len / fftSize)));
-            
+            const fftSize = 2048;
             if (len < fftSize) return null;
             
-            // Band definitions (logarithmic spacing)
+            const numWindows = Math.min(50, Math.floor(len / fftSize));
+            const freqPerBin = sampleRate / fftSize;
+            
+            // Define bands with bin ranges
             const bands = [
-                { name: 'sub', min: 20, max: 60 },
-                { name: 'bass', min: 60, max: 250 },
-                { name: 'lowMid', min: 250, max: 500 },
-                { name: 'mid', min: 500, max: 2000 },
-                { name: 'highMid', min: 2000, max: 4000 },
-                { name: 'presence', min: 4000, max: 8000 },
-                { name: 'air', min: 8000, max: Math.min(20000, sampleRate / 2) }
+                { name: 'sub', minHz: 20, maxHz: 60 },
+                { name: 'bass', minHz: 60, maxHz: 250 },
+                { name: 'lowMid', minHz: 250, maxHz: 500 },
+                { name: 'mid', minHz: 500, maxHz: 2000 },
+                { name: 'highMid', minHz: 2000, maxHz: 4000 },
+                { name: 'presence', minHz: 4000, maxHz: 8000 },
+                { name: 'air', minHz: 8000, maxHz: Math.min(16000, sampleRate / 2) }
             ];
             
-            const freqPerBin = sampleRate / fftSize;
-            const bandEnergy = {};
-            bands.forEach(b => bandEnergy[b.name] = 0);
+            // Calculate bin ranges for each band
+            bands.forEach(band => {
+                band.minBin = Math.floor(band.minHz / freqPerBin);
+                band.maxBin = Math.min(Math.ceil(band.maxHz / freqPerBin), fftSize / 2 - 1);
+            });
             
-            // Process multiple windows across the track
+            const bandRMS = {};
+            bands.forEach(b => bandRMS[b.name] = 0);
+            
+            // Analyze windows
             for (let w = 0; w < numWindows; w++) {
                 const startIdx = Math.floor((w / numWindows) * (len - fftSize));
                 
-                // Apply Hanning window and mix to mono
-                const real = new Float32Array(fftSize);
-                const imag = new Float32Array(fftSize);
-                
+                // Prepare mono signal with Hanning window
+                const signal = new Float32Array(fftSize);
                 for (let i = 0; i < fftSize; i++) {
-                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
-                    real[i] = ((left[startIdx + i] + right[startIdx + i]) / 2) * window;
-                    imag[i] = 0;
+                    const mono = (left[startIdx + i] + right[startIdx + i]) / 2;
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / fftSize));
+                    signal[i] = mono * window;
                 }
                 
-                // Simple radix-2 FFT
-                fft(real, imag);
-                
-                // Sum energy per band
-                for (let bin = 0; bin < fftSize / 2; bin++) {
-                    const freq = bin * freqPerBin;
-                    const magnitude = Math.sqrt(real[bin] * real[bin] + imag[bin] * imag[bin]);
+                // Compute FFT magnitude for each band using simple DFT for accuracy
+                for (const band of bands) {
+                    let bandEnergy = 0;
+                    const numBins = band.maxBin - band.minBin + 1;
                     
-                    for (const band of bands) {
-                        if (freq >= band.min && freq < band.max) {
-                            bandEnergy[band.name] += magnitude * magnitude;
-                            break;
+                    // Sample bins across the band
+                    const step = Math.max(1, Math.floor(numBins / 8));
+                    let sampledBins = 0;
+                    
+                    for (let bin = band.minBin; bin <= band.maxBin; bin += step) {
+                        // Goertzel for this bin
+                        const k = bin;
+                        const w0 = 2 * Math.PI * k / fftSize;
+                        const coeff = 2 * Math.cos(w0);
+                        
+                        let s1 = 0, s2 = 0;
+                        for (let n = 0; n < fftSize; n++) {
+                            const s0 = signal[n] + coeff * s1 - s2;
+                            s2 = s1;
+                            s1 = s0;
                         }
+                        
+                        const mag = Math.sqrt(s1 * s1 + s2 * s2 - coeff * s1 * s2) / fftSize;
+                        bandEnergy += mag;
+                        sampledBins++;
+                    }
+                    
+                    if (sampledBins > 0) {
+                        bandRMS[band.name] += bandEnergy / sampledBins;
                     }
                 }
             }
             
-            // Convert to dB scale (relative)
+            // Average over windows and convert to dB
             const bandDb = {};
-            let maxDb = -Infinity;
-            
             for (const band of bands) {
-                const avgEnergy = bandEnergy[band.name] / numWindows;
-                // Normalize by bandwidth (octave-based)
-                const octaves = Math.log2(band.max / band.min);
-                const normalizedEnergy = avgEnergy / octaves;
-                bandDb[band.name] = 10 * Math.log10(Math.max(normalizedEnergy, 1e-12));
+                const avg = bandRMS[band.name] / numWindows;
+                bandDb[band.name] = 20 * Math.log10(Math.max(avg, 1e-10));
+            }
+            
+            // Find max for relative display
+            let maxDb = -Infinity;
+            for (const band of bands) {
                 if (bandDb[band.name] > maxDb) maxDb = bandDb[band.name];
             }
             
-            // Convert to 0-100 scale relative to max
+            // Convert to 0-100 relative scale (max = 100, -40dB below = 0)
             const result = {};
             for (const band of bands) {
                 const dbBelow = maxDb - bandDb[band.name];
-                // Map: 0dB below = 100%, 30dB below = 0%
-                result[band.name] = Math.max(0, Math.min(100, 100 - (dbBelow * 3.33)));
+                result[band.name] = Math.max(0, Math.min(100, 100 - (dbBelow * 2.5)));
             }
-            
-            // Calculate totals
-            result.lowEnd = (result.sub + result.bass) / 2;
-            result.mids = (result.lowMid + result.mid + result.highMid) / 3;
-            result.highs = (result.presence + result.air) / 2;
             
             return result;
-        }
-        
-        // Simple in-place radix-2 FFT
-        function fft(real, imag) {
-            const n = real.length;
-            
-            // Bit reversal
-            for (let i = 0, j = 0; i < n; i++) {
-                if (j > i) {
-                    [real[i], real[j]] = [real[j], real[i]];
-                    [imag[i], imag[j]] = [imag[j], imag[i]];
-                }
-                let m = n >> 1;
-                while (m >= 1 && j >= m) {
-                    j -= m;
-                    m >>= 1;
-                }
-                j += m;
-            }
-            
-            // Cooley-Tukey FFT
-            for (let size = 2; size <= n; size *= 2) {
-                const halfSize = size / 2;
-                const step = Math.PI / halfSize;
-                
-                for (let i = 0; i < n; i += size) {
-                    for (let j = 0, angle = 0; j < halfSize; j++, angle += step) {
-                        const cos = Math.cos(angle);
-                        const sin = -Math.sin(angle);
-                        
-                        const idx1 = i + j;
-                        const idx2 = i + j + halfSize;
-                        
-                        const tReal = real[idx2] * cos - imag[idx2] * sin;
-                        const tImag = real[idx2] * sin + imag[idx2] * cos;
-                        
-                        real[idx2] = real[idx1] - tReal;
-                        imag[idx2] = imag[idx1] - tImag;
-                        real[idx1] = real[idx1] + tReal;
-                        imag[idx1] = imag[idx1] + tImag;
-                    }
-                }
-            }
         }
 
         async function analyzeAudio(buf) {
@@ -1690,25 +1661,8 @@
                 });
                 freqBars.innerHTML = html;
                 
-                // Summary
-                const summary = document.getElementById('freqSummary');
-                const lowEnd = r.spectrum.lowEnd;
-                const highs = r.spectrum.highs;
-                
-                let msg = '';
-                if (highs > 70 && lowEnd < 50) {
-                    msg = t('freq_bright');
-                } else if (highs < 40 && lowEnd > 60) {
-                    msg = t('freq_dark');
-                } else if (lowEnd > 75) {
-                    msg = t('freq_heavy_bass');
-                } else if (lowEnd < 35) {
-                    msg = t('freq_light_bass');
-                } else {
-                    msg = t('freq_balanced');
-                }
-                
-                summary.innerHTML = `🎚️ ${msg}`;
+                // Hide summary - just show visual data
+                document.getElementById('freqSummary').style.display = 'none';
                 document.getElementById('freqBalance').style.display = 'block';
             } else {
                 document.getElementById('freqBalance').style.display = 'none';
@@ -1945,27 +1899,6 @@
                     doc.setTextColor(...dark);
                     doc.text(Math.round(val).toString(), 160, rowY);
                 });
-                
-                // Summary
-                y += 64;
-                const lowEnd = r.spectrum.lowEnd;
-                const highs = r.spectrum.highs;
-                let summaryMsg = 'Balanced mix';
-                if (highs > 70 && lowEnd < 50) summaryMsg = 'Bright mix - strong highs';
-                else if (highs < 40 && lowEnd > 60) summaryMsg = 'Dark mix - weak highs';
-                else if (lowEnd > 75) summaryMsg = 'Heavy low end';
-                else if (lowEnd < 35) summaryMsg = 'Light low end';
-                
-                doc.setFillColor(255, 248, 220);
-                doc.roundedRect(20, y - 5, 170, 12, 2, 2, 'F');
-                doc.setDrawColor(...gold);
-                doc.setLineWidth(0.5);
-                doc.roundedRect(20, y - 5, 170, 12, 2, 2, 'S');
-                
-                doc.setTextColor(...dark);
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Summary: ' + summaryMsg, 105, y + 3, { align: 'center' });
             }
             
             // Issues
