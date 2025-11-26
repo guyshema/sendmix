@@ -3031,14 +3031,20 @@
             const ctx = canvas.getContext('2d');
             const dpr = window.devicePixelRatio || 1;
             
+            // Get canvas size - use attributes if getBoundingClientRect returns 0 (hidden element)
+            let rect = canvas.getBoundingClientRect();
+            let w = rect.width || canvas.getAttribute('width') || 400;
+            let h = rect.height || canvas.getAttribute('height') || 120;
+            
+            // Ensure numbers
+            w = parseFloat(w);
+            h = parseFloat(h);
+            
             // Set canvas size for high DPI
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
             ctx.scale(dpr, dpr);
             
-            const w = rect.width;
-            const h = rect.height;
             const padding = { left: 35, right: 15, top: 10, bottom: 22 };
             const graphW = w - padding.left - padding.right;
             const graphH = h - padding.top - padding.bottom;
@@ -3485,6 +3491,68 @@
                     });
                     
                     y += flatBands.length * 7 + 5;
+                }
+                
+                // === Frequency Graphs (side by side) ===
+                checkPage(50);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Spectrum Graphs', 20, y);
+                y += 5;
+                
+                // Get canvas images
+                const graphPerceptual = document.getElementById('freqGraph');
+                const graphFlat = document.getElementById('freqGraphFlat');
+                
+                if (graphPerceptual && graphFlat && r.spectrumDetail && r.spectrumFlat) {
+                    try {
+                        // Redraw both graphs to ensure they're current
+                        drawFreqGraph('freqGraph', r.spectrumDetail, '#22d3ee');
+                        drawFreqGraph('freqGraphFlat', r.spectrumFlat, '#a78bfa');
+                        
+                        // Capture graph with dark background for PDF
+                        function captureGraphWithBackground(canvas) {
+                            const tempCanvas = document.createElement('canvas');
+                            tempCanvas.width = canvas.width;
+                            tempCanvas.height = canvas.height;
+                            const ctx = tempCanvas.getContext('2d');
+                            
+                            // Dark background
+                            ctx.fillStyle = '#1a1a2e';
+                            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                            
+                            // Copy original canvas content
+                            ctx.drawImage(canvas, 0, 0);
+                            
+                            return tempCanvas.toDataURL('image/png');
+                        }
+                        
+                        // Graph dimensions in PDF (side by side)
+                        const graphWidth = 85;
+                        const graphHeight = 35;
+                        
+                        // Perceptual graph (left)
+                        const imgDataPerceptual = captureGraphWithBackground(graphPerceptual);
+                        doc.addImage(imgDataPerceptual, 'PNG', 20, y, graphWidth, graphHeight);
+                        
+                        // Flat graph (right)
+                        const imgDataFlat = captureGraphWithBackground(graphFlat);
+                        doc.addImage(imgDataFlat, 'PNG', 110, y, graphWidth, graphHeight);
+                        
+                        // Labels under graphs
+                        y += graphHeight + 3;
+                        doc.setFontSize(7);
+                        doc.setTextColor(34, 211, 238);
+                        doc.text('Perceptual (A-weighted)', 20 + graphWidth/2, y, { align: 'center' });
+                        doc.setTextColor(167, 139, 250);
+                        doc.text('Raw Measurement (Flat)', 110 + graphWidth/2, y, { align: 'center' });
+                        
+                        y += 8;
+                    } catch(e) {
+                        console.log('Could not add graphs to PDF:', e);
+                    }
                 }
             }
             
