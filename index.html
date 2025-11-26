@@ -562,7 +562,7 @@
             text-decoration: none;
         }
 
-        /* Frequency Balance 3-Band */
+        /* Frequency Balance 4-Band */
         .freq-balance {
             background: rgba(255,255,255,0.03);
             border-radius: 12px;
@@ -582,10 +582,73 @@
             margin-bottom: 16px;
         }
 
-        .freq-3band {
+        .freq-6band {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 10px;
+        }
+
+        /* Spectrum Tabs */
+        .spectrum-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 16px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .spectrum-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: #71717a;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .spectrum-tab:hover {
+            background: rgba(255,255,255,0.05);
+            color: #a1a1aa;
+        }
+
+        .spectrum-tab.active {
+            background: rgba(34, 211, 238, 0.15);
+            color: #22d3ee;
+        }
+
+        .spectrum-tab[data-tab="flat"].active {
+            background: rgba(167, 139, 250, 0.15);
+            color: #a78bfa;
+        }
+
+        .spectrum-tab-icon {
+            font-size: 16px;
+        }
+
+        .spectrum-panel {
+            display: none;
+        }
+
+        .spectrum-panel.active {
+            display: block;
+        }
+
+        .spectrum-panel-description {
+            font-size: 11px;
+            color: #71717a;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            line-height: 1.5;
         }
 
         .freq-band {
@@ -668,6 +731,15 @@
             background: linear-gradient(270deg, #22c55e, #3b82f6);
         }
 
+        /* Flat measurement bars (purple) */
+        .freq-meter-bar.flat.positive {
+            background: linear-gradient(90deg, #8b5cf6, #c084fc);
+        }
+
+        .freq-meter-bar.flat.negative {
+            background: linear-gradient(270deg, #8b5cf6, #6366f1);
+        }
+
         .freq-meter-ref {
             position: absolute;
             left: 50%;
@@ -700,23 +772,126 @@
             color: #a1a1aa;
         }
 
-        .freq-graph-container {
+        .freq-graphs-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
             margin-top: 16px;
+        }
+
+        .freq-graph-container {
             background: #0d0d1a;
             border-radius: 8px;
             padding: 12px;
             position: relative;
         }
 
-        #freqGraph {
+        .freq-graph-label {
+            font-size: 12px;
+            color: #a1a1aa;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        #freqGraph, #freqGraphFlat {
             width: 100%;
-            height: 180px;
+            height: 160px;
             display: block;
         }
 
-        body.rtl .freq-reference {
+        /* Analysis Details */
+        .analysis-details {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            margin-top: 16px;
+            overflow: hidden;
+        }
+
+        .details-header {
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.02);
+        }
+
+        .details-header:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .details-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .details-content {
+            display: none;
+            padding: 16px 18px;
+        }
+
+        .details-content.show {
+            display: block;
+        }
+
+        .detail-section {
+            margin-bottom: 16px;
+        }
+
+        .detail-section h4 {
+            font-size: 13px;
+            color: #a1a1aa;
+            margin-bottom: 10px;
+        }
+
+        .clip-log {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .clip-log-item {
+            padding: 4px 8px;
+            margin-bottom: 4px;
+            background: rgba(239, 68, 68, 0.15);
+            border-radius: 4px;
+            border-left: 3px solid #ef4444;
+        }
+
+        .clip-log-item .time {
+            color: #fbbf24;
+            font-weight: 600;
+        }
+
+        .clip-log-item .peak {
+            color: #ef4444;
+        }
+
+        .clip-log-item .channel {
+            color: #71717a;
+        }
+
+        .analysis-log {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px;
+            line-height: 1.5;
+            color: #a1a1aa;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        body.rtl .clip-log-item {
             border-left: none;
-            border-right: 3px solid #c9a227;
+            border-right: 3px solid #ef4444;
         }
 
         /* Spectrum */
@@ -961,7 +1136,7 @@
                             <li><strong>Dynamic Range</strong> - Difference between peak and RMS (crest factor)</li>
                             <li><strong>Correlation</strong> - Mono compatibility. Below 0 = phase issues</li>
                             <li><strong>Stereo Width</strong> - How wide the stereo image is</li>
-                            <li><strong>Frequency Balance</strong> - Energy distribution across Low/Mid/High relative to Mid (0 dB). Balanced = within ±3 dB</li>
+                            <li><strong>Frequency Balance</strong> - Energy in 6 bands (Sub/Bass/Low-Mid/Mid/High-Mid/High). 0 dB = average</li>
                         </ul>
                     </div>
                     <div class="guideline-section">
@@ -990,7 +1165,7 @@
                             <li><strong>Dynamic Range</strong> - כמה הבדל יש בין החזק לחלש</li>
                             <li><strong>Correlation</strong> - האם יש בעיות פאזה? מתחת ל-0 = יש בעיה</li>
                             <li><strong>Stereo Width</strong> - כמה רחב הסטריאו</li>
-                            <li><strong>Frequency Balance</strong> - חלוקת האנרגיה בין באסים/אמצע/גבוהים. ±3 dB מהאמצע = מאוזן</li>
+                            <li><strong>Frequency Balance</strong> - אנרגיה ב-6 טווחים (סאב/באס/נמוך-אמצע/אמצע/אמצע-גבוה/גבוהים). 0 dB = הממוצע</li>
                         </ul>
                     </div>
                     <div class="guideline-section">
@@ -1001,6 +1176,251 @@
                             <li>ניתוח התדרים משוער - יכול להשתנות ממנתחים אחרים</li>
                             <li>אם משהו נראה תקין פה אבל נשמע לא טוב - תסמכו על האוזניים</li>
                             <li>השוואה לרפרנסים תמיד עדיפה על מספרים</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Guide -->
+        <!-- Understanding Measurements -->
+        <div class="guidelines user-guide">
+            <div class="guidelines-header" id="guideHeader">
+                <div class="guidelines-title">📊 <span data-en="Understanding the Measurements" data-he="הבנת המדידות">Understanding the Measurements</span></div>
+                <span id="guideArrow">▼</span>
+            </div>
+            <div class="guidelines-content" id="guideContent">
+                <!-- English Guide -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>🎚️ Levels - How Loud Is Your Mix?</h4>
+                        <p><strong>Peak</strong> = The loudest moment in your song. Like the highest point on a roller coaster.<br>
+                        ✅ Good: -3 to -1 dB &nbsp; ⚠️ Problem: 0 dB or higher (causes distortion)</p>
+                        
+                        <p><strong>RMS</strong> = Average loudness. Like measuring the "typical" height of the roller coaster.<br>
+                        ✅ Normal: -18 to -12 dB</p>
+                        
+                        <p><strong>LUFS</strong> = How loud it actually sounds to your ears (not just numbers).<br>
+                        ✅ For mastering: -18 to -14 LUFS gives the mastering engineer room to work</p>
+                        
+                        <p><strong>Dynamic Range</strong> = The difference between quiet and loud parts. High = more "breathing", Low = more "squashed".<br>
+                        ✅ Good: 8-15 dB &nbsp; ⚠️ Too low: Under 6 dB (over-compressed)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🔊 Stereo - Left and Right</h4>
+                        <p><strong>Correlation</strong> = Do left and right play nice together?<br>
+                        ✅ Good: 0.3 to 1.0 &nbsp; ⚠️ Problem: Below 0 (will sound weird in mono, like on phone speakers)</p>
+                        
+                        <p><strong>Stereo Width</strong> = How "wide" the sound feels.<br>
+                        ✅ Normal: 30-70% &nbsp; Very wide isn't always better!</p>
+                        
+                        <p><strong>L/R Balance</strong> = Is one side louder than the other?<br>
+                        ✅ Good: Within ±1 dB &nbsp; ⚠️ Problem: More than ±2 dB (mix is lopsided)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🎛️ Frequency Balance - The 6 Bands</h4>
+                        <p>Think of it like a graphic equalizer. Each band shows if that area is louder (+) or quieter (-) than average:</p>
+                        
+                        <p><strong>Sub (20-60Hz)</strong> = The deep rumble you feel more than hear. Kick drum thump.<br>
+                        ⚠️ Too much = muddy, boomy &nbsp; Too little = thin, no weight</p>
+                        
+                        <p><strong>Bass (60-200Hz)</strong> = The bass guitar, low end of vocals, warmth.<br>
+                        ⚠️ Too much = boomy, unclear &nbsp; Too little = weak, no foundation</p>
+                        
+                        <p><strong>Low-Mid (200-500Hz)</strong> = Body and warmth, but also "mud" lives here.<br>
+                        ⚠️ Too much = muddy, boxy &nbsp; Too little = thin, hollow</p>
+                        
+                        <p><strong>Mid (500Hz-2kHz)</strong> = Vocals, guitars, most of what you "hear".<br>
+                        ⚠️ Too much = honky, harsh &nbsp; Too little = distant, lost</p>
+                        
+                        <p><strong>High-Mid (2-4kHz)</strong> = Clarity, presence, attack. Your ear is most sensitive here.<br>
+                        ⚠️ Too much = harsh, fatiguing &nbsp; Too little = dull, buried</p>
+                        
+                        <p><strong>High (4-16kHz)</strong> = Air, sparkle, cymbals, "s" sounds.<br>
+                        ⚠️ Too much = piercing, sibilant &nbsp; Too little = dark, muffled</p>
+                        
+                        <p><strong>👂 Perceptual vs 📊 Raw:</strong><br>
+                        "Perceptual" shows how your ears actually hear it (bass seems quieter because our ears are less sensitive there).<br>
+                        "Raw" shows the actual energy - useful for comparing with other analyzers.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>⚡ Clipping - What Are Those Red Warnings?</h4>
+                        <p>Clipping happens when your audio is too loud and gets "cut off" at the top, causing distortion.</p>
+                        <p>✅ Ideal: 0 clips &nbsp; ⚠️ A few clips: Check those moments &nbsp; ❌ Many clips: Reduce level at source</p>
+                    </div>
+                </div>
+                
+                <!-- Hebrew Guide -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>🎚️ עוצמות - כמה חזק המיקס שלך?</h4>
+                        <p><strong>Peak</strong> = הרגע הכי חזק בשיר. כמו הנקודה הכי גבוהה ברכבת הרים.<br>
+                        ✅ טוב: -3 עד -1 dB &nbsp; ⚠️ בעיה: 0 dB ומעלה (גורם לעיוות)</p>
+                        
+                        <p><strong>RMS</strong> = ממוצע העוצמה. כמו לחשב את הגובה ה"טיפוסי" של רכבת ההרים.<br>
+                        ✅ רגיל: -18 עד -12 dB</p>
+                        
+                        <p><strong>LUFS</strong> = כמה חזק זה באמת נשמע לאוזניים שלך (לא רק מספרים).<br>
+                        ✅ למאסטרינג: -18 עד -14 LUFS נותן למאסטר מקום לעבוד</p>
+                        
+                        <p><strong>Dynamic Range</strong> = ההבדל בין החלקים השקטים לחזקים. גבוה = יותר "נשימה", נמוך = יותר "מעוך".<br>
+                        ✅ טוב: 8-15 dB &nbsp; ⚠️ נמוך מדי: מתחת ל-6 dB (דחיסת יתר)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🔊 סטריאו - שמאל וימין</h4>
+                        <p><strong>Correlation</strong> = האם שמאל וימין מסתדרים יחד?<br>
+                        ✅ טוב: 0.3 עד 1.0 &nbsp; ⚠️ בעיה: מתחת ל-0 (יישמע מוזר במונו, כמו ברמקולי טלפון)</p>
+                        
+                        <p><strong>Stereo Width</strong> = כמה "רחב" הצליל מרגיש.<br>
+                        ✅ רגיל: 30-70% &nbsp; רחב מאוד לא תמיד עדיף!</p>
+                        
+                        <p><strong>L/R Balance</strong> = האם צד אחד חזק מהשני?<br>
+                        ✅ טוב: בטווח של ±1 dB &nbsp; ⚠️ בעיה: יותר מ-±2 dB (המיקס לא מאוזן)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>🎛️ איזון תדרים - 6 הטווחים</h4>
+                        <p>תחשוב על זה כמו אקולייזר גרפי. כל טווח מראה אם האזור הזה חזק יותר (+) או חלש יותר (-) מהממוצע:</p>
+                        
+                        <p><strong>Sub (20-60Hz)</strong> = הרעידה העמוקה שמרגישים יותר משומעים. דפיקת קיק.<br>
+                        ⚠️ יותר מדי = מבולגן, בומי &nbsp; פחות מדי = דק, בלי משקל</p>
+                        
+                        <p><strong>Bass (60-200Hz)</strong> = הבאס גיטרה, החלק הנמוך של קולות, חמימות.<br>
+                        ⚠️ יותר מדי = בומי, לא ברור &nbsp; פחות מדי = חלש, בלי יסוד</p>
+                        
+                        <p><strong>Low-Mid (200-500Hz)</strong> = גוף וחמימות, אבל גם "בוץ" גר פה.<br>
+                        ⚠️ יותר מדי = מבוצבץ, קופסתי &nbsp; פחות מדי = דק, חלול</p>
+                        
+                        <p><strong>Mid (500Hz-2kHz)</strong> = קולות, גיטרות, רוב מה שאתה "שומע".<br>
+                        ⚠️ יותר מדי = צורם, חד &nbsp; פחות מדי = רחוק, אבוד</p>
+                        
+                        <p><strong>High-Mid (2-4kHz)</strong> = בהירות, נוכחות, אטאק. האוזן הכי רגישה פה.<br>
+                        ⚠️ יותר מדי = צורם, מעייף &nbsp; פחות מדי = עמום, קבור</p>
+                        
+                        <p><strong>High (4-16kHz)</strong> = אוויר, ברק, מצילות, צלילי "ס".<br>
+                        ⚠️ יותר מדי = חודר, סיבילנטי &nbsp; פחות מדי = חשוך, עמום</p>
+                        
+                        <p><strong>👂 Perceptual מול 📊 Raw:</strong><br>
+                        "לפי האוזן" מראה איך האוזניים שלך באמת שומעות (הבאס נראה שקט יותר כי האוזניים פחות רגישות שם).<br>
+                        "מדידה רגילה" מראה את האנרגיה האמיתית - שימושי להשוואה עם מנתחים אחרים.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>⚡ קליפינג - מה האזהרות האדומות האלה?</h4>
+                        <p>קליפינג קורה כשהאודיו חזק מדי ו"נחתך" בחלק העליון, וגורם לעיוות.</p>
+                        <p>✅ אידיאלי: 0 קליפים &nbsp; ⚠️ כמה קליפים: תבדוק את הרגעים האלה &nbsp; ❌ הרבה קליפים: תוריד רמה במקור</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How To Use -->
+        <div class="guidelines how-to-use">
+            <div class="guidelines-header" id="howToHeader">
+                <div class="guidelines-title">🚀 <span data-en="How To Use This Tool" data-he="איך להשתמש בכלי">How To Use This Tool</span></div>
+                <span id="howToArrow">▼</span>
+            </div>
+            <div class="guidelines-content" id="howToContent">
+                <!-- English How To -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>Step 1: Upload Your File</h4>
+                        <p>🎵 <strong>Drag & Drop</strong> your audio file onto the upload area below, or <strong>click</strong> to browse your computer.</p>
+                        <p>Supported formats: WAV, AIFF, MP3, FLAC (up to 200MB)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 2: Wait for Analysis</h4>
+                        <p>⏳ The tool will analyze your entire file. This takes a few seconds depending on the file length.</p>
+                        <p>You'll see a progress bar while it works.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 3: Review Results</h4>
+                        <p>📊 Once complete, you'll see:</p>
+                        <ul>
+                            <li><strong>Levels section</strong> - Peak, RMS, LUFS, Dynamic Range</li>
+                            <li><strong>Stereo section</strong> - Correlation, Width, L/R Balance</li>
+                            <li><strong>Frequency Balance</strong> - 6-band analysis with graph (switch between Perceptual/Raw tabs)</li>
+                            <li><strong>Issues</strong> - Any problems detected (clipping, phase issues, etc.)</li>
+                        </ul>
+                        <p>🟢 Green = Good &nbsp; 🟡 Yellow = Check it &nbsp; 🔴 Red = Problem</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 4: Listen & Compare</h4>
+                        <p>▶️ Use the <strong>built-in player</strong> at the bottom to listen to your file.</p>
+                        <p>Click on clip timestamps to jump directly to problem areas.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>Step 5: Download Report (Optional)</h4>
+                        <p>📄 Click the <strong>"Download PDF Report"</strong> button to save a professional report.</p>
+                        <p>Great for your records or to share with clients/collaborators.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>💡 Tips</h4>
+                        <ul>
+                            <li>Analyze your mix BEFORE sending to mastering</li>
+                            <li>Compare with a reference track you trust</li>
+                            <li>Use the "Analysis Details" section to see the full log</li>
+                            <li>Switch language with 🌐 button at top right</li>
+                            <li>Numbers are guides - your ears are the final judge!</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Hebrew How To -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>שלב 1: העלאת קובץ</h4>
+                        <p>🎵 <strong>גרור ושחרר</strong> את קובץ האודיו לאזור ההעלאה למטה, או <strong>לחץ</strong> כדי לבחור מהמחשב.</p>
+                        <p>פורמטים נתמכים: WAV, AIFF, MP3, FLAC (עד 200MB)</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 2: המתנה לניתוח</h4>
+                        <p>⏳ הכלי ינתח את כל הקובץ. זה לוקח כמה שניות תלוי באורך הקובץ.</p>
+                        <p>תראה סרגל התקדמות בזמן העבודה.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 3: סקירת התוצאות</h4>
+                        <p>📊 בסיום, תראה:</p>
+                        <ul>
+                            <li><strong>אזור Levels</strong> - Peak, RMS, LUFS, Dynamic Range</li>
+                            <li><strong>אזור Stereo</strong> - Correlation, Width, L/R Balance</li>
+                            <li><strong>Frequency Balance</strong> - ניתוח 6 טווחים עם גרף (עבור בין טאבים Perceptual/Raw)</li>
+                            <li><strong>Issues</strong> - בעיות שזוהו (קליפינג, בעיות פאזה וכו')</li>
+                        </ul>
+                        <p>🟢 ירוק = טוב &nbsp; 🟡 צהוב = תבדוק &nbsp; 🔴 אדום = בעיה</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 4: האזנה והשוואה</h4>
+                        <p>▶️ השתמש <strong>בנגן המובנה</strong> בתחתית כדי להאזין לקובץ.</p>
+                        <p>לחץ על זמני הקליפים כדי לקפוץ ישירות לנקודות הבעייתיות.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>שלב 5: הורדת דוח (אופציונלי)</h4>
+                        <p>📄 לחץ על כפתור <strong>"Download PDF Report"</strong> כדי לשמור דוח מקצועי.</p>
+                        <p>מעולה לתיעוד או לשיתוף עם לקוחות/שותפים.</p>
+                    </div>
+                    
+                    <div class="guideline-section">
+                        <h4>💡 טיפים</h4>
+                        <ul>
+                            <li>נתח את המיקס לפני שליחה למאסטרינג</li>
+                            <li>השווה לרפרנס שאתה סומך עליו</li>
+                            <li>השתמש בסקשן "Analysis Details" כדי לראות את הלוג המלא</li>
+                            <li>החלף שפה עם כפתור 🌐 בפינה הימנית העליונה</li>
+                            <li>המספרים הם מדריך - האוזניים שלך הן השופט הסופי!</li>
                         </ul>
                     </div>
                 </div>
@@ -1088,56 +1508,175 @@
                 </div>
             </div>
 
-            <!-- Frequency Balance (3-band) -->
+            <!-- Frequency Balance with Tabs -->
             <div class="freq-balance" id="freqBalance" style="display:none;">
                 <div class="freq-title">🎚️ <span data-en="Frequency Balance" data-he="איזון תדרים">Frequency Balance</span></div>
-                <div class="freq-note" data-en="Relative to Mid (0 dB)" data-he="ביחס לאמצעיים (0 dB)">Relative to Mid (0 dB)</div>
-                <div class="freq-3band">
-                    <div class="freq-band">
-                        <div class="freq-band-label" data-en="Low" data-he="נמוכים">Low</div>
-                        <div class="freq-band-range">20-250Hz</div>
-                        <div class="freq-band-meter">
-                            <div class="freq-meter-scale">
-                                <span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span>
+                
+                <!-- Tabs -->
+                <div class="spectrum-tabs">
+                    <button class="spectrum-tab active" data-tab="perceptual" onclick="switchSpectrumTab('perceptual')">
+                        <span class="spectrum-tab-icon">👂</span>
+                        <span data-en="Perceptual" data-he="לפי האוזן">Perceptual</span>
+                    </button>
+                    <button class="spectrum-tab" data-tab="flat" onclick="switchSpectrumTab('flat')">
+                        <span class="spectrum-tab-icon">📊</span>
+                        <span data-en="Raw Measurement" data-he="מדידה רגילה">Raw Measurement</span>
+                    </button>
+                </div>
+                
+                <!-- Perceptual Panel (A-weighted) -->
+                <div class="spectrum-panel active" id="panelPerceptual">
+                    <div class="spectrum-panel-description" data-en="A-weighted measurement - shows how the human ear perceives the frequency balance. Low frequencies are reduced because we're less sensitive to them." data-he="מדידה משוקללת A - מראה איך האוזן האנושית שומעת את איזון התדרים. תדרים נמוכים מופחתים כי אנחנו פחות רגישים אליהם.">A-weighted measurement - shows how the human ear perceives the frequency balance. Low frequencies are reduced because we're less sensitive to them.</div>
+                    
+                    <div class="freq-6band">
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Sub" data-he="סאב">Sub</div>
+                            <div class="freq-band-range">20-60Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarSub"></div></div>
                             </div>
-                            <div class="freq-meter-track">
-                                <div class="freq-meter-bar" id="freqBarLow"></div>
-                            </div>
+                            <div class="freq-band-value" id="freqValSub">-</div>
                         </div>
-                        <div class="freq-band-value" id="freqValLow">-</div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Bass" data-he="באס">Bass</div>
+                            <div class="freq-band-range">60-200Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarBass"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValBass">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Low-Mid" data-he="נמוך-אמצע">Low-Mid</div>
+                            <div class="freq-band-range">200-500Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarLowMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValLowMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Mid" data-he="אמצע">Mid</div>
+                            <div class="freq-band-range">500Hz-2kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High-Mid" data-he="אמצע-גבוה">High-Mid</div>
+                            <div class="freq-band-range">2-4kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarHighMid"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighMid">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
+                            <div class="freq-band-range">4-16kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar" id="freqBarHigh"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHigh">-</div>
+                        </div>
                     </div>
-                    <div class="freq-band">
-                        <div class="freq-band-label" data-en="Mid" data-he="אמצעיים">Mid</div>
-                        <div class="freq-band-range">250Hz-4kHz</div>
-                        <div class="freq-band-meter">
-                            <div class="freq-meter-scale">
-                                <span></span><span></span><span>REF</span><span></span><span></span>
-                            </div>
-                            <div class="freq-meter-track ref">
-                                <div class="freq-meter-ref"></div>
-                            </div>
-                        </div>
-                        <div class="freq-band-value" id="freqValMid">0 dB</div>
-                    </div>
-                    <div class="freq-band">
-                        <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
-                        <div class="freq-band-range">4-16kHz</div>
-                        <div class="freq-band-meter">
-                            <div class="freq-meter-scale">
-                                <span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span>
-                            </div>
-                            <div class="freq-meter-track">
-                                <div class="freq-meter-bar" id="freqBarHigh"></div>
-                            </div>
-                        </div>
-                        <div class="freq-band-value" id="freqValHigh">-</div>
+                    
+                    <div class="freq-graph-container" style="margin-top:16px;">
+                        <canvas id="freqGraph" width="400" height="120"></canvas>
                     </div>
                 </div>
-                <div class="freq-reference" data-en="Balanced = within ±3 dB of Mid" data-he="מאוזן = בטווח של ±3 dB מהאמצעיים">Balanced = within ±3 dB of Mid</div>
                 
-                <!-- Frequency Graph -->
-                <div class="freq-graph-container">
-                    <canvas id="freqGraph" width="400" height="120"></canvas>
+                <!-- Flat Panel (Raw Measurement) -->
+                <div class="spectrum-panel" id="panelFlat">
+                    <div class="spectrum-panel-description" data-en="Raw measurement without weighting - shows actual energy levels at each frequency. Useful for comparison with standard spectrum analyzers." data-he="מדידה רגילה ללא שיקלול - מראה את רמות האנרגיה האמיתיות בכל תדר. שימושי להשוואה עם ספקטרום אנלייזרים רגילים.">Raw measurement without weighting - shows actual energy levels at each frequency. Useful for comparison with standard spectrum analyzers.</div>
+                    
+                    <div class="freq-6band">
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Sub" data-he="סאב">Sub</div>
+                            <div class="freq-band-range">20-60Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarSubFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValSubFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Bass" data-he="באס">Bass</div>
+                            <div class="freq-band-range">60-200Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarBassFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValBassFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Low-Mid" data-he="נמוך-אמצע">Low-Mid</div>
+                            <div class="freq-band-range">200-500Hz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarLowMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValLowMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="Mid" data-he="אמצע">Mid</div>
+                            <div class="freq-band-range">500Hz-2kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High-Mid" data-he="אמצע-גבוה">High-Mid</div>
+                            <div class="freq-band-range">2-4kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarHighMidFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighMidFlat">-</div>
+                        </div>
+                        <div class="freq-band">
+                            <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
+                            <div class="freq-band-range">4-16kHz</div>
+                            <div class="freq-band-meter">
+                                <div class="freq-meter-scale"><span>-6</span><span>-3</span><span>0</span><span>+3</span><span>+6</span></div>
+                                <div class="freq-meter-track"><div class="freq-meter-bar flat" id="freqBarHighFlat"></div></div>
+                            </div>
+                            <div class="freq-band-value" id="freqValHighFlat">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="freq-graph-container" style="margin-top:16px;">
+                        <canvas id="freqGraphFlat" width="400" height="120"></canvas>
+                    </div>
+                </div>
+                
+                <div class="freq-reference" data-en="Balanced = all bands near 0 dB" data-he="מאוזן = כל הטווחים קרובים ל-0 dB">Balanced = all bands near 0 dB</div>
+            </div>
+
+            <!-- Analysis Details (Clips & Log) -->
+            <div class="analysis-details" id="analysisDetails" style="display:none;">
+                <div class="details-header" id="detailsHeader">
+                    <div class="details-title">📋 <span data-en="Analysis Details" data-he="פירוט הניתוח">Analysis Details</span></div>
+                    <span id="detailsArrow">▼</span>
+                </div>
+                <div class="details-content" id="detailsContent">
+                    <!-- Clip Events -->
+                    <div class="detail-section" id="clipSection" style="display:none;">
+                        <h4 data-en="⚡ Clip Events" data-he="⚡ אירועי קליפינג">⚡ Clip Events</h4>
+                        <div class="clip-log" id="clipLog"></div>
+                    </div>
+                    
+                    <!-- Analysis Log -->
+                    <div class="detail-section">
+                        <h4 data-en="📊 Full Analysis Log" data-he="📊 לוג ניתוח מלא">📊 Full Analysis Log</h4>
+                        <pre class="analysis-log" id="analysisLog"></pre>
+                    </div>
                 </div>
             </div>
 
@@ -1432,6 +1971,7 @@
                     async function(decodedBuffer) {
                         buffer = decodedBuffer;
                         const analysis = await analyzeAudio(buffer);
+                        analysis.fileName = file.name;
                         window.lastAnalysis = analysis;
                         loading.classList.remove('show');
                         showResults(analysis);
@@ -1693,15 +2233,19 @@
 
             // Simple 3-band spectral analysis (Low/Mid/High)
             // Using Goertzel algorithm for specific frequency bands
-            const spectrum = analyzeSpectrum4Band(left, right, len, sampleRate);
+            const spectrum = analyzeSpectrum6Band(left, right, len, sampleRate);
+            const spectrumFlatBands = analyzeSpectrum6BandFlat(left, right, len, sampleRate);
             const spectrumDetail = analyzeSpectrumDetailed(left, right, len, sampleRate);
+            const spectrumFlat = analyzeSpectrumFlat(left, right, len, sampleRate);
 
             return {
                 peakDb, rmsDb, lufs, crest, dynamicRange, width, correlation, balanceDb,
-                hasClipping, clippedSamples, clipEvents, issues, spectrum, spectrumDetail,
+                hasClipping, clippedSamples, clipEvents, issues, spectrum, spectrumFlatBands, spectrumDetail, spectrumFlat,
                 peakL: 20 * Math.log10(peakL || 1e-10),
                 peakR: 20 * Math.log10(peakR || 1e-10),
-                duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels
+                duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels,
+                samples: len,
+                dcOffset: { left: dcOffsetL, right: dcOffsetR }
             };
         }
 
@@ -1792,7 +2336,83 @@
             return lufs;
         }
 
-        // Detailed spectrum for graph (30 bands, 1/3 octave style)
+        // A-weighting curve (how humans perceive loudness at different frequencies)
+        function aWeightDb(freq) {
+            const f2 = freq * freq;
+            const f4 = f2 * f2;
+            const ra = (12194 * 12194 * f4) / 
+                       ((f2 + 20.6 * 20.6) * 
+                        Math.sqrt((f2 + 107.7 * 107.7) * (f2 + 737.9 * 737.9)) * 
+                        (f2 + 12194 * 12194));
+            return 20 * Math.log10(ra) + 2.0;
+        }
+        
+        // Flat spectrum (no weighting - raw measurement)
+        function analyzeSpectrumFlat(left, right, len, sampleRate) {
+            const fftSize = 8192;
+            const numFFTs = Math.min(50, Math.floor(len / fftSize));
+            if (numFFTs < 1) return null;
+            
+            const binHz = sampleRate / fftSize;
+            
+            // ISO 1/3 octave center frequencies
+            const centerFreqs = [20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250,
+                                 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500,
+                                 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000];
+            
+            const bandEnergy = new Array(centerFreqs.length).fill(0);
+            
+            for (let f = 0; f < numFFTs; f++) {
+                const startIdx = Math.floor((f / numFFTs) * (len - fftSize));
+                
+                const real = new Float32Array(fftSize);
+                const imag = new Float32Array(fftSize);
+                
+                for (let i = 0; i < fftSize; i++) {
+                    const mono = (left[startIdx + i] + right[startIdx + i]) * 0.5;
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / fftSize));
+                    real[i] = mono * window;
+                    imag[i] = 0;
+                }
+                
+                fftInPlace(real, imag);
+                
+                const bandFactor = Math.pow(2, 1/6);
+                
+                for (let b = 0; b < centerFreqs.length; b++) {
+                    const fc = centerFreqs[b];
+                    const fLow = fc / bandFactor;
+                    const fHigh = Math.min(fc * bandFactor, sampleRate / 2);
+                    
+                    const binLow = Math.max(1, Math.floor(fLow / binHz));
+                    const binHigh = Math.min(Math.floor(fHigh / binHz), fftSize / 2 - 1);
+                    
+                    if (binHigh >= binLow) {
+                        for (let bin = binLow; bin <= binHigh; bin++) {
+                            bandEnergy[b] += real[bin] * real[bin] + imag[bin] * imag[bin];
+                        }
+                    }
+                }
+            }
+            
+            // Average over FFT frames
+            for (let b = 0; b < bandEnergy.length; b++) {
+                bandEnergy[b] /= numFFTs;
+            }
+            
+            // Convert to dB - use 1kHz as reference (no A-weighting)
+            const refBand = centerFreqs.indexOf(1000);
+            const refEnergy = bandEnergy[refBand] || 1e-10;
+            
+            const bandDb = bandEnergy.map(e => 10 * Math.log10((e / refEnergy) || 1e-10));
+            
+            return {
+                freqs: centerFreqs,
+                db: bandDb
+            };
+        }
+        
+        // Detailed spectrum for graph (30 bands, 1/3 octave style) with A-weighting
         function analyzeSpectrumDetailed(left, right, len, sampleRate) {
             const fftSize = 8192;
             const numFFTs = Math.min(50, Math.floor(len / fftSize));
@@ -1848,11 +2468,17 @@
                 bandEnergy[b] /= numFFTs;
             }
             
-            // Convert to dB - use 1kHz band as reference (0 dB)
+            // Convert to dB and apply A-weighting (perceptual)
+            // Use 1kHz band as reference (where A-weight = 0 dB)
             const refBand = centerFreqs.indexOf(1000);
             const refEnergy = bandEnergy[refBand] || 1e-10;
             
-            const bandDb = bandEnergy.map(e => 10 * Math.log10((e / refEnergy) || 1e-10));
+            const bandDb = bandEnergy.map((e, i) => {
+                const rawDb = 10 * Math.log10((e / refEnergy) || 1e-10);
+                // Apply A-weighting relative to 1kHz (where A-weight ≈ 0)
+                const aWeight = aWeightDb(centerFreqs[i]) - aWeightDb(1000);
+                return rawDb + aWeight;
+            });
             
             return {
                 freqs: centerFreqs,
@@ -1860,33 +2486,41 @@
             };
         }
         
-        // 4-Band Spectrum Analysis - Low, Lo-Mid, Hi-Mid, High
-        function analyzeSpectrum4Band(left, right, len, sampleRate) {
+        // 5-Band Spectrum Analysis - Low, Low-Mid, Mid, High-Mid, High
+        function analyzeSpectrum6Band(left, right, len, sampleRate) {
             const detail = analyzeSpectrumDetailed(left, right, len, sampleRate);
             if (!detail) return null;
             
-            // Band boundaries:
-            // Low: 20-250Hz
-            // Lo-Mid: 250-1kHz
-            // Hi-Mid: 1k-4kHz
-            // High: 4k-16kHz
+            // 6 Band boundaries (industry standard):
+            // Sub: 20-60Hz (rumble, kick fundamental)
+            // Bass: 60-200Hz (bass guitar, warmth)
+            // Low-Mid: 200-500Hz (body, mud zone)
+            // Mid: 500Hz-2kHz (vocals, presence)
+            // High-Mid: 2k-4kHz (clarity, harshness)
+            // High: 4k-16kHz (air, brilliance)
             
-            let lowEnergy = 0, loMidEnergy = 0, hiMidEnergy = 0, highEnergy = 0;
-            let lowCount = 0, loMidCount = 0, hiMidCount = 0, highCount = 0;
+            let subEnergy = 0, bassEnergy = 0, lowMidEnergy = 0, midEnergy = 0, highMidEnergy = 0, highEnergy = 0;
+            let subCount = 0, bassCount = 0, lowMidCount = 0, midCount = 0, highMidCount = 0, highCount = 0;
             
             for (let i = 0; i < detail.freqs.length; i++) {
                 const freq = detail.freqs[i];
                 const energy = Math.pow(10, detail.db[i] / 10);
                 
-                if (freq <= 250) {
-                    lowEnergy += energy;
-                    lowCount++;
-                } else if (freq <= 1000) {
-                    loMidEnergy += energy;
-                    loMidCount++;
+                if (freq <= 60) {
+                    subEnergy += energy;
+                    subCount++;
+                } else if (freq <= 200) {
+                    bassEnergy += energy;
+                    bassCount++;
+                } else if (freq <= 500) {
+                    lowMidEnergy += energy;
+                    lowMidCount++;
+                } else if (freq <= 2000) {
+                    midEnergy += energy;
+                    midCount++;
                 } else if (freq <= 4000) {
-                    hiMidEnergy += energy;
-                    hiMidCount++;
+                    highMidEnergy += energy;
+                    highMidCount++;
                 } else {
                     highEnergy += energy;
                     highCount++;
@@ -1894,27 +2528,96 @@
             }
             
             // Average and convert to dB
-            const lowDb = lowCount > 0 ? 10 * Math.log10(lowEnergy / lowCount) : -30;
-            const loMidDb = loMidCount > 0 ? 10 * Math.log10(loMidEnergy / loMidCount) : -30;
-            const hiMidDb = hiMidCount > 0 ? 10 * Math.log10(hiMidEnergy / hiMidCount) : -30;
+            const subDb = subCount > 0 ? 10 * Math.log10(subEnergy / subCount) : -30;
+            const bassDb = bassCount > 0 ? 10 * Math.log10(bassEnergy / bassCount) : -30;
+            const lowMidDb = lowMidCount > 0 ? 10 * Math.log10(lowMidEnergy / lowMidCount) : -30;
+            const midDb = midCount > 0 ? 10 * Math.log10(midEnergy / midCount) : -30;
+            const highMidDb = highMidCount > 0 ? 10 * Math.log10(highMidEnergy / highMidCount) : -30;
             const highDb = highCount > 0 ? 10 * Math.log10(highEnergy / highCount) : -30;
             
-            // Use overall average as reference (so we see actual balance)
-            const avgDb = (lowDb + loMidDb + hiMidDb + highDb) / 4;
+            // Use overall average as reference
+            const avgDb = (subDb + bassDb + lowMidDb + midDb + highMidDb + highDb) / 6;
             
             const result = {
-                low: lowDb - avgDb,
-                loMid: loMidDb - avgDb,
-                hiMid: hiMidDb - avgDb,
+                sub: subDb - avgDb,
+                bass: bassDb - avgDb,
+                lowMid: lowMidDb - avgDb,
+                mid: midDb - avgDb,
+                highMid: highMidDb - avgDb,
                 high: highDb - avgDb
             };
             
-            console.log('=== Spectrum Balance (4-Band) ===');
-            console.log(`Low (20-250Hz): ${result.low > 0 ? '+' : ''}${result.low.toFixed(1)} dB`);
-            console.log(`Lo-Mid (250Hz-1kHz): ${result.loMid > 0 ? '+' : ''}${result.loMid.toFixed(1)} dB`);
-            console.log(`Hi-Mid (1-4kHz): ${result.hiMid > 0 ? '+' : ''}${result.hiMid.toFixed(1)} dB`);
+            console.log('=== Spectrum Balance (6-Band, A-weighted) ===');
+            console.log(`Sub (20-60Hz): ${result.sub > 0 ? '+' : ''}${result.sub.toFixed(1)} dB`);
+            console.log(`Bass (60-200Hz): ${result.bass > 0 ? '+' : ''}${result.bass.toFixed(1)} dB`);
+            console.log(`Low-Mid (200-500Hz): ${result.lowMid > 0 ? '+' : ''}${result.lowMid.toFixed(1)} dB`);
+            console.log(`Mid (500Hz-2kHz): ${result.mid > 0 ? '+' : ''}${result.mid.toFixed(1)} dB`);
+            console.log(`High-Mid (2-4kHz): ${result.highMid > 0 ? '+' : ''}${result.highMid.toFixed(1)} dB`);
             console.log(`High (4-16kHz): ${result.high > 0 ? '+' : ''}${result.high.toFixed(1)} dB`);
-            console.log('=================================');
+            console.log('=============================================');
+            
+            return result;
+        }
+        
+        // 6-Band Spectrum Analysis FLAT (no A-weighting)
+        function analyzeSpectrum6BandFlat(left, right, len, sampleRate) {
+            const detail = analyzeSpectrumFlat(left, right, len, sampleRate);
+            if (!detail) return null;
+            
+            let subEnergy = 0, bassEnergy = 0, lowMidEnergy = 0, midEnergy = 0, highMidEnergy = 0, highEnergy = 0;
+            let subCount = 0, bassCount = 0, lowMidCount = 0, midCount = 0, highMidCount = 0, highCount = 0;
+            
+            for (let i = 0; i < detail.freqs.length; i++) {
+                const freq = detail.freqs[i];
+                const energy = Math.pow(10, detail.db[i] / 10);
+                
+                if (freq <= 60) {
+                    subEnergy += energy;
+                    subCount++;
+                } else if (freq <= 200) {
+                    bassEnergy += energy;
+                    bassCount++;
+                } else if (freq <= 500) {
+                    lowMidEnergy += energy;
+                    lowMidCount++;
+                } else if (freq <= 2000) {
+                    midEnergy += energy;
+                    midCount++;
+                } else if (freq <= 4000) {
+                    highMidEnergy += energy;
+                    highMidCount++;
+                } else {
+                    highEnergy += energy;
+                    highCount++;
+                }
+            }
+            
+            const subDb = subCount > 0 ? 10 * Math.log10(subEnergy / subCount) : -30;
+            const bassDb = bassCount > 0 ? 10 * Math.log10(bassEnergy / bassCount) : -30;
+            const lowMidDb = lowMidCount > 0 ? 10 * Math.log10(lowMidEnergy / lowMidCount) : -30;
+            const midDb = midCount > 0 ? 10 * Math.log10(midEnergy / midCount) : -30;
+            const highMidDb = highMidCount > 0 ? 10 * Math.log10(highMidEnergy / highMidCount) : -30;
+            const highDb = highCount > 0 ? 10 * Math.log10(highEnergy / highCount) : -30;
+            
+            const avgDb = (subDb + bassDb + lowMidDb + midDb + highMidDb + highDb) / 6;
+            
+            const result = {
+                sub: subDb - avgDb,
+                bass: bassDb - avgDb,
+                lowMid: lowMidDb - avgDb,
+                mid: midDb - avgDb,
+                highMid: highMidDb - avgDb,
+                high: highDb - avgDb
+            };
+            
+            console.log('=== Spectrum Balance (6-Band, Flat) ===');
+            console.log(`Sub (20-60Hz): ${result.sub > 0 ? '+' : ''}${result.sub.toFixed(1)} dB`);
+            console.log(`Bass (60-200Hz): ${result.bass > 0 ? '+' : ''}${result.bass.toFixed(1)} dB`);
+            console.log(`Low-Mid (200-500Hz): ${result.lowMid > 0 ? '+' : ''}${result.lowMid.toFixed(1)} dB`);
+            console.log(`Mid (500Hz-2kHz): ${result.mid > 0 ? '+' : ''}${result.mid.toFixed(1)} dB`);
+            console.log(`High-Mid (2-4kHz): ${result.highMid > 0 ? '+' : ''}${result.highMid.toFixed(1)} dB`);
+            console.log(`High (4-16kHz): ${result.high > 0 ? '+' : ''}${result.high.toFixed(1)} dB`);
+            console.log('=======================================');
             
             return result;
         }
@@ -1959,6 +2662,51 @@
                         imag[idx1] = imag[idx1] + tImag;
                     }
                 }
+            }
+        }
+
+        // Spectrum tab switching
+        function switchSpectrumTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.spectrum-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            
+            // Update panels
+            document.getElementById('panelPerceptual').classList.toggle('active', tab === 'perceptual');
+            document.getElementById('panelFlat').classList.toggle('active', tab === 'flat');
+            
+            // Redraw the appropriate graph
+            if (window.lastAnalysis) {
+                if (tab === 'perceptual' && window.lastAnalysis.spectrumDetail) {
+                    setTimeout(() => drawFreqGraph('freqGraph', window.lastAnalysis.spectrumDetail, '#22d3ee'), 50);
+                } else if (tab === 'flat' && window.lastAnalysis.spectrumFlat) {
+                    setTimeout(() => drawFreqGraph('freqGraphFlat', window.lastAnalysis.spectrumFlat, '#a78bfa'), 50);
+                }
+            }
+        }
+
+        // Spectrum tab switching
+        function switchSpectrumTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.spectrum-tab').forEach(t => {
+                t.classList.toggle('active', t.dataset.tab === tab);
+            });
+            
+            // Update panels
+            document.getElementById('panelPerceptual').classList.toggle('active', tab === 'perceptual');
+            document.getElementById('panelFlat').classList.toggle('active', tab === 'flat');
+            
+            // Redraw graphs (needed after panel becomes visible)
+            if (window.lastAnalysis) {
+                setTimeout(() => {
+                    if (tab === 'perceptual' && window.lastAnalysis.spectrumDetail) {
+                        drawFreqGraph('freqGraph', window.lastAnalysis.spectrumDetail, '#22d3ee');
+                    }
+                    if (tab === 'flat' && window.lastAnalysis.spectrumFlat) {
+                        drawFreqGraph('freqGraphFlat', window.lastAnalysis.spectrumFlat, '#a78bfa');
+                    }
+                }, 50);
             }
         }
 
@@ -2127,48 +2875,49 @@
             document.getElementById('balanceStatus').textContent = Math.abs(r.balanceDb) < 1 ? t('balanced') : t('unbalanced');
             document.getElementById('balanceStatus').className = 'metric-status ' + (Math.abs(r.balanceDb) < 1.5 ? 'good' : 'warn');
 
-            // 3-Band Frequency Balance (dB relative to Mid)
+            // 5-Band Frequency Balance (dB relative to average)
             if (r.spectrum) {
-                // Low band
-                const lowDb = r.spectrum.low;
-                const lowBar = document.getElementById('freqBarLow');
-                const lowVal = document.getElementById('freqValLow');
-                // Scale: ±6dB = full width (50% each side)
-                const lowWidth = Math.min(50, Math.abs(lowDb) * (50/6));
-                
-                lowBar.className = 'freq-meter-bar ' + (lowDb >= 0 ? 'positive' : 'negative');
-                if (lowDb >= 0) {
-                    lowBar.style.left = '50%';
-                    lowBar.style.right = 'auto';
-                } else {
-                    lowBar.style.right = '50%';
-                    lowBar.style.left = 'auto';
+                // Helper function for band display
+                function updateBand(bandName, dbValue, isFlat) {
+                    const suffix = isFlat ? 'Flat' : '';
+                    const bar = document.getElementById('freqBar' + bandName + suffix);
+                    const val = document.getElementById('freqVal' + bandName + suffix);
+                    if (!bar || !val) return;
+                    
+                    // Scale: ±6dB = full width (50% each side)
+                    const width = Math.min(50, Math.abs(dbValue) * (50/6));
+                    
+                    const flatClass = isFlat ? ' flat' : '';
+                    bar.className = 'freq-meter-bar' + flatClass + ' ' + (dbValue >= 0 ? 'positive' : 'negative');
+                    if (dbValue >= 0) {
+                        bar.style.left = '50%';
+                        bar.style.right = 'auto';
+                    } else {
+                        bar.style.right = '50%';
+                        bar.style.left = 'auto';
+                    }
+                    bar.style.width = width + '%';
+                    val.textContent = (dbValue > 0 ? '+' : '') + dbValue.toFixed(1) + ' dB';
+                    val.className = 'freq-band-value ' + (Math.abs(dbValue) <= 3 ? 'balanced' : 'warn');
                 }
-                lowBar.style.width = lowWidth + '%';
-                lowVal.textContent = (lowDb > 0 ? '+' : '') + lowDb.toFixed(1) + ' dB';
-                lowVal.className = 'freq-band-value ' + (Math.abs(lowDb) <= 3 ? 'balanced' : 'warn');
                 
-                // Mid band (reference)
-                document.getElementById('freqValMid').textContent = '0 dB';
-                document.getElementById('freqValMid').className = 'freq-band-value balanced';
+                // Perceptual (A-weighted) bands
+                updateBand('Sub', r.spectrum.sub, false);
+                updateBand('Bass', r.spectrum.bass, false);
+                updateBand('LowMid', r.spectrum.lowMid, false);
+                updateBand('Mid', r.spectrum.mid, false);
+                updateBand('HighMid', r.spectrum.highMid, false);
+                updateBand('High', r.spectrum.high, false);
                 
-                // High band
-                const highDb = r.spectrum.high;
-                const highBar = document.getElementById('freqBarHigh');
-                const highVal = document.getElementById('freqValHigh');
-                const highWidth = Math.min(50, Math.abs(highDb) * (50/6));
-                
-                highBar.className = 'freq-meter-bar ' + (highDb >= 0 ? 'positive' : 'negative');
-                if (highDb >= 0) {
-                    highBar.style.left = '50%';
-                    highBar.style.right = 'auto';
-                } else {
-                    highBar.style.right = '50%';
-                    highBar.style.left = 'auto';
+                // Flat (raw measurement) bands
+                if (r.spectrumFlatBands) {
+                    updateBand('Sub', r.spectrumFlatBands.sub, true);
+                    updateBand('Bass', r.spectrumFlatBands.bass, true);
+                    updateBand('LowMid', r.spectrumFlatBands.lowMid, true);
+                    updateBand('Mid', r.spectrumFlatBands.mid, true);
+                    updateBand('HighMid', r.spectrumFlatBands.highMid, true);
+                    updateBand('High', r.spectrumFlatBands.high, true);
                 }
-                highBar.style.width = highWidth + '%';
-                highVal.textContent = (highDb > 0 ? '+' : '') + highDb.toFixed(1) + ' dB';
-                highVal.className = 'freq-band-value ' + (Math.abs(highDb) <= 3 ? 'balanced' : 'warn');
                 
                 document.getElementById('freqBalance').style.display = 'block';
             } else {
@@ -2181,14 +2930,102 @@
 
             initSpectrumBars();
             
-            // Draw frequency graph if available
+            // Draw frequency graphs
             if (r.spectrumDetail) {
-                drawFreqGraph(r.spectrumDetail);
+                drawFreqGraph('freqGraph', r.spectrumDetail, '#22d3ee'); // Cyan for perceptual
             }
+            if (r.spectrumFlat) {
+                drawFreqGraph('freqGraphFlat', r.spectrumFlat, '#a78bfa'); // Purple for flat
+            }
+            
+            // Populate Analysis Details section
+            const analysisDetails = document.getElementById('analysisDetails');
+            const clipSection = document.getElementById('clipSection');
+            const clipLog = document.getElementById('clipLog');
+            const analysisLog = document.getElementById('analysisLog');
+            
+            // Clip events
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                clipSection.style.display = 'block';
+                let clipHtml = '';
+                r.clipEvents.forEach((clip, i) => {
+                    const timeStr = formatTime(clip.time);
+                    clipHtml += `<div class="clip-log-item">
+                        <span class="time">${timeStr}</span> - 
+                        <span class="peak">${clip.peakDb.toFixed(1)} dB</span> 
+                        <span class="channel">(${clip.channel})</span>
+                    </div>`;
+                });
+                if (r.clipEvents.length > 50) {
+                    clipHtml += `<div style="color:#71717a;margin-top:8px;">... ${currentLang === 'he' ? 'ועוד' : 'and'} ${r.clippedSamples} ${currentLang === 'he' ? 'סאמפלים' : 'samples'}</div>`;
+                }
+                clipLog.innerHTML = clipHtml;
+            } else {
+                clipSection.style.display = 'none';
+            }
+            
+            // Analysis log
+            let logText = `=== Analysis Results ===\n`;
+            logText += `File: ${r.fileName || 'Unknown'}\n`;
+            logText += `Duration: ${formatTime(r.duration)} (${r.samples?.toLocaleString() || '?'} samples @ ${r.sampleRate}Hz)\n`;
+            logText += `Channels: ${r.channels}\n\n`;
+            
+            logText += `--- Levels ---\n`;
+            logText += `Peak: ${r.peakDb.toFixed(2)} dBFS\n`;
+            logText += `RMS: ${r.rmsDb.toFixed(2)} dBFS\n`;
+            logText += `LUFS: ${r.lufs.toFixed(1)} LUFS\n`;
+            logText += `Crest Factor: ${r.crest.toFixed(2)} dB\n`;
+            logText += `Dynamic Range: ${r.dynamicRange.toFixed(2)} dB\n\n`;
+            
+            logText += `--- Stereo ---\n`;
+            logText += `Correlation: ${r.correlation.toFixed(3)}\n`;
+            logText += `Stereo Width: ${r.width.toFixed(1)}%\n`;
+            logText += `L/R Balance: ${r.balanceDb > 0 ? '+' : ''}${r.balanceDb.toFixed(2)} dB\n\n`;
+            
+            logText += `--- Spectrum: Perceptual (A-weighted) ---\n`;
+            if (r.spectrum) {
+                logText += `Sub (20-60Hz): ${r.spectrum.sub > 0 ? '+' : ''}${r.spectrum.sub.toFixed(1)} dB\n`;
+                logText += `Bass (60-200Hz): ${r.spectrum.bass > 0 ? '+' : ''}${r.spectrum.bass.toFixed(1)} dB\n`;
+                logText += `Low-Mid (200-500Hz): ${r.spectrum.lowMid > 0 ? '+' : ''}${r.spectrum.lowMid.toFixed(1)} dB\n`;
+                logText += `Mid (500Hz-2kHz): ${r.spectrum.mid > 0 ? '+' : ''}${r.spectrum.mid.toFixed(1)} dB\n`;
+                logText += `High-Mid (2-4kHz): ${r.spectrum.highMid > 0 ? '+' : ''}${r.spectrum.highMid.toFixed(1)} dB\n`;
+                logText += `High (4-16kHz): ${r.spectrum.high > 0 ? '+' : ''}${r.spectrum.high.toFixed(1)} dB\n`;
+            }
+            logText += `\n`;
+            
+            logText += `--- Spectrum: Raw Measurement (Flat) ---\n`;
+            if (r.spectrumFlatBands) {
+                logText += `Sub (20-60Hz): ${r.spectrumFlatBands.sub > 0 ? '+' : ''}${r.spectrumFlatBands.sub.toFixed(1)} dB\n`;
+                logText += `Bass (60-200Hz): ${r.spectrumFlatBands.bass > 0 ? '+' : ''}${r.spectrumFlatBands.bass.toFixed(1)} dB\n`;
+                logText += `Low-Mid (200-500Hz): ${r.spectrumFlatBands.lowMid > 0 ? '+' : ''}${r.spectrumFlatBands.lowMid.toFixed(1)} dB\n`;
+                logText += `Mid (500Hz-2kHz): ${r.spectrumFlatBands.mid > 0 ? '+' : ''}${r.spectrumFlatBands.mid.toFixed(1)} dB\n`;
+                logText += `High-Mid (2-4kHz): ${r.spectrumFlatBands.highMid > 0 ? '+' : ''}${r.spectrumFlatBands.highMid.toFixed(1)} dB\n`;
+                logText += `High (4-16kHz): ${r.spectrumFlatBands.high > 0 ? '+' : ''}${r.spectrumFlatBands.high.toFixed(1)} dB\n`;
+            }
+            logText += `\n`;
+            
+            logText += `--- Technical ---\n`;
+            logText += `Clipped Samples: ${r.clippedSamples} (${((r.clippedSamples / r.samples) * 100).toFixed(4)}%)\n`;
+            logText += `DC Offset: L=${(r.dcOffset?.left * 100).toFixed(4) || '?'}%, R=${(r.dcOffset?.right * 100).toFixed(4) || '?'}%\n`;
+            
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                logText += `\n--- Clip Events (${r.clipEvents.length}) ---\n`;
+                r.clipEvents.slice(0, 20).forEach((clip, i) => {
+                    logText += `${i+1}. ${formatTime(clip.time)} - ${clip.peakDb.toFixed(1)} dB (${clip.channel})\n`;
+                });
+                if (r.clipEvents.length > 20) {
+                    logText += `... and ${r.clipEvents.length - 20} more\n`;
+                }
+            }
+            
+            logText += `\n========================`;
+            analysisLog.textContent = logText;
+            
+            analysisDetails.style.display = 'block';
         }
         
-        function drawFreqGraph(data) {
-            const canvas = document.getElementById('freqGraph');
+        function drawFreqGraph(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
             if (!canvas) return;
             
             const ctx = canvas.getContext('2d');
@@ -2202,12 +3039,12 @@
             
             const w = rect.width;
             const h = rect.height;
-            const padding = { left: 35, right: 15, top: 15, bottom: 25 };
+            const padding = { left: 35, right: 15, top: 10, bottom: 22 };
             const graphW = w - padding.left - padding.right;
             const graphH = h - padding.top - padding.bottom;
             
-            // Y-axis range: +6 dB to -24 dB (30 dB total)
-            const dbMax = 6;
+            // Y-axis range: +12 dB to -24 dB (36 dB total)
+            const dbMax = 12;
             const dbMin = -24;
             const dbRange = dbMax - dbMin;
             
@@ -2220,8 +3057,8 @@
             ctx.lineWidth = 1;
             
             // Horizontal grid lines (dB)
-            const dbLines = [6, 0, -6, -12, -18, -24];
-            ctx.font = '10px sans-serif';
+            const dbLines = [12, 6, 0, -6, -12, -18, -24];
+            ctx.font = '9px sans-serif';
             ctx.fillStyle = '#52525b';
             ctx.textAlign = 'right';
             
@@ -2232,7 +3069,7 @@
                 ctx.lineTo(w - padding.right, y);
                 ctx.stroke();
                 const label = db > 0 ? '+' + db : db + '';
-                ctx.fillText(label, padding.left - 5, y + 3);
+                ctx.fillText(label, padding.left - 4, y + 3);
             });
             
             // Vertical grid lines (frequency)
@@ -2249,13 +3086,13 @@
                 ctx.setLineDash([]);
                 
                 const label = freq >= 1000 ? (freq / 1000) + 'k' : freq + '';
-                ctx.fillText(label, x, h - padding.bottom + 12);
+                ctx.fillText(label, x, h - padding.bottom + 10);
             });
             
             // Draw curve
             if (data.freqs && data.db && data.freqs.length > 0) {
                 ctx.beginPath();
-                ctx.strokeStyle = '#22d3ee';
+                ctx.strokeStyle = color;
                 ctx.lineWidth = 2;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
@@ -2282,9 +3119,21 @@
                 ctx.lineTo(padding.left + graphW, zeroY);
                 ctx.lineTo(padding.left, zeroY);
                 ctx.closePath();
+                
+                // Convert hex color to rgb for gradient
+                const hexToRgb = (hex) => {
+                    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                    return result ? {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                    } : {r: 34, g: 211, b: 238};
+                };
+                const rgb = hexToRgb(color);
+                
                 const gradient = ctx.createLinearGradient(0, padding.top, 0, zeroY);
-                gradient.addColorStop(0, 'rgba(34, 211, 238, 0.3)');
-                gradient.addColorStop(1, 'rgba(34, 211, 238, 0.05)');
+                gradient.addColorStop(0, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.3)`);
+                gradient.addColorStop(1, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.05)`);
                 ctx.fillStyle = gradient;
                 ctx.fill();
             }
@@ -2505,7 +3354,7 @@
                 doc.text(m[2], 120, rowY);
             });
             
-            // Frequency Balance
+            // Frequency Balance - Perceptual (A-weighted)
             if (r.spectrum) {
                 y += 60;
                 doc.setTextColor(...dark);
@@ -2513,61 +3362,120 @@
                 doc.setFont('helvetica', 'bold');
                 doc.text('Frequency Balance', 20, y);
                 
+                y += 8;
+                doc.setFontSize(10);
+                doc.setTextColor(34, 211, 238); // Cyan
+                doc.text('👂 Perceptual (A-weighted)', 20, y);
+                
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'italic');
                 doc.setTextColor(...gray);
-                doc.text('Relative to Mid (0 dB = reference)', 20, y + 6);
+                doc.text('Shows how the human ear perceives the frequency balance', 75, y);
                 
-                y += 14;
+                y += 10;
                 const bands = [
-                    { name: 'Low (20-250Hz)', value: r.spectrum.low },
-                    { name: 'Mid (250Hz-4kHz)', value: 0, isRef: true },
+                    { name: 'Sub (20-60Hz)', value: r.spectrum.sub },
+                    { name: 'Bass (60-200Hz)', value: r.spectrum.bass },
+                    { name: 'Low-Mid (200-500Hz)', value: r.spectrum.lowMid },
+                    { name: 'Mid (500Hz-2kHz)', value: r.spectrum.mid },
+                    { name: 'High-Mid (2-4kHz)', value: r.spectrum.highMid },
                     { name: 'High (4-16kHz)', value: r.spectrum.high }
                 ];
                 
                 bands.forEach((band, i) => {
-                    const rowY = y + (i * 12);
+                    const rowY = y + (i * 9);
                     
                     doc.setTextColor(...gray);
-                    doc.setFontSize(10);
+                    doc.setFontSize(9);
+                    doc.setFont('helvetica', 'normal');
                     doc.text(band.name, 20, rowY);
                     
                     // Bar background
                     doc.setFillColor(230, 230, 230);
-                    doc.roundedRect(75, rowY - 4, 80, 6, 2, 2, 'F');
+                    doc.roundedRect(80, rowY - 3, 60, 5, 2, 2, 'F');
                     
                     // Center line
                     doc.setFillColor(150, 150, 150);
-                    doc.rect(114.5, rowY - 4, 1, 6, 'F');
+                    doc.rect(109.5, rowY - 3, 1, 5, 'F');
                     
-                    if (band.isRef) {
-                        // Reference marker
-                        doc.setFillColor(34, 197, 94);
-                        doc.roundedRect(113, rowY - 4, 4, 6, 1, 1, 'F');
+                    // Bar from center
+                    const barWidth = Math.min(28, Math.abs(band.value) * (28/6));
+                    const isBalanced = Math.abs(band.value) <= 3;
+                    doc.setFillColor(isBalanced ? 34 : 245, isBalanced ? 197 : 158, isBalanced ? 94 : 11);
+                    if (band.value >= 0) {
+                        doc.roundedRect(110, rowY - 3, barWidth, 5, 2, 2, 'F');
                     } else {
-                        // Bar from center (±6dB = full width)
-                        const barWidth = Math.min(38, Math.abs(band.value) * (38/6));
-                        const isBalanced = Math.abs(band.value) <= 3;
-                        doc.setFillColor(isBalanced ? 34 : 245, isBalanced ? 197 : 158, isBalanced ? 94 : 11);
-                        if (band.value >= 0) {
-                            doc.roundedRect(115, rowY - 4, barWidth, 6, 2, 2, 'F');
-                        } else {
-                            doc.roundedRect(115 - barWidth, rowY - 4, barWidth, 6, 2, 2, 'F');
-                        }
+                        doc.roundedRect(110 - barWidth, rowY - 3, barWidth, 5, 2, 2, 'F');
                     }
                     
                     // Value
                     doc.setTextColor(...dark);
                     doc.setFont('helvetica', 'bold');
-                    const valText = band.isRef ? '0 dB' : ((band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB');
-                    doc.text(valText, 162, rowY);
+                    const valText = (band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB';
+                    doc.text(valText, 145, rowY);
                     doc.setFont('helvetica', 'normal');
                 });
                 
-                y += 40;
+                y += 58;
+                
+                // Flat (Raw Measurement)
+                if (r.spectrumFlatBands) {
+                    doc.setFontSize(10);
+                    doc.setTextColor(167, 139, 250); // Purple
+                    doc.text('📊 Raw Measurement (Flat)', 20, y);
+                    
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'italic');
+                    doc.setTextColor(...gray);
+                    doc.text('Actual energy levels at each frequency', 80, y);
+                    
+                    y += 10;
+                    const flatBands = [
+                        { name: 'Sub (20-60Hz)', value: r.spectrumFlatBands.sub },
+                        { name: 'Bass (60-200Hz)', value: r.spectrumFlatBands.bass },
+                        { name: 'Low-Mid (200-500Hz)', value: r.spectrumFlatBands.lowMid },
+                        { name: 'Mid (500Hz-2kHz)', value: r.spectrumFlatBands.mid },
+                        { name: 'High-Mid (2-4kHz)', value: r.spectrumFlatBands.highMid },
+                        { name: 'High (4-16kHz)', value: r.spectrumFlatBands.high }
+                    ];
+                    
+                    flatBands.forEach((band, i) => {
+                        const rowY = y + (i * 9);
+                        
+                        doc.setTextColor(...gray);
+                        doc.setFontSize(9);
+                        doc.setFont('helvetica', 'normal');
+                        doc.text(band.name, 20, rowY);
+                        
+                        doc.setFillColor(230, 230, 230);
+                        doc.roundedRect(80, rowY - 3, 60, 5, 2, 2, 'F');
+                        
+                        doc.setFillColor(150, 150, 150);
+                        doc.rect(109.5, rowY - 3, 1, 5, 'F');
+                        
+                        const barWidth = Math.min(28, Math.abs(band.value) * (28/6));
+                        const isBalanced = Math.abs(band.value) <= 3;
+                        // Purple shades for flat
+                        doc.setFillColor(isBalanced ? 139 : 245, isBalanced ? 92 : 158, isBalanced ? 246 : 11);
+                        if (band.value >= 0) {
+                            doc.roundedRect(110, rowY - 3, barWidth, 5, 2, 2, 'F');
+                        } else {
+                            doc.roundedRect(110 - barWidth, rowY - 3, barWidth, 5, 2, 2, 'F');
+                        }
+                        
+                        doc.setTextColor(...dark);
+                        doc.setFont('helvetica', 'bold');
+                        const valText = (band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB';
+                        doc.text(valText, 145, rowY);
+                        doc.setFont('helvetica', 'normal');
+                    });
+                    
+                    y += 55;
+                }
+                
                 doc.setFontSize(8);
                 doc.setTextColor(...gray);
-                doc.text('Balanced = within +/-3 dB of Mid', 20, y);
+                doc.text('All bands near 0 dB = balanced', 20, y);
             }
             
             // Issues
@@ -2657,6 +3565,30 @@
         document.getElementById('aboutHeader').addEventListener('click', () => {
             const content = document.getElementById('aboutContent');
             const arrow = document.getElementById('aboutArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        });
+
+        // Guide toggle
+        document.getElementById('guideHeader').addEventListener('click', () => {
+            const content = document.getElementById('guideContent');
+            const arrow = document.getElementById('guideArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        });
+
+        // How To Use toggle
+        document.getElementById('howToHeader').addEventListener('click', () => {
+            const content = document.getElementById('howToContent');
+            const arrow = document.getElementById('howToArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        });
+
+        // Details toggle
+        document.getElementById('detailsHeader').addEventListener('click', () => {
+            const content = document.getElementById('detailsContent');
+            const arrow = document.getElementById('detailsArrow');
             content.classList.toggle('show');
             arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
         });
