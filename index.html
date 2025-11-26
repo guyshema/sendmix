@@ -541,90 +541,6 @@
             text-decoration: none;
         }
 
-        /* Frequency Balance */
-        .freq-balance {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-        }
-
-        .freq-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 14px;
-        }
-
-        .freq-note {
-            font-size: 11px;
-            color: #71717a;
-            margin-bottom: 12px;
-            font-style: italic;
-        }
-
-        .freq-bars {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .freq-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .freq-label {
-            width: 80px;
-            font-size: 12px;
-            color: #a1a1aa;
-        }
-
-        body.rtl .freq-label {
-            text-align: right;
-        }
-
-        .freq-bar-wrap {
-            flex: 1;
-            height: 16px;
-            background: #1a1a2e;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .freq-bar-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .freq-bar-fill.low { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .freq-bar-fill.mid { background: linear-gradient(90deg, #22c55e, #4ade80); }
-        .freq-bar-fill.high { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-
-        .freq-val {
-            width: 35px;
-            font-size: 12px;
-            color: #e4e4e7;
-            text-align: right;
-            font-weight: 500;
-        }
-
-        .freq-summary {
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(201, 162, 39, 0.1);
-            border-radius: 8px;
-            border-left: 3px solid #c9a227;
-            font-size: 13px;
-            color: #e4e4e7;
-        }
-
-        body.rtl .freq-summary {
-            border-left: none;
-            border-right: 3px solid #c9a227;
-        }
-
         /* Spectrum */
         .spectrum {
             background: rgba(255,255,255,0.03);
@@ -921,14 +837,6 @@
                 </div>
             </div>
 
-            <!-- Frequency Balance -->
-            <div class="freq-balance" id="freqBalance">
-                <div class="freq-title">📊 <span data-en="Frequency Balance" data-he="איזון תדרים"></span></div>
-                <div class="freq-note" data-en="* General overview only, not 100% accurate" data-he="* סקירה כללית בלבד, לא מדויק 100%">* General overview only, not 100% accurate</div>
-                <div class="freq-bars" id="freqBars"></div>
-                <div class="freq-summary" id="freqSummary"></div>
-            </div>
-
             <!-- Live Spectrum -->
             <div class="spectrum" id="spectrum">
                 <div class="spectrum-title">
@@ -1045,21 +953,7 @@
                 inst_naming: 'File names: Artist – Track – MIX / Artist – Track – MASTER REF',
                 
                 // Correlation
-                correlation: 'corr',
-                
-                // Frequency bands
-                freq_sub: 'Sub',
-                freq_bass: 'Bass',
-                freq_lowmid: 'Low Mid',
-                freq_mid: 'Mid',
-                freq_himid: 'Hi Mid',
-                freq_presence: 'Presence',
-                freq_air: 'Air',
-                freq_balanced: 'Balanced mix',
-                freq_bright: 'Bright mix - strong highs',
-                freq_dark: 'Dark mix - weak highs',
-                freq_heavy_bass: 'Heavy low end',
-                freq_light_bass: 'Light low end'
+                correlation: 'corr'
             },
             he: {
                 // Status
@@ -1116,21 +1010,7 @@
                 inst_naming: 'שמות קבצים: Artist – Track – MIX / Artist – Track – MASTER REF',
                 
                 // Correlation
-                correlation: 'קורלציה',
-                
-                // Frequency bands
-                freq_sub: 'סאב',
-                freq_bass: 'בס',
-                freq_lowmid: 'לואו-מיד',
-                freq_mid: 'מיד',
-                freq_himid: 'היי-מיד',
-                freq_presence: 'נוכחות',
-                freq_air: 'אוויר',
-                freq_balanced: 'מיקס מאוזן',
-                freq_bright: 'מיקס בהיר - גבוהים חזקים',
-                freq_dark: 'מיקס כהה - גבוהים חלשים',
-                freq_heavy_bass: 'הרבה בס',
-                freq_light_bass: 'בס חלש'
+                correlation: 'קורלציה'
             }
         };
 
@@ -1256,107 +1136,6 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // Real FFT-based spectrum analysis using proper averaging
-        async function analyzeSpectrum(buf) {
-            const sampleRate = buf.sampleRate;
-            const left = buf.getChannelData(0);
-            const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
-            const len = buf.length;
-            
-            const fftSize = 2048;
-            if (len < fftSize) return null;
-            
-            const numWindows = Math.min(50, Math.floor(len / fftSize));
-            const freqPerBin = sampleRate / fftSize;
-            
-            // Define bands with bin ranges
-            const bands = [
-                { name: 'sub', minHz: 20, maxHz: 60 },
-                { name: 'bass', minHz: 60, maxHz: 250 },
-                { name: 'lowMid', minHz: 250, maxHz: 500 },
-                { name: 'mid', minHz: 500, maxHz: 2000 },
-                { name: 'highMid', minHz: 2000, maxHz: 4000 },
-                { name: 'presence', minHz: 4000, maxHz: 8000 },
-                { name: 'air', minHz: 8000, maxHz: Math.min(16000, sampleRate / 2) }
-            ];
-            
-            // Calculate bin ranges for each band
-            bands.forEach(band => {
-                band.minBin = Math.floor(band.minHz / freqPerBin);
-                band.maxBin = Math.min(Math.ceil(band.maxHz / freqPerBin), fftSize / 2 - 1);
-            });
-            
-            const bandRMS = {};
-            bands.forEach(b => bandRMS[b.name] = 0);
-            
-            // Analyze windows
-            for (let w = 0; w < numWindows; w++) {
-                const startIdx = Math.floor((w / numWindows) * (len - fftSize));
-                
-                // Prepare mono signal with Hanning window
-                const signal = new Float32Array(fftSize);
-                for (let i = 0; i < fftSize; i++) {
-                    const mono = (left[startIdx + i] + right[startIdx + i]) / 2;
-                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / fftSize));
-                    signal[i] = mono * window;
-                }
-                
-                // Compute FFT magnitude for each band using simple DFT for accuracy
-                for (const band of bands) {
-                    let bandEnergy = 0;
-                    const numBins = band.maxBin - band.minBin + 1;
-                    
-                    // Sample bins across the band
-                    const step = Math.max(1, Math.floor(numBins / 8));
-                    let sampledBins = 0;
-                    
-                    for (let bin = band.minBin; bin <= band.maxBin; bin += step) {
-                        // Goertzel for this bin
-                        const k = bin;
-                        const w0 = 2 * Math.PI * k / fftSize;
-                        const coeff = 2 * Math.cos(w0);
-                        
-                        let s1 = 0, s2 = 0;
-                        for (let n = 0; n < fftSize; n++) {
-                            const s0 = signal[n] + coeff * s1 - s2;
-                            s2 = s1;
-                            s1 = s0;
-                        }
-                        
-                        const mag = Math.sqrt(s1 * s1 + s2 * s2 - coeff * s1 * s2) / fftSize;
-                        bandEnergy += mag;
-                        sampledBins++;
-                    }
-                    
-                    if (sampledBins > 0) {
-                        bandRMS[band.name] += bandEnergy / sampledBins;
-                    }
-                }
-            }
-            
-            // Average over windows and convert to dB
-            const bandDb = {};
-            for (const band of bands) {
-                const avg = bandRMS[band.name] / numWindows;
-                bandDb[band.name] = 20 * Math.log10(Math.max(avg, 1e-10));
-            }
-            
-            // Find max for relative display
-            let maxDb = -Infinity;
-            for (const band of bands) {
-                if (bandDb[band.name] > maxDb) maxDb = bandDb[band.name];
-            }
-            
-            // Convert to 0-100 relative scale (max = 100, -40dB below = 0)
-            const result = {};
-            for (const band of bands) {
-                const dbBelow = maxDb - bandDb[band.name];
-                result[band.name] = Math.max(0, Math.min(100, 100 - (dbBelow * 2.5)));
-            }
-            
-            return result;
-        }
-
         async function analyzeAudio(buf) {
             const left = buf.getChannelData(0);
             const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
@@ -1472,12 +1251,9 @@
                 issues.push({ id: 'wide', severity: 'warn' });
             }
 
-            // Spectrum analysis
-            const spectrum = await analyzeSpectrum(buf);
-
             return {
                 peakDb, rmsDb, crest, dynamicRange, width, correlation, balanceDb,
-                hasClipping, clippedSamples, issues, spectrum,
+                hasClipping, clippedSamples, issues,
                 duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels
             };
         }
@@ -1632,41 +1408,6 @@
             // Player
             document.getElementById('player').classList.add('show');
             document.getElementById('totalTime').textContent = formatTime(r.duration);
-
-            // Frequency Balance Display
-            if (r.spectrum) {
-                const freqBars = document.getElementById('freqBars');
-                const bands = [
-                    { key: 'sub', label: 'freq_sub', color: 'low' },
-                    { key: 'bass', label: 'freq_bass', color: 'low' },
-                    { key: 'lowMid', label: 'freq_lowmid', color: 'mid' },
-                    { key: 'mid', label: 'freq_mid', color: 'mid' },
-                    { key: 'highMid', label: 'freq_himid', color: 'mid' },
-                    { key: 'presence', label: 'freq_presence', color: 'high' },
-                    { key: 'air', label: 'freq_air', color: 'high' }
-                ];
-                
-                let html = '';
-                bands.forEach(band => {
-                    const val = r.spectrum[band.key] || 0;
-                    html += `
-                        <div class="freq-row">
-                            <div class="freq-label">${t(band.label)}</div>
-                            <div class="freq-bar-wrap">
-                                <div class="freq-bar-fill ${band.color}" style="width: ${val}%"></div>
-                            </div>
-                            <div class="freq-val">${Math.round(val)}</div>
-                        </div>
-                    `;
-                });
-                freqBars.innerHTML = html;
-                
-                // Hide summary - just show visual data
-                document.getElementById('freqSummary').style.display = 'none';
-                document.getElementById('freqBalance').style.display = 'block';
-            } else {
-                document.getElementById('freqBalance').style.display = 'none';
-            }
 
             initSpectrumBars();
         }
@@ -1854,52 +1595,6 @@
                 doc.setTextColor(...statusColor);
                 doc.text(m[2], 120, rowY);
             });
-            
-            // Frequency Balance
-            if (r.spectrum) {
-                y += 60;
-                doc.setTextColor(...dark);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Frequency Balance', 20, y);
-                
-                doc.setFontSize(8);
-                doc.setFont('helvetica', 'italic');
-                doc.setTextColor(...gray);
-                doc.text('* General overview only, not 100% accurate', 20, y + 6);
-                
-                y += 14;
-                const bands = [
-                    { key: 'sub', label: 'Sub (20-60Hz)', color: [59, 130, 246] },
-                    { key: 'bass', label: 'Bass (60-250Hz)', color: [59, 130, 246] },
-                    { key: 'lowMid', label: 'Low Mid (250-500Hz)', color: [34, 197, 94] },
-                    { key: 'mid', label: 'Mid (500-2kHz)', color: [34, 197, 94] },
-                    { key: 'highMid', label: 'Hi Mid (2-4kHz)', color: [34, 197, 94] },
-                    { key: 'presence', label: 'Presence (4-8kHz)', color: [245, 158, 11] },
-                    { key: 'air', label: 'Air (8-20kHz)', color: [245, 158, 11] }
-                ];
-                
-                bands.forEach((band, i) => {
-                    const rowY = y + (i * 8);
-                    const val = r.spectrum[band.key] || 0;
-                    
-                    doc.setTextColor(...gray);
-                    doc.setFontSize(9);
-                    doc.text(band.label, 20, rowY);
-                    
-                    // Bar background
-                    doc.setFillColor(230, 230, 230);
-                    doc.roundedRect(75, rowY - 4, 80, 5, 1, 1, 'F');
-                    
-                    // Bar fill
-                    doc.setFillColor(...band.color);
-                    doc.roundedRect(75, rowY - 4, val * 0.8, 5, 1, 1, 'F');
-                    
-                    // Value
-                    doc.setTextColor(...dark);
-                    doc.text(Math.round(val).toString(), 160, rowY);
-                });
-            }
             
             // Issues
             if (r.issues.length > 0) {
