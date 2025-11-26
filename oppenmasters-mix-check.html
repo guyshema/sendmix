@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oppenmasters | Pre-Mastering Mix Check</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            color: #f4f4f5;
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        body.rtl {
+            direction: rtl;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Language Toggle */
+        .lang-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid #3f3f46;
+            background: transparent;
+            color: #71717a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            border-color: #c9a227;
+            color: #c9a227;
+        }
+
+        .lang-btn.active {
+            background: #c9a227;
+            border-color: #c9a227;
+            color: #000;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .logo span {
+            color: #c9a227;
+        }
+
+        .tagline {
+            color: #71717a;
+            font-size: 14px;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            background: rgba(255,255,255,0.03);
+            border: 2px dashed #3f3f46;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #c9a227;
+            background: rgba(201, 162, 39, 0.05);
+        }
+
+        .upload-area.has-file {
+            border-style: solid;
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-size: 16px;
+            color: #a1a1aa;
+            margin-bottom: 8px;
+        }
+
+        .upload-formats {
+            font-size: 12px;
+            color: #52525b;
+        }
+
+        .file-info {
+            display: none;
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .file-info.show { display: block; }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .file-meta {
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show { display: block; }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #27272a;
+            border-top-color: #c9a227;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Results */
+        .results {
+            display: none;
+        }
+
+        .results.show { display: block; }
+
+        /* Status Card */
+        .status-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+        }
+
+        .status-card.ready {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.08);
+        }
+
+        .status-card.warning {
+            border-color: #eab308;
+            background: rgba(234, 179, 8, 0.08);
+        }
+
+        .status-card.issues {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .status-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+
+        .status-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .status-desc {
+            color: #a1a1aa;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .metric-card.full {
+            grid-column: span 2;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .metric-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .metric-status.good {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .metric-status.warn {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .metric-status.bad {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Issues List */
+        .issues-section {
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .issues-section.show { display: block; }
+
+        .issues-title {
+            font-weight: 600;
+            color: #ef4444;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .issue-item {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .issue-item:last-child { margin-bottom: 0; }
+
+        .issue-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .issue-desc {
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: rgba(201, 162, 39, 0.08);
+            border: 1px solid rgba(201, 162, 39, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .instructions-title {
+            font-weight: 600;
+            color: #c9a227;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instruction-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .instruction-item:last-child { margin-bottom: 0; }
+
+        .instruction-num {
+            background: #c9a227;
+            color: #000;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Guidelines Panel */
+        .guidelines {
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .guidelines-header {
+            background: rgba(201, 162, 39, 0.1);
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guidelines-header:hover {
+            background: rgba(201, 162, 39, 0.15);
+        }
+
+        .guidelines-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .guidelines-content {
+            display: none;
+            padding: 16px;
+        }
+
+        .guidelines-content.show { display: block; }
+
+        .guideline-section {
+            margin-bottom: 16px;
+        }
+
+        .guideline-section:last-child { margin-bottom: 0; }
+
+        .guideline-section h4 {
+            color: #c9a227;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .guideline-section ul {
+            list-style: none;
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+
+        .guideline-section li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        body.rtl .guideline-section li {
+            padding-left: 0;
+            padding-right: 16px;
+        }
+
+        .guideline-section li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #c9a227;
+        }
+
+        body.rtl .guideline-section li::before {
+            left: auto;
+            right: 0;
+        }
+
+        /* Player */
+        .player {
+            display: none;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .player.show { display: block; }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .play-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #c9a227;
+            border: none;
+            color: #000;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .play-btn:hover {
+            background: #d4af37;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-time {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 6px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #27272a;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #c9a227;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        /* Reset Button */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .pdf-btn, .reset-btn {
+            flex: 1;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .pdf-btn {
+            background: linear-gradient(135deg, #c9a227, #d4af37);
+            border: none;
+            color: #000;
+        }
+
+        .pdf-btn:hover {
+            background: linear-gradient(135deg, #d4af37, #e5c158);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+        }
+
+        .reset-btn {
+            background: transparent;
+            border: 2px solid #3f3f46;
+            color: #a1a1aa;
+        }
+
+        .reset-btn:hover {
+            border-color: #c9a227;
+            color: #c9a227;
+        }
+
+        .btn-icon {
+            font-size: 18px;
+        }
+
+        .btn-text {
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #52525b;
+            font-size: 12px;
+        }
+
+        .footer a {
+            color: #c9a227;
+            text-decoration: none;
+        }
+
+        /* Frequency Balance */
+        .freq-balance {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .freq-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .freq-note {
+            font-size: 11px;
+            color: #71717a;
+            margin-bottom: 12px;
+            font-style: italic;
+        }
+
+        .freq-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .freq-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .freq-label {
+            width: 80px;
+            font-size: 12px;
+            color: #a1a1aa;
+        }
+
+        body.rtl .freq-label {
+            text-align: right;
+        }
+
+        .freq-bar-wrap {
+            flex: 1;
+            height: 16px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .freq-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .freq-bar-fill.low { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .freq-bar-fill.mid { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .freq-bar-fill.high { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+        .freq-val {
+            width: 35px;
+            font-size: 12px;
+            color: #e4e4e7;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .freq-summary {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #c9a227;
+            font-size: 13px;
+            color: #e4e4e7;
+        }
+
+        body.rtl .freq-summary {
+            border-left: none;
+            border-right: 3px solid #c9a227;
+        }
+
+        /* Spectrum */
+        .spectrum {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .spectrum-title {
+            font-size: 12px;
+            color: #71717a;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .spectrum-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 80px;
+            gap: 2px;
+        }
+
+        .spectrum-bar {
+            flex: 1;
+            background: linear-gradient(to top, #c9a227, #d4af37);
+            min-height: 4px;
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s;
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #52525b;
+            margin-top: 8px;
+        }
+
+        .live-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Hidden input */
+        input[type="file"] { display: none; }
+
+        /* Checklist */
+        .checklist {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .checklist-title {
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .check-item:last-child { border-bottom: none; }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .check-icon.pass {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .check-icon.fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .check-icon.warn {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+        }
+
+        .check-text {
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .check-value {
+            font-size: 13px;
+            color: #71717a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Language Toggle -->
+        <div class="lang-toggle">
+            <button class="lang-btn active" id="langEn" onclick="setLang('en')">English</button>
+            <button class="lang-btn" id="langHe" onclick="setLang('he')">עברית</button>
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo"><span>oppen</span>masters</div>
+            <div class="tagline" data-en="Pre-Mastering Mix Check" data-he="בדיקת מיקס לפני מאסטרינג"></div>
+        </div>
+
+        <!-- Guidelines -->
+        <div class="guidelines">
+            <div class="guidelines-header" id="guidelinesHeader">
+                <div class="guidelines-title">📖 <span data-en="Submission Guidelines" data-he="הנחיות הגשה למאסטרינג"></span></div>
+                <span id="guidelinesArrow">▲</span>
+            </div>
+            <div class="guidelines-content show" id="guidelinesContent">
+                <!-- English Guidelines -->
+                <div class="lang-content" data-lang="en">
+                    <div class="guideline-section">
+                        <h4>Required Files</h4>
+                        <ul>
+                            <li><strong>Reference Master</strong> - Keep ALL your processing! Don't remove anything. I want to hear your vision, intention and energy as-is</li>
+                            <li><strong>Clean Mix</strong> - Without master bus processing (no limiter/maximizer)</li>
+                            <li>Original Sample Rate - don't convert!</li>
+                            <li>Original Bit Depth</li>
+                            <li>No Dither applied</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>Volume & Headroom</h4>
+                        <ul>
+                            <li>No need to lower to -6dB or any specific number</li>
+                            <li>I don't care about volume - just no clipping!</li>
+                            <li>Export as you hear it</li>
+                            <li>No Limiter/Maximizer on Clean Mix</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>What NOT to Do</h4>
+                        <ul>
+                            <li>Don't change Sample Rate</li>
+                            <li>Don't Normalize</li>
+                            <li>Don't apply SRC/Resampling</li>
+                            <li>Don't add processing to Mix Bus on clean version</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>File Names</h4>
+                        <ul>
+                            <li>Artist – Track – MIX</li>
+                            <li>Artist – Track – MASTER REF</li>
+                            <li>Format: WAV or AIFF only</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Hebrew Guidelines -->
+                <div class="lang-content" data-lang="he" style="display:none;">
+                    <div class="guideline-section">
+                        <h4>קבצים נדרשים</h4>
+                        <ul>
+                            <li><strong>Reference Master</strong> - השאירו את כל העיבודים! אל תורידו שום דבר. אני רוצה לשמוע את החזון, הכוונה והאנרגיה המקורית שלכם כמו שהיא</li>
+                            <li><strong>Clean Mix</strong> - ללא עיבודי מאסטר על המיקס באס (ללא לימיטר/מקסימייזר)</li>
+                            <li>Sample Rate מקורי - לא לשנות!</li>
+                            <li>Bit Depth מקורי</li>
+                            <li>ללא Dither</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>ווליום ו-Headroom</h4>
+                        <ul>
+                            <li>אין צורך להוריד ל-6dB או מספר ספציפי</li>
+                            <li>לא אכפת לי ווליום - רק בלי קליפינג!</li>
+                            <li>תוציאו כמו שאתם שומעים</li>
+                            <li>ללא Limiter/Maximizer על ה-Clean Mix</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>מה לא לעשות</h4>
+                        <ul>
+                            <li>לא לשנות Sample Rate</li>
+                            <li>לא לעשות Normalizing</li>
+                            <li>לא לעשות SRC/Resampling</li>
+                            <li>לא להוסיף עיבודים על Mix Bus בגרסה הנקייה</li>
+                        </ul>
+                    </div>
+                    <div class="guideline-section">
+                        <h4>שמות קבצים</h4>
+                        <ul>
+                            <li>Artist – Track – MIX</li>
+                            <li>Artist – Track – MASTER REF</li>
+                            <li>פורמט: WAV או AIFF בלבד</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">🎵</div>
+            <div class="upload-text" data-en="Drop file here or click to browse" data-he="גרור קובץ לכאן או לחץ לבחירה"></div>
+            <div class="upload-formats">WAV, AIFF, MP3, FLAC • Max 200MB</div>
+        </div>
+        <input type="file" id="fileInput" accept="audio/*">
+
+        <!-- File Info -->
+        <div class="file-info" id="fileInfo">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-meta" id="fileMeta"></div>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div data-en="Analyzing mix..." data-he="מנתח את המיקס..."></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <!-- Status Card -->
+            <div class="status-card" id="statusCard">
+                <div class="status-icon" id="statusIcon">✅</div>
+                <div class="status-title" id="statusTitle"></div>
+                <div class="status-desc" id="statusDesc"></div>
+            </div>
+
+            <!-- Checklist -->
+            <div class="checklist" id="checklist">
+                <div class="checklist-title">📋 <span data-en="Quality Check" data-he="בדיקת תקינות"></span></div>
+                <div id="checkItems"></div>
+            </div>
+
+            <!-- Issues -->
+            <div class="issues-section" id="issuesSection">
+                <div class="issues-title">⚠️ <span data-en="Issues Found" data-he="בעיות שנמצאו"></span></div>
+                <div id="issuesList"></div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="instructions" id="instructions">
+                <div class="instructions-title">📝 <span data-en="How to Fix" data-he="הנחיות לתיקון"></span></div>
+                <div id="instructionsList"></div>
+            </div>
+
+            <!-- Metrics Grid -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Peak Level" data-he="עוצמת Peak"></div>
+                    <div class="metric-value" id="peakValue">-</div>
+                    <div class="metric-status" id="peakStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Average Level" data-he="עוצמה ממוצעת"></div>
+                    <div class="metric-value" id="rmsValue">-</div>
+                    <div class="metric-status" id="rmsStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Dynamic Range" data-he="טווח דינמי"></div>
+                    <div class="metric-value" id="dynValue">-</div>
+                    <div class="metric-status" id="dynStatus">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label" data-en="Stereo Width" data-he="רוחב סטריאו"></div>
+                    <div class="metric-value" id="widthValue">-</div>
+                    <div class="metric-status" id="widthStatus">-</div>
+                </div>
+                <div class="metric-card full">
+                    <div class="metric-label" data-en="L/R Balance" data-he="איזון L/R"></div>
+                    <div class="metric-value" id="balanceValue">-</div>
+                    <div class="metric-status" id="balanceStatus">-</div>
+                </div>
+            </div>
+
+            <!-- Frequency Balance -->
+            <div class="freq-balance" id="freqBalance">
+                <div class="freq-title">📊 <span data-en="Frequency Balance" data-he="איזון תדרים"></span></div>
+                <div class="freq-note" data-en="* General overview only, not 100% accurate" data-he="* סקירה כללית בלבד, לא מדויק 100%">* General overview only, not 100% accurate</div>
+                <div class="freq-bars" id="freqBars"></div>
+                <div class="freq-summary" id="freqSummary"></div>
+            </div>
+
+            <!-- Live Spectrum -->
+            <div class="spectrum" id="spectrum">
+                <div class="spectrum-title">
+                    <span data-en="Live Spectrum" data-he="ספקטרום חי"></span>
+                    <span class="live-badge" id="liveBadge" style="display:none;">Live</span>
+                </div>
+                <div class="spectrum-bars" id="bars"></div>
+                <div class="spectrum-labels">
+                    <span>Sub</span>
+                    <span>Bass</span>
+                    <span>Low Mid</span>
+                    <span>Mid</span>
+                    <span>High Mid</span>
+                    <span>Air</span>
+                </div>
+            </div>
+
+            <!-- Player -->
+            <div class="player" id="player">
+                <div class="player-controls">
+                    <button class="play-btn" id="playBtn">▶</button>
+                    <div class="player-info">
+                        <div class="player-time">
+                            <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="pdf-btn" id="pdfBtn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-en="Download PDF Report" data-he="הורד דו״ח PDF">Download PDF Report</span>
+                </button>
+                <button class="reset-btn" id="resetBtn">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text" data-en="Check Another File" data-he="בדוק קובץ נוסף">Check Another File</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <a href="https://guyshema.com" target="_blank">guyshema.com</a><br>
+            <a href="mailto:musicshema@gmail.com">musicshema@gmail.com</a><br>
+            Guy Shema Oppenheimer © 2025
+        </div>
+    </div>
+
+    <!-- jsPDF Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script>
+        // ========== LANGUAGE SYSTEM ==========
+        let currentLang = 'en';
+        
+        const texts = {
+            en: {
+                // Status
+                ready_title: 'Mix is Ready!',
+                ready_desc: 'Good to send for mastering',
+                warning_title: 'Some Things to Check',
+                warning_desc: 'Can send, but review the notes below',
+                issues_title: 'Issues to Fix',
+                issues_desc: 'Please fix these issues before sending',
+                
+                // Checklist
+                check_clipping: 'No digital clipping',
+                check_phase: 'Mono compatibility (phase)',
+                check_balance: 'L/R Balance',
+                check_dynamics: 'Dynamic Range',
+                check_width: 'Stereo Width',
+                
+                // Metric status
+                ok: 'OK',
+                good: 'Good',
+                high: 'High',
+                clipping: 'Clipping!',
+                weak: 'Weak',
+                strong: 'Strong',
+                compressed: 'Compressed',
+                very_dynamic: 'Very Dynamic',
+                narrow: 'Narrow',
+                wide: 'Wide',
+                centered: 'Centered',
+                balanced: 'Balanced',
+                unbalanced: 'Unbalanced',
+                
+                // Issues
+                issue_clipping: 'Digital Clipping!',
+                issue_clipping_desc: 'Samples are hitting 0dBFS or above. This will cause distortion.',
+                issue_phase_severe: 'Severe Phase Issues!',
+                issue_phase_severe_desc: 'Elements will cancel in mono.',
+                issue_phase_warn: 'Possible Phase Issues',
+                issue_phase_warn_desc: 'Negative correlation. Check mono compatibility.',
+                issue_balance: 'Asymmetric Balance',
+                issue_balance_desc: 'Mix leans to one side.',
+                issue_quiet: 'Very Low Level',
+                issue_quiet_desc: 'Mix is very quiet. Make sure this is intentional.',
+                issue_crushed: 'Over-Compressed',
+                issue_crushed_desc: 'Almost no dynamic range. If using a limiter, send version without it.',
+                issue_wide: 'Too Wide',
+                issue_wide_desc: 'Extreme stereo width may cause issues.',
+                
+                // Instructions
+                inst_clipping: 'Lower the Mix Bus or Master Fader so peaks don\'t hit 0dB',
+                inst_limiter: 'If there\'s a Limiter on the master, send a clean version without it',
+                inst_phase: 'Check mix in mono - look for Stereo Wideners or Chorus causing phase cancellation',
+                inst_sample_rate: 'Export at the project\'s original Sample Rate',
+                inst_naming: 'File names: Artist – Track – MIX / Artist – Track – MASTER REF',
+                
+                // Correlation
+                correlation: 'corr',
+                
+                // Frequency bands
+                freq_sub: 'Sub',
+                freq_bass: 'Bass',
+                freq_lowmid: 'Low Mid',
+                freq_mid: 'Mid',
+                freq_himid: 'Hi Mid',
+                freq_presence: 'Presence',
+                freq_air: 'Air',
+                freq_balanced: 'Balanced mix',
+                freq_bright: 'Bright mix - strong highs',
+                freq_dark: 'Dark mix - weak highs',
+                freq_heavy_bass: 'Heavy low end',
+                freq_light_bass: 'Light low end'
+            },
+            he: {
+                // Status
+                ready_title: 'המיקס מוכן!',
+                ready_desc: 'אפשר לשלוח למאסטרינג',
+                warning_title: 'יש דברים לבדוק',
+                warning_desc: 'אפשר לשלוח, אבל כדאי לבדוק את ההערות',
+                issues_title: 'יש בעיות לתקן',
+                issues_desc: 'נא לתקן את הבעיות לפני שליחה למאסטרינג',
+                
+                // Checklist
+                check_clipping: 'ללא קליפינג דיגיטלי',
+                check_phase: 'תאימות מונו (פאזה)',
+                check_balance: 'איזון L/R',
+                check_dynamics: 'טווח דינמי',
+                check_width: 'רוחב סטריאו',
+                
+                // Metric status
+                ok: 'תקין',
+                good: 'טוב',
+                high: 'גבוה',
+                clipping: 'קליפינג!',
+                weak: 'חלש',
+                strong: 'חזק',
+                compressed: 'דחוס',
+                very_dynamic: 'דינמי מאוד',
+                narrow: 'צר',
+                wide: 'רחב',
+                centered: 'מרכז',
+                balanced: 'מאוזן',
+                unbalanced: 'לא סימטרי',
+                
+                // Issues
+                issue_clipping: 'קליפינג דיגיטלי!',
+                issue_clipping_desc: 'יש דגימות שמגיעות ל-0dBFS או מעבר. זה יגרום לעיוות.',
+                issue_phase_severe: 'בעיית פאזה חמורה!',
+                issue_phase_severe_desc: 'אלמנטים יתבטלו במונו.',
+                issue_phase_warn: 'בעיית פאזה אפשרית',
+                issue_phase_warn_desc: 'קורלציה שלילית. כדאי לבדוק מונו.',
+                issue_balance: 'איזון לא סימטרי',
+                issue_balance_desc: 'המיקס נוטה לצד אחד.',
+                issue_quiet: 'עוצמה נמוכה מאוד',
+                issue_quiet_desc: 'המיקס חלש מאוד. וודאו שזה מכוון ולא טעות ביצוא.',
+                issue_crushed: 'דחוס מדי',
+                issue_crushed_desc: 'כמעט אין טווח דינמי. אם יש לימיטר - שלחו גרסה בלעדיו.',
+                issue_wide: 'רחב מדי',
+                issue_wide_desc: 'רוחב סטריאו קיצוני עלול לגרום לבעיות.',
+                
+                // Instructions
+                inst_clipping: 'הורידו את עוצמת ה-Mix Bus או Master Fader כך שהפיקים לא יגעו ב-0dB',
+                inst_limiter: 'אם יש Limiter על המאסטר - שלחו גרסה נקייה בלעדיו',
+                inst_phase: 'בדקו את המיקס במונו - חפשו Stereo Wideners או Chorus שגורמים לביטולי פאזה',
+                inst_sample_rate: 'ייצאו ב-Sample Rate המקורי של הפרויקט',
+                inst_naming: 'שמות קבצים: Artist – Track – MIX / Artist – Track – MASTER REF',
+                
+                // Correlation
+                correlation: 'קורלציה',
+                
+                // Frequency bands
+                freq_sub: 'סאב',
+                freq_bass: 'בס',
+                freq_lowmid: 'לואו-מיד',
+                freq_mid: 'מיד',
+                freq_himid: 'היי-מיד',
+                freq_presence: 'נוכחות',
+                freq_air: 'אוויר',
+                freq_balanced: 'מיקס מאוזן',
+                freq_bright: 'מיקס בהיר - גבוהים חזקים',
+                freq_dark: 'מיקס כהה - גבוהים חלשים',
+                freq_heavy_bass: 'הרבה בס',
+                freq_light_bass: 'בס חלש'
+            }
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            
+            // Update buttons
+            document.getElementById('langEn').classList.toggle('active', lang === 'en');
+            document.getElementById('langHe').classList.toggle('active', lang === 'he');
+            
+            // Update RTL
+            document.body.classList.toggle('rtl', lang === 'he');
+            
+            // Update all data-en/data-he elements
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute('data-' + lang);
+            });
+            
+            // Update guidelines content
+            document.querySelectorAll('.lang-content').forEach(el => {
+                el.style.display = el.getAttribute('data-lang') === lang ? 'block' : 'none';
+            });
+            
+            // Re-render results if we have them
+            if (window.lastAnalysis) {
+                showResults(window.lastAnalysis);
+            }
+        }
+
+        function t(key) {
+            return texts[currentLang][key] || key;
+        }
+
+        // ========== AUDIO ANALYSIS ==========
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+
+        let audioCtx = null;
+        let buffer = null;
+        let source = null;
+        let analyser = null;
+        let isPlaying = false;
+        let startTime = 0;
+        let pauseTime = 0;
+        let animId = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Upload handlers
+        uploadArea.addEventListener('click', () => {
+            initAudio();
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            initAudio();
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('audio/') && !file.name.match(/\.(wav|aiff|aif|mp3|flac|m4a|ogg)$/i)) {
+                alert(currentLang === 'he' ? 'נא לבחור קובץ אודיו' : 'Please select an audio file');
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileMeta').textContent = formatSize(file.size);
+            fileInfo.classList.add('show');
+            uploadArea.classList.add('has-file');
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                audioCtx.decodeAudioData(e.target.result,
+                    async function(decodedBuffer) {
+                        buffer = decodedBuffer;
+                        const analysis = await analyzeAudio(buffer);
+                        window.lastAnalysis = analysis;
+                        loading.classList.remove('show');
+                        showResults(analysis);
+                    },
+                    function(err) {
+                        alert((currentLang === 'he' ? 'לא ניתן לקרוא את הקובץ: ' : 'Cannot read file: ') + err);
+                        reset();
+                    }
+                );
+            };
+            reader.onerror = function() {
+                alert(currentLang === 'he' ? 'שגיאה בקריאת הקובץ' : 'Error reading file');
+                reset();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Real FFT-based spectrum analysis
+        async function analyzeSpectrum(buf) {
+            const sampleRate = buf.sampleRate;
+            const left = buf.getChannelData(0);
+            const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
+            const len = buf.length;
+            
+            const fftSize = 4096;
+            const numWindows = Math.max(1, Math.min(100, Math.floor(len / fftSize)));
+            
+            if (len < fftSize) return null;
+            
+            // Band definitions (logarithmic spacing)
+            const bands = [
+                { name: 'sub', min: 20, max: 60 },
+                { name: 'bass', min: 60, max: 250 },
+                { name: 'lowMid', min: 250, max: 500 },
+                { name: 'mid', min: 500, max: 2000 },
+                { name: 'highMid', min: 2000, max: 4000 },
+                { name: 'presence', min: 4000, max: 8000 },
+                { name: 'air', min: 8000, max: Math.min(20000, sampleRate / 2) }
+            ];
+            
+            const freqPerBin = sampleRate / fftSize;
+            const bandEnergy = {};
+            bands.forEach(b => bandEnergy[b.name] = 0);
+            
+            // Process multiple windows across the track
+            for (let w = 0; w < numWindows; w++) {
+                const startIdx = Math.floor((w / numWindows) * (len - fftSize));
+                
+                // Apply Hanning window and mix to mono
+                const real = new Float32Array(fftSize);
+                const imag = new Float32Array(fftSize);
+                
+                for (let i = 0; i < fftSize; i++) {
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / (fftSize - 1)));
+                    real[i] = ((left[startIdx + i] + right[startIdx + i]) / 2) * window;
+                    imag[i] = 0;
+                }
+                
+                // Simple radix-2 FFT
+                fft(real, imag);
+                
+                // Sum energy per band
+                for (let bin = 0; bin < fftSize / 2; bin++) {
+                    const freq = bin * freqPerBin;
+                    const magnitude = Math.sqrt(real[bin] * real[bin] + imag[bin] * imag[bin]);
+                    
+                    for (const band of bands) {
+                        if (freq >= band.min && freq < band.max) {
+                            bandEnergy[band.name] += magnitude * magnitude;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Convert to dB scale (relative)
+            const bandDb = {};
+            let maxDb = -Infinity;
+            
+            for (const band of bands) {
+                const avgEnergy = bandEnergy[band.name] / numWindows;
+                // Normalize by bandwidth (octave-based)
+                const octaves = Math.log2(band.max / band.min);
+                const normalizedEnergy = avgEnergy / octaves;
+                bandDb[band.name] = 10 * Math.log10(Math.max(normalizedEnergy, 1e-12));
+                if (bandDb[band.name] > maxDb) maxDb = bandDb[band.name];
+            }
+            
+            // Convert to 0-100 scale relative to max
+            const result = {};
+            for (const band of bands) {
+                const dbBelow = maxDb - bandDb[band.name];
+                // Map: 0dB below = 100%, 30dB below = 0%
+                result[band.name] = Math.max(0, Math.min(100, 100 - (dbBelow * 3.33)));
+            }
+            
+            // Calculate totals
+            result.lowEnd = (result.sub + result.bass) / 2;
+            result.mids = (result.lowMid + result.mid + result.highMid) / 3;
+            result.highs = (result.presence + result.air) / 2;
+            
+            return result;
+        }
+        
+        // Simple in-place radix-2 FFT
+        function fft(real, imag) {
+            const n = real.length;
+            
+            // Bit reversal
+            for (let i = 0, j = 0; i < n; i++) {
+                if (j > i) {
+                    [real[i], real[j]] = [real[j], real[i]];
+                    [imag[i], imag[j]] = [imag[j], imag[i]];
+                }
+                let m = n >> 1;
+                while (m >= 1 && j >= m) {
+                    j -= m;
+                    m >>= 1;
+                }
+                j += m;
+            }
+            
+            // Cooley-Tukey FFT
+            for (let size = 2; size <= n; size *= 2) {
+                const halfSize = size / 2;
+                const step = Math.PI / halfSize;
+                
+                for (let i = 0; i < n; i += size) {
+                    for (let j = 0, angle = 0; j < halfSize; j++, angle += step) {
+                        const cos = Math.cos(angle);
+                        const sin = -Math.sin(angle);
+                        
+                        const idx1 = i + j;
+                        const idx2 = i + j + halfSize;
+                        
+                        const tReal = real[idx2] * cos - imag[idx2] * sin;
+                        const tImag = real[idx2] * sin + imag[idx2] * cos;
+                        
+                        real[idx2] = real[idx1] - tReal;
+                        imag[idx2] = imag[idx1] - tImag;
+                        real[idx1] = real[idx1] + tReal;
+                        imag[idx1] = imag[idx1] + tImag;
+                    }
+                }
+            }
+        }
+
+        async function analyzeAudio(buf) {
+            const left = buf.getChannelData(0);
+            const right = buf.numberOfChannels > 1 ? buf.getChannelData(1) : left;
+            const len = left.length;
+            const sampleRate = buf.sampleRate;
+
+            const maxSamples = 200000;
+            const step = Math.max(1, Math.floor(len / maxSamples));
+            const samples = Math.floor(len / step);
+
+            let sumL = 0, sumR = 0, peak = 0;
+            let sumMono = 0, sumSide = 0;
+            let dotProduct = 0;
+            let clippedSamples = 0;
+
+            for (let i = 0; i < len; i += step) {
+                const l = left[i];
+                const r = right[i];
+                const mono = (l + r) / 2;
+                const side = (l - r) / 2;
+
+                sumL += l * l;
+                sumR += r * r;
+                sumMono += mono * mono;
+                sumSide += side * side;
+                dotProduct += l * r;
+
+                const absL = Math.abs(l);
+                const absR = Math.abs(r);
+                if (absL > peak) peak = absL;
+                if (absR > peak) peak = absR;
+
+                if (absL >= 0.9999 || absR >= 0.9999) {
+                    clippedSamples++;
+                }
+            }
+
+            const rmsL = Math.sqrt(sumL / samples);
+            const rmsR = Math.sqrt(sumR / samples);
+            const rms = Math.sqrt((sumL + sumR) / (samples * 2));
+            const rmsMono = Math.sqrt(sumMono / samples);
+            const rmsSide = Math.sqrt(sumSide / samples);
+
+            const rmsDb = 20 * Math.log10(rms || 0.0001);
+            const peakDb = 20 * Math.log10(peak || 0.0001);
+            const crest = peakDb - rmsDb;
+
+            const correlation = dotProduct / (Math.sqrt(sumL) * Math.sqrt(sumR) || 1);
+
+            let width = 0;
+            if (rmsMono > 0.0001) {
+                width = Math.min(100, (rmsSide / rmsMono) * 100);
+            }
+
+            const balanceDb = 20 * Math.log10((rmsR || 0.0001) / (rmsL || 0.0001));
+
+            // Dynamic range
+            const windowSize = Math.floor(sampleRate * 0.4 / step);
+            const windowCount = Math.floor(samples / windowSize);
+            const windowLoudness = [];
+
+            for (let w = 0; w < windowCount; w++) {
+                let windowSum = 0;
+                const start = w * windowSize;
+                for (let i = 0; i < windowSize; i++) {
+                    const idx = (start + i) * step;
+                    if (idx < len) {
+                        const mono = (left[idx] + right[idx]) / 2;
+                        windowSum += mono * mono;
+                    }
+                }
+                const windowRms = Math.sqrt(windowSum / windowSize);
+                if (windowRms > 0.0001) {
+                    windowLoudness.push(20 * Math.log10(windowRms));
+                }
+            }
+
+            let dynamicRange = crest;
+            if (windowLoudness.length > 10) {
+                windowLoudness.sort((a, b) => a - b);
+                const low = windowLoudness[Math.floor(windowLoudness.length * 0.1)];
+                const high = windowLoudness[Math.floor(windowLoudness.length * 0.95)];
+                dynamicRange = Math.max(0, high - low);
+            }
+
+            // Issues
+            const issues = [];
+            const hasClipping = peak >= 0.9999 || clippedSamples > 10;
+            
+            if (hasClipping) {
+                issues.push({ id: 'clipping', severity: 'bad' });
+            }
+
+            if (correlation < -0.2) {
+                issues.push({ id: 'phase_severe', severity: 'bad', correlation });
+            } else if (correlation < 0) {
+                issues.push({ id: 'phase_warn', severity: 'warn', correlation });
+            }
+
+            if (Math.abs(balanceDb) > 2) {
+                issues.push({ id: 'balance', severity: 'warn', balanceDb });
+            }
+
+            if (peakDb < -12) {
+                issues.push({ id: 'quiet', severity: 'warn' });
+            }
+
+            if (crest < 4 && peakDb > -6) {
+                issues.push({ id: 'crushed', severity: 'warn' });
+            }
+
+            if (width > 80) {
+                issues.push({ id: 'wide', severity: 'warn' });
+            }
+
+            // Spectrum analysis
+            const spectrum = await analyzeSpectrum(buf);
+
+            return {
+                peakDb, rmsDb, crest, dynamicRange, width, correlation, balanceDb,
+                hasClipping, clippedSamples, issues, spectrum,
+                duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels
+            };
+        }
+
+        function showResults(r) {
+            results.classList.add('show');
+
+            const hasBadIssues = r.issues.some(i => i.severity === 'bad');
+            const hasWarnIssues = r.issues.some(i => i.severity === 'warn');
+
+            const statusCard = document.getElementById('statusCard');
+            const statusIcon = document.getElementById('statusIcon');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusDesc = document.getElementById('statusDesc');
+
+            if (hasBadIssues) {
+                statusCard.className = 'status-card issues';
+                statusIcon.textContent = '❌';
+                statusTitle.textContent = t('issues_title');
+                statusDesc.textContent = t('issues_desc');
+            } else if (hasWarnIssues) {
+                statusCard.className = 'status-card warning';
+                statusIcon.textContent = '⚠️';
+                statusTitle.textContent = t('warning_title');
+                statusDesc.textContent = t('warning_desc');
+            } else {
+                statusCard.className = 'status-card ready';
+                statusIcon.textContent = '✅';
+                statusTitle.textContent = t('ready_title');
+                statusDesc.textContent = t('ready_desc');
+            }
+
+            // Checklist
+            const checkItems = document.getElementById('checkItems');
+            const peakOk = r.peakDb < 0;
+            const phaseOk = r.correlation >= 0;
+            const balanceOk = Math.abs(r.balanceDb) <= 1.5;
+            const dynOk = r.crest >= 4;
+            const widthOk = r.width <= 80 && r.width >= 10;
+
+            checkItems.innerHTML = `
+                <div class="check-item">
+                    <div class="check-icon ${peakOk ? 'pass' : 'fail'}">${peakOk ? '✓' : '✗'}</div>
+                    <div class="check-text">${t('check_clipping')}</div>
+                    <div class="check-value">${r.peakDb.toFixed(1)} dB</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${r.correlation >= 0.3 ? 'pass' : (phaseOk ? 'warn' : 'fail')}">${r.correlation >= 0.3 ? '✓' : (phaseOk ? '!' : '✗')}</div>
+                    <div class="check-text">${t('check_phase')}</div>
+                    <div class="check-value">${r.correlation.toFixed(2)}</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${balanceOk ? 'pass' : 'warn'}">${balanceOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_balance')}</div>
+                    <div class="check-value">${Math.abs(r.balanceDb) < 0.5 ? t('balanced') : (r.balanceDb > 0 ? 'R' : 'L') + ' +' + Math.abs(r.balanceDb).toFixed(1) + 'dB'}</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${dynOk ? 'pass' : 'warn'}">${dynOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_dynamics')}</div>
+                    <div class="check-value">${r.crest.toFixed(1)} dB</div>
+                </div>
+                <div class="check-item">
+                    <div class="check-icon ${widthOk ? 'pass' : 'warn'}">${widthOk ? '✓' : '!'}</div>
+                    <div class="check-text">${t('check_width')}</div>
+                    <div class="check-value">${r.width.toFixed(0)}%</div>
+                </div>
+            `;
+
+            // Issues section
+            const issuesSection = document.getElementById('issuesSection');
+            const issuesList = document.getElementById('issuesList');
+
+            if (r.issues.length > 0) {
+                issuesSection.classList.add('show');
+                issuesList.innerHTML = r.issues.map(issue => {
+                    let name, desc;
+                    if (issue.id === 'clipping') {
+                        name = t('issue_clipping');
+                        desc = t('issue_clipping_desc');
+                    } else if (issue.id === 'phase_severe') {
+                        name = t('issue_phase_severe');
+                        desc = `${t('correlation')}: ${issue.correlation.toFixed(2)}. ${t('issue_phase_severe_desc')}`;
+                    } else if (issue.id === 'phase_warn') {
+                        name = t('issue_phase_warn');
+                        desc = `${t('correlation')}: ${issue.correlation.toFixed(2)}. ${t('issue_phase_warn_desc')}`;
+                    } else if (issue.id === 'balance') {
+                        name = t('issue_balance');
+                        desc = `${t('issue_balance_desc')} ${Math.abs(issue.balanceDb).toFixed(1)}dB ${issue.balanceDb > 0 ? (currentLang === 'he' ? 'לימין' : 'right') : (currentLang === 'he' ? 'לשמאל' : 'left')}.`;
+                    } else if (issue.id === 'quiet') {
+                        name = t('issue_quiet');
+                        desc = t('issue_quiet_desc');
+                    } else if (issue.id === 'crushed') {
+                        name = t('issue_crushed');
+                        desc = t('issue_crushed_desc');
+                    } else if (issue.id === 'wide') {
+                        name = t('issue_wide');
+                        desc = t('issue_wide_desc');
+                    }
+                    return `<div class="issue-item"><div class="issue-name">${name}</div><div class="issue-desc">${desc}</div></div>`;
+                }).join('');
+            } else {
+                issuesSection.classList.remove('show');
+            }
+
+            // Instructions
+            const instructions = document.getElementById('instructions');
+            const instructionsList = document.getElementById('instructionsList');
+
+            if (r.issues.length > 0 || r.crest < 6) {
+                instructions.style.display = 'block';
+                let instHtml = '';
+                let instNum = 1;
+
+                if (r.hasClipping) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_clipping')}</div></div>`;
+                }
+                if (r.crest < 5) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_limiter')}</div></div>`;
+                }
+                if (r.issues.some(i => i.id.includes('phase'))) {
+                    instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_phase')}</div></div>`;
+                }
+                instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_sample_rate')} (${r.sampleRate}Hz ✓)</div></div>`;
+                instHtml += `<div class="instruction-item"><div class="instruction-num">${instNum++}</div><div>${t('inst_naming')}</div></div>`;
+
+                instructionsList.innerHTML = instHtml;
+            } else {
+                instructions.style.display = 'none';
+            }
+
+            // Metrics
+            document.getElementById('peakValue').textContent = r.peakDb.toFixed(1) + ' dB';
+            document.getElementById('peakStatus').textContent = r.peakDb < -1 ? t('ok') : (r.peakDb < 0 ? t('high') : t('clipping'));
+            document.getElementById('peakStatus').className = 'metric-status ' + (r.peakDb < -1 ? 'good' : (r.peakDb < 0 ? 'warn' : 'bad'));
+
+            document.getElementById('rmsValue').textContent = r.rmsDb.toFixed(1) + ' dB';
+            document.getElementById('rmsStatus').textContent = r.rmsDb < -20 ? t('weak') : (r.rmsDb < -6 ? t('ok') : t('strong'));
+            document.getElementById('rmsStatus').className = 'metric-status ' + (r.rmsDb < -20 ? 'warn' : 'good');
+
+            document.getElementById('dynValue').textContent = r.crest.toFixed(1) + ' dB';
+            document.getElementById('dynStatus').textContent = r.crest < 4 ? t('compressed') : (r.crest > 16 ? t('very_dynamic') : t('ok'));
+            document.getElementById('dynStatus').className = 'metric-status ' + (r.crest < 4 ? 'warn' : 'good');
+
+            document.getElementById('widthValue').textContent = r.width.toFixed(0) + '%';
+            document.getElementById('widthStatus').textContent = r.width < 20 ? t('narrow') : (r.width > 70 ? t('wide') : t('ok'));
+            document.getElementById('widthStatus').className = 'metric-status ' + (r.width > 80 || r.width < 10 ? 'warn' : 'good');
+
+            document.getElementById('balanceValue').textContent = Math.abs(r.balanceDb) < 0.5 ? t('centered') : (r.balanceDb > 0 ? 'R' : 'L') + ' +' + Math.abs(r.balanceDb).toFixed(1) + 'dB';
+            document.getElementById('balanceStatus').textContent = Math.abs(r.balanceDb) < 1 ? t('balanced') : t('unbalanced');
+            document.getElementById('balanceStatus').className = 'metric-status ' + (Math.abs(r.balanceDb) < 1.5 ? 'good' : 'warn');
+
+            // Player
+            document.getElementById('player').classList.add('show');
+            document.getElementById('totalTime').textContent = formatTime(r.duration);
+
+            // Frequency Balance Display
+            if (r.spectrum) {
+                const freqBars = document.getElementById('freqBars');
+                const bands = [
+                    { key: 'sub', label: 'freq_sub', color: 'low' },
+                    { key: 'bass', label: 'freq_bass', color: 'low' },
+                    { key: 'lowMid', label: 'freq_lowmid', color: 'mid' },
+                    { key: 'mid', label: 'freq_mid', color: 'mid' },
+                    { key: 'highMid', label: 'freq_himid', color: 'mid' },
+                    { key: 'presence', label: 'freq_presence', color: 'high' },
+                    { key: 'air', label: 'freq_air', color: 'high' }
+                ];
+                
+                let html = '';
+                bands.forEach(band => {
+                    const val = r.spectrum[band.key] || 0;
+                    html += `
+                        <div class="freq-row">
+                            <div class="freq-label">${t(band.label)}</div>
+                            <div class="freq-bar-wrap">
+                                <div class="freq-bar-fill ${band.color}" style="width: ${val}%"></div>
+                            </div>
+                            <div class="freq-val">${Math.round(val)}</div>
+                        </div>
+                    `;
+                });
+                freqBars.innerHTML = html;
+                
+                // Summary
+                const summary = document.getElementById('freqSummary');
+                const lowEnd = r.spectrum.lowEnd;
+                const highs = r.spectrum.highs;
+                
+                let msg = '';
+                if (highs > 70 && lowEnd < 50) {
+                    msg = t('freq_bright');
+                } else if (highs < 40 && lowEnd > 60) {
+                    msg = t('freq_dark');
+                } else if (lowEnd > 75) {
+                    msg = t('freq_heavy_bass');
+                } else if (lowEnd < 35) {
+                    msg = t('freq_light_bass');
+                } else {
+                    msg = t('freq_balanced');
+                }
+                
+                summary.innerHTML = `🎚️ ${msg}`;
+                document.getElementById('freqBalance').style.display = 'block';
+            } else {
+                document.getElementById('freqBalance').style.display = 'none';
+            }
+
+            initSpectrumBars();
+        }
+
+        function initSpectrumBars() {
+            const bars = document.getElementById('bars');
+            bars.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'spectrum-bar';
+                bar.style.height = '4px';
+                bars.appendChild(bar);
+            }
+        }
+
+        // Player
+        const playBtn = document.getElementById('playBtn');
+        playBtn.addEventListener('click', togglePlay);
+
+        function togglePlay() {
+            if (isPlaying) stopAudio();
+            else playAudio();
+        }
+
+        function playAudio() {
+            if (!buffer) return;
+
+            source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            source.start(0, pauseTime);
+            startTime = audioCtx.currentTime - pauseTime;
+            isPlaying = true;
+            playBtn.textContent = '⏸';
+            document.getElementById('liveBadge').style.display = 'inline';
+
+            source.onended = () => {
+                if (isPlaying) {
+                    stopAudio();
+                    pauseTime = 0;
+                }
+            };
+
+            updateSpectrum();
+        }
+
+        function stopAudio() {
+            if (source) {
+                source.stop();
+                source.disconnect();
+            }
+            pauseTime = audioCtx.currentTime - startTime;
+            if (pauseTime >= buffer.duration) pauseTime = 0;
+            isPlaying = false;
+            playBtn.textContent = '▶';
+            document.getElementById('liveBadge').style.display = 'none';
+            if (animId) cancelAnimationFrame(animId);
+        }
+
+        function updateSpectrum() {
+            if (!isPlaying || !analyser) return;
+
+            const freqData = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(freqData);
+
+            const bars = document.querySelectorAll('.spectrum-bar');
+            const step = Math.floor(freqData.length / bars.length);
+
+            bars.forEach((bar, i) => {
+                const value = freqData[i * step];
+                const height = Math.max(4, (value / 255) * 80);
+                bar.style.height = height + 'px';
+            });
+
+            const elapsed = audioCtx.currentTime - startTime;
+            document.getElementById('currentTime').textContent = formatTime(elapsed);
+            document.getElementById('progressFill').style.width = (elapsed / buffer.duration * 100) + '%';
+
+            animId = requestAnimationFrame(updateSpectrum);
+        }
+
+        // Reset
+        document.getElementById('resetBtn').addEventListener('click', reset);
+
+        // PDF Download
+        document.getElementById('pdfBtn').addEventListener('click', generatePDF);
+
+        function generatePDF() {
+            if (!window.lastAnalysis) return;
+            
+            const r = window.lastAnalysis;
+            const fileName = document.getElementById('fileName').textContent || 'audio-file';
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const gold = [201, 162, 39];
+            const dark = [26, 26, 46];
+            const white = [244, 244, 245];
+            const gray = [113, 113, 122];
+            
+            // Header background
+            doc.setFillColor(...dark);
+            doc.rect(0, 0, 210, 50, 'F');
+            
+            // Logo - oppenmasters as styled text
+            doc.setFontSize(28);
+            doc.setFont('helvetica', 'bold');
+            // Draw "oppen" in white
+            doc.setTextColor(...white);
+            doc.text('oppen', 20, 28);
+            // Draw "masters" in gold right after (measure oppen width)
+            const oppenWidth = doc.getTextWidth('oppen');
+            doc.setTextColor(...gold);
+            doc.text('masters', 20 + oppenWidth, 28);
+            
+            // Subtitle
+            doc.setTextColor(...gray);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text('Pre-Mastering Mix Analysis Report', 20, 38);
+            
+            // File info
+            doc.setTextColor(...dark);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('File: ' + fileName, 20, 60);
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(...gray);
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            doc.text('Generated: ' + dateStr, 20, 68);
+            doc.text('Duration: ' + formatTime(r.duration) + ' | Sample Rate: ' + formatSampleRate(r.sampleRate) + ' | Channels: ' + r.channels, 20, 74);
+            
+            // Status
+            let y = 88;
+            const hasBadIssues = r.issues.some(i => i.severity === 'bad');
+            const hasWarnIssues = r.issues.some(i => i.severity === 'warn');
+            
+            doc.setFillColor(...(hasBadIssues ? [239, 68, 68] : (hasWarnIssues ? [245, 158, 11] : [34, 197, 94])));
+            doc.roundedRect(20, y, 170, 20, 3, 3, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            const statusText = hasBadIssues ? 'Issues Found - Needs Attention' : (hasWarnIssues ? 'Minor Issues - Review Recommended' : 'Mix is Ready for Mastering');
+            doc.text(statusText, 105, y + 13, { align: 'center' });
+            
+            // Metrics section
+            y = 118;
+            doc.setTextColor(...dark);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Audio Metrics', 20, y);
+            
+            y += 10;
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            
+            const metrics = [
+                ['Peak Level', r.peakDb.toFixed(1) + ' dB', r.peakDb < -1 ? 'OK' : (r.peakDb < 0 ? 'High' : 'Clipping!')],
+                ['Average Level (RMS)', r.rmsDb.toFixed(1) + ' dB', r.rmsDb < -20 ? 'Quiet' : 'OK'],
+                ['Dynamic Range', r.crest.toFixed(1) + ' dB', r.crest < 4 ? 'Compressed' : (r.crest > 16 ? 'Very Dynamic' : 'OK')],
+                ['Stereo Width', r.width.toFixed(0) + '%', r.width > 80 ? 'Very Wide' : 'OK'],
+                ['Mono Correlation', r.correlation.toFixed(2), r.correlation < 0 ? 'Phase Issues!' : 'OK'],
+                ['L/R Balance', (r.balanceDb > 0 ? '+' : '') + r.balanceDb.toFixed(1) + ' dB', Math.abs(r.balanceDb) > 2 ? 'Unbalanced' : 'OK']
+            ];
+            
+            metrics.forEach((m, i) => {
+                const rowY = y + (i * 8);
+                doc.setTextColor(...gray);
+                doc.text(m[0] + ':', 20, rowY);
+                doc.setTextColor(...dark);
+                doc.setFont('helvetica', 'bold');
+                doc.text(m[1], 80, rowY);
+                doc.setFont('helvetica', 'normal');
+                const statusColor = m[2].includes('!') || m[2].includes('Issue') ? [239, 68, 68] : 
+                                    (m[2] === 'OK' ? [34, 197, 94] : [245, 158, 11]);
+                doc.setTextColor(...statusColor);
+                doc.text(m[2], 120, rowY);
+            });
+            
+            // Frequency Balance
+            if (r.spectrum) {
+                y += 60;
+                doc.setTextColor(...dark);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Frequency Balance', 20, y);
+                
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(...gray);
+                doc.text('* General overview only, not 100% accurate', 20, y + 6);
+                
+                y += 14;
+                const bands = [
+                    { key: 'sub', label: 'Sub (20-60Hz)', color: [59, 130, 246] },
+                    { key: 'bass', label: 'Bass (60-250Hz)', color: [59, 130, 246] },
+                    { key: 'lowMid', label: 'Low Mid (250-500Hz)', color: [34, 197, 94] },
+                    { key: 'mid', label: 'Mid (500-2kHz)', color: [34, 197, 94] },
+                    { key: 'highMid', label: 'Hi Mid (2-4kHz)', color: [34, 197, 94] },
+                    { key: 'presence', label: 'Presence (4-8kHz)', color: [245, 158, 11] },
+                    { key: 'air', label: 'Air (8-20kHz)', color: [245, 158, 11] }
+                ];
+                
+                bands.forEach((band, i) => {
+                    const rowY = y + (i * 8);
+                    const val = r.spectrum[band.key] || 0;
+                    
+                    doc.setTextColor(...gray);
+                    doc.setFontSize(9);
+                    doc.text(band.label, 20, rowY);
+                    
+                    // Bar background
+                    doc.setFillColor(230, 230, 230);
+                    doc.roundedRect(75, rowY - 4, 80, 5, 1, 1, 'F');
+                    
+                    // Bar fill
+                    doc.setFillColor(...band.color);
+                    doc.roundedRect(75, rowY - 4, val * 0.8, 5, 1, 1, 'F');
+                    
+                    // Value
+                    doc.setTextColor(...dark);
+                    doc.text(Math.round(val).toString(), 160, rowY);
+                });
+                
+                // Summary
+                y += 64;
+                const lowEnd = r.spectrum.lowEnd;
+                const highs = r.spectrum.highs;
+                let summaryMsg = 'Balanced mix';
+                if (highs > 70 && lowEnd < 50) summaryMsg = 'Bright mix - strong highs';
+                else if (highs < 40 && lowEnd > 60) summaryMsg = 'Dark mix - weak highs';
+                else if (lowEnd > 75) summaryMsg = 'Heavy low end';
+                else if (lowEnd < 35) summaryMsg = 'Light low end';
+                
+                doc.setFillColor(255, 248, 220);
+                doc.roundedRect(20, y - 5, 170, 12, 2, 2, 'F');
+                doc.setDrawColor(...gold);
+                doc.setLineWidth(0.5);
+                doc.roundedRect(20, y - 5, 170, 12, 2, 2, 'S');
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Summary: ' + summaryMsg, 105, y + 3, { align: 'center' });
+            }
+            
+            // Issues
+            if (r.issues.length > 0) {
+                y += 20;
+                doc.setTextColor(...dark);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Issues Found', 20, y);
+                
+                y += 8;
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                
+                r.issues.forEach((issue, i) => {
+                    const issueY = y + (i * 7);
+                    const icon = issue.severity === 'bad' ? '❌' : '⚠️';
+                    let text = issue.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    doc.setTextColor(issue.severity === 'bad' ? 239 : 245, issue.severity === 'bad' ? 68 : 158, issue.severity === 'bad' ? 68 : 11);
+                    doc.text(icon + ' ' + text, 20, issueY);
+                });
+            }
+            
+            // Footer
+            doc.setFillColor(...dark);
+            doc.rect(0, 280, 210, 17, 'F');
+            
+            doc.setTextColor(...gray);
+            doc.setFontSize(9);
+            doc.text('guyshema.com | musicshema@gmail.com', 105, 288, { align: 'center' });
+            doc.setTextColor(...gold);
+            doc.setFontSize(8);
+            doc.text('oppenmasters © 2025', 105, 294, { align: 'center' });
+            
+            // Save
+            const safeName = fileName.replace(/[^a-zA-Z0-9\-_\u0590-\u05FF]/g, '_').substring(0, 50);
+            doc.save('oppenmasters_report_' + safeName + '.pdf');
+        }
+
+        function reset() {
+            stopAudio();
+            fileInput.value = '';
+            fileInfo.classList.remove('show');
+            uploadArea.classList.remove('has-file');
+            loading.classList.remove('show');
+            results.classList.remove('show');
+            buffer = null;
+            pauseTime = 0;
+            window.lastAnalysis = null;
+        }
+
+        // Guidelines toggle
+        document.getElementById('guidelinesHeader').addEventListener('click', () => {
+            const content = document.getElementById('guidelinesContent');
+            const arrow = document.getElementById('guidelinesArrow');
+            content.classList.toggle('show');
+            arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+        });
+
+        // Utils
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function formatSampleRate(sr) {
+            return (sr / 1000).toFixed(1) + 'kHz';
+        }
+    </script>
+</body>
+</html>
