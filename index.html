@@ -676,7 +676,7 @@
         <!-- Guidelines -->
         <div class="guidelines">
             <div class="guidelines-header" id="guidelinesHeader">
-                <div class="guidelines-title">📖 <span data-en="Submission Guidelines" data-he="הנחיות הגשה למאסטרינג"></span></div>
+                <div class="guidelines-title">📖 <span data-en="Submission Guidelines" data-he="הנחיות הגשה למאסטרינג">Submission Guidelines</span></div>
                 <span id="guidelinesArrow">▲</span>
             </div>
             <div class="guidelines-content show" id="guidelinesContent">
@@ -695,9 +695,9 @@
                     <div class="guideline-section">
                         <h4>Volume & Headroom</h4>
                         <ul>
-                            <li>No need to lower to -6dB or any specific number</li>
-                            <li>I don't care about volume - just no clipping!</li>
-                            <li>Export as you hear it</li>
+                            <li><strong>Don't mix too quiet!</strong> A very low mix level wastes bit-depth resolution - keep healthy levels</li>
+                            <li>In a busy/dense mix, it's totally fine to get close to 0dB - as long as there's no clipping</li>
+                            <li>No need to hit -6dB exactly - just avoid clipping</li>
                             <li>No Limiter/Maximizer on Clean Mix</li>
                         </ul>
                     </div>
@@ -734,9 +734,9 @@
                     <div class="guideline-section">
                         <h4>ווליום ו-Headroom</h4>
                         <ul>
-                            <li>אין צורך להוריד ל-6dB או מספר ספציפי</li>
-                            <li>לא אכפת לי ווליום - רק בלי קליפינג!</li>
-                            <li>תוציאו כמו שאתם שומעים</li>
+                            <li><strong>לא למקס חלש מדי!</strong> רמה נמוכה מדי מבזבזת רזולוציית ביטים - שמרו על רמות בריאות</li>
+                            <li>במיקס עמוס זה בסדר גמור להתקרב ל-0dB - כל עוד אין קליפינג</li>
+                            <li>לא חייבים בדיוק -6dB - פשוט הימנעו מקליפינג</li>
                             <li>ללא Limiter/Maximizer על ה-Clean Mix</li>
                         </ul>
                     </div>
@@ -1669,6 +1669,9 @@
         function formatSampleRate(sr) {
             return (sr / 1000).toFixed(1) + 'kHz';
         }
+
+        // Initialize language on page load
+        setLang('en');
     </script>
 </body>
 </html>
