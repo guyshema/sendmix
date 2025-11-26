@@ -4038,62 +4038,148 @@
                 }
                 
                 // === Frequency Graphs (side by side) ===
-                checkPage(50);
+                checkPage(65);
                 
                 doc.setTextColor(...dark);
                 doc.setFontSize(10);
                 doc.setFont('helvetica', 'bold');
                 doc.text('Spectrum Graphs', 20, y);
-                y += 5;
+                y += 8;
                 
-                // Get canvas images
+                // Get canvas elements
                 const graphPerceptual = document.getElementById('freqGraph');
                 const graphFlat = document.getElementById('freqGraphFlat');
                 
                 if (graphPerceptual && graphFlat && r.spectrumDetail && r.spectrumFlat) {
                     try {
-                        // Redraw both graphs to ensure they're current
-                        drawFreqGraph('freqGraph', r.spectrumDetail, '#22d3ee');
-                        drawFreqGraph('freqGraphFlat', r.spectrumFlat, '#a78bfa');
-                        
-                        // Capture graph with dark background for PDF
-                        function captureGraphWithBackground(canvas) {
-                            const tempCanvas = document.createElement('canvas');
-                            tempCanvas.width = canvas.width;
-                            tempCanvas.height = canvas.height;
-                            const ctx = tempCanvas.getContext('2d');
+                        // Create high-res canvases for PDF (fixed size, not dependent on screen)
+                        function drawGraphForPDF(data, color) {
+                            const pdfCanvas = document.createElement('canvas');
+                            const w = 400;
+                            const h = 140;
+                            pdfCanvas.width = w * 2; // 2x for quality
+                            pdfCanvas.height = h * 2;
+                            const ctx = pdfCanvas.getContext('2d');
+                            ctx.scale(2, 2);
+                            
+                            const padding = { left: 35, right: 15, top: 12, bottom: 24 };
+                            const graphW = w - padding.left - padding.right;
+                            const graphH = h - padding.top - padding.bottom;
+                            
+                            const dbMax = 12;
+                            const dbMin = -24;
+                            const dbRange = dbMax - dbMin;
                             
                             // Dark background
-                            ctx.fillStyle = '#1a1a2e';
-                            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                            ctx.fillStyle = '#0d0d1a';
+                            ctx.fillRect(0, 0, w, h);
                             
-                            // Copy original canvas content
-                            ctx.drawImage(canvas, 0, 0);
+                            // Grid lines
+                            ctx.strokeStyle = '#2a2a3e';
+                            ctx.lineWidth = 1;
                             
-                            return tempCanvas.toDataURL('image/png');
+                            // Horizontal grid (dB)
+                            const dbLines = [12, 6, 0, -6, -12, -18, -24];
+                            ctx.font = '10px sans-serif';
+                            ctx.fillStyle = '#71717a';
+                            ctx.textAlign = 'right';
+                            
+                            dbLines.forEach(db => {
+                                const yPos = padding.top + ((dbMax - db) / dbRange) * graphH;
+                                ctx.beginPath();
+                                ctx.moveTo(padding.left, yPos);
+                                ctx.lineTo(w - padding.right, yPos);
+                                ctx.stroke();
+                                const label = db > 0 ? '+' + db : db + '';
+                                ctx.fillText(label, padding.left - 4, yPos + 3);
+                            });
+                            
+                            // 0 dB line highlighted
+                            ctx.strokeStyle = '#52525b';
+                            ctx.lineWidth = 1.5;
+                            const zeroY = padding.top + ((dbMax - 0) / dbRange) * graphH;
+                            ctx.beginPath();
+                            ctx.moveTo(padding.left, zeroY);
+                            ctx.lineTo(w - padding.right, zeroY);
+                            ctx.stroke();
+                            
+                            // Vertical grid (frequency)
+                            ctx.strokeStyle = '#2a2a3e';
+                            ctx.lineWidth = 1;
+                            const freqLines = [50, 100, 200, 500, 1000, 2000, 5000, 10000];
+                            ctx.textAlign = 'center';
+                            
+                            freqLines.forEach(freq => {
+                                const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                                ctx.beginPath();
+                                ctx.setLineDash([2, 4]);
+                                ctx.moveTo(x, padding.top);
+                                ctx.lineTo(x, h - padding.bottom);
+                                ctx.stroke();
+                                ctx.setLineDash([]);
+                                
+                                const label = freq >= 1000 ? (freq / 1000) + 'k' : freq + '';
+                                ctx.fillText(label, x, h - padding.bottom + 12);
+                            });
+                            
+                            // Draw curve
+                            if (data.freqs && data.db && data.freqs.length > 0) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 2.5;
+                                ctx.lineCap = 'round';
+                                ctx.lineJoin = 'round';
+                                
+                                let started = false;
+                                for (let i = 0; i < data.freqs.length; i++) {
+                                    const freq = data.freqs[i];
+                                    const db = Math.max(dbMin, Math.min(dbMax, data.db[i]));
+                                    
+                                    const x = padding.left + (Math.log10(freq / 20) / Math.log10(20000 / 20)) * graphW;
+                                    const yPos = padding.top + ((dbMax - db) / dbRange) * graphH;
+                                    
+                                    if (!started) {
+                                        ctx.moveTo(x, yPos);
+                                        started = true;
+                                    } else {
+                                        ctx.lineTo(x, yPos);
+                                    }
+                                }
+                                ctx.stroke();
+                                
+                                // Glow effect
+                                ctx.strokeStyle = color;
+                                ctx.lineWidth = 4;
+                                ctx.globalAlpha = 0.3;
+                                ctx.stroke();
+                                ctx.globalAlpha = 1;
+                            }
+                            
+                            return pdfCanvas.toDataURL('image/png');
                         }
                         
-                        // Graph dimensions in PDF (side by side)
+                        // Graph dimensions in PDF (side by side, larger)
                         const graphWidth = 85;
-                        const graphHeight = 35;
+                        const graphHeight = 45;
                         
                         // Perceptual graph (left)
-                        const imgDataPerceptual = captureGraphWithBackground(graphPerceptual);
+                        const imgDataPerceptual = drawGraphForPDF(r.spectrumDetail, '#22d3ee');
                         doc.addImage(imgDataPerceptual, 'PNG', 20, y, graphWidth, graphHeight);
                         
                         // Flat graph (right)
-                        const imgDataFlat = captureGraphWithBackground(graphFlat);
+                        const imgDataFlat = drawGraphForPDF(r.spectrumFlat, '#a78bfa');
                         doc.addImage(imgDataFlat, 'PNG', 110, y, graphWidth, graphHeight);
                         
                         // Labels under graphs
-                        y += graphHeight + 3;
-                        doc.setFontSize(7);
+                        y += graphHeight + 4;
+                        doc.setFontSize(8);
+                        doc.setFont('helvetica', 'bold');
                         doc.setTextColor(34, 211, 238);
                         doc.text('Perceptual (A-weighted)', 20 + graphWidth/2, y, { align: 'center' });
                         doc.setTextColor(167, 139, 250);
                         doc.text('Raw Measurement (Flat)', 110 + graphWidth/2, y, { align: 'center' });
                         
-                        y += 8;
+                        y += 10;
                     } catch(e) {
                         console.log('Could not add graphs to PDF:', e);
                     }
