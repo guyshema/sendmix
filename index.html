@@ -541,6 +541,97 @@
             text-decoration: none;
         }
 
+        /* Frequency Balance 3-Band */
+        .freq-balance {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .freq-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .freq-note {
+            font-size: 11px;
+            color: #71717a;
+            margin-bottom: 16px;
+        }
+
+        .freq-3band {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .freq-band {
+            display: grid;
+            grid-template-columns: 70px 75px 1fr 50px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .freq-band-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #f4f4f5;
+        }
+
+        .freq-band-range {
+            font-size: 11px;
+            color: #71717a;
+        }
+
+        .freq-band-bar-wrap {
+            height: 24px;
+            background: #1a1a2e;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .freq-band-bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        .freq-band-bar.low {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+
+        .freq-band-bar.mid {
+            background: linear-gradient(90deg, #22c55e, #4ade80);
+        }
+
+        .freq-band-bar.high {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .freq-band-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #f4f4f5;
+            text-align: right;
+        }
+
+        .freq-reference {
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #c9a227;
+            font-size: 12px;
+            color: #a1a1aa;
+        }
+
+        body.rtl .freq-reference {
+            border-left: none;
+            border-right: 3px solid #c9a227;
+        }
+
         /* Spectrum */
         .spectrum {
             background: rgba(255,255,255,0.03);
@@ -835,6 +926,39 @@
                     <div class="metric-value" id="balanceValue">-</div>
                     <div class="metric-status" id="balanceStatus">-</div>
                 </div>
+            </div>
+
+            <!-- Frequency Balance (3-band) -->
+            <div class="freq-balance" id="freqBalance" style="display:none;">
+                <div class="freq-title">🎚️ <span data-en="Frequency Balance" data-he="איזון תדרים">Frequency Balance</span></div>
+                <div class="freq-note" data-en="Energy distribution (octave-normalized)" data-he="התפלגות אנרגיה (מנורמל לאוקטבות)">Energy distribution (octave-normalized)</div>
+                <div class="freq-3band">
+                    <div class="freq-band">
+                        <div class="freq-band-label" data-en="Low" data-he="נמוכים">Low</div>
+                        <div class="freq-band-range">20-250Hz</div>
+                        <div class="freq-band-bar-wrap">
+                            <div class="freq-band-bar low" id="freqBarLow" style="width:0%"></div>
+                        </div>
+                        <div class="freq-band-value" id="freqValLow">-</div>
+                    </div>
+                    <div class="freq-band">
+                        <div class="freq-band-label" data-en="Mid" data-he="אמצעיים">Mid</div>
+                        <div class="freq-band-range">250Hz-4kHz</div>
+                        <div class="freq-band-bar-wrap">
+                            <div class="freq-band-bar mid" id="freqBarMid" style="width:0%"></div>
+                        </div>
+                        <div class="freq-band-value" id="freqValMid">-</div>
+                    </div>
+                    <div class="freq-band">
+                        <div class="freq-band-label" data-en="High" data-he="גבוהים">High</div>
+                        <div class="freq-band-range">4-16kHz</div>
+                        <div class="freq-band-bar-wrap">
+                            <div class="freq-band-bar high" id="freqBarHigh" style="width:0%"></div>
+                        </div>
+                        <div class="freq-band-value" id="freqValHigh">-</div>
+                    </div>
+                </div>
+                <div class="freq-reference" data-en="Typical mix: Low ~30-35%, Mid ~40-45%, High ~20-30%" data-he="מיקס טיפוסי: נמוכים ~30-35%, אמצעיים ~40-45%, גבוהים ~20-30%">Typical mix: Low ~30-35%, Mid ~40-45%, High ~20-30%</div>
             </div>
 
             <!-- Live Spectrum -->
@@ -1195,8 +1319,10 @@
             
             const rmsL = Math.sqrt(sumLsq / len);
             const rmsR = Math.sqrt(sumRsq / len);
-            const rms = Math.sqrt((sumLsq + sumRsq) / (len * 2));
-            const rmsDb = 20 * Math.log10(rms || 1e-10);
+            const rmsDbL = 20 * Math.log10(rmsL || 1e-10);
+            const rmsDbR = 20 * Math.log10(rmsR || 1e-10);
+            // Average of L/R in dB (standard metering approach)
+            const rmsDb = (rmsDbL + rmsDbR) / 2;
             
             const crest = peakDb - rmsDb;
 
@@ -1254,7 +1380,7 @@
             // Log results for verification
             console.log('=== Analysis Results ===');
             console.log(`Peak: ${peakDb.toFixed(2)} dBFS (L: ${(20*Math.log10(peakL||1e-10)).toFixed(2)}, R: ${(20*Math.log10(peakR||1e-10)).toFixed(2)})`);
-            console.log(`RMS: ${rmsDb.toFixed(2)} dBFS (L: ${(20*Math.log10(rmsL||1e-10)).toFixed(2)}, R: ${(20*Math.log10(rmsR||1e-10)).toFixed(2)})`);
+            console.log(`RMS: ${rmsDb.toFixed(2)} dBFS (L: ${rmsDbL.toFixed(2)}, R: ${rmsDbR.toFixed(2)})`);
             console.log(`Crest Factor: ${crest.toFixed(2)} dB`);
             console.log(`Dynamic Range: ${dynamicRange.toFixed(2)} dB`);
             console.log(`Correlation: ${correlation.toFixed(3)}`);
@@ -1266,7 +1392,8 @@
 
             // Issues detection
             const issues = [];
-            const hasClipping = peak >= 0.9999 || clippedSamples > Math.floor(sampleRate * 0.001);
+            // Clipping: peak at or above -0.1dB, or many samples at max
+            const hasClipping = peakDb >= -0.1 || clippedSamples > Math.floor(sampleRate * 0.001);
             
             if (hasClipping) {
                 issues.push({ id: 'clipping', severity: 'bad' });
@@ -1299,13 +1426,109 @@
                 issues.push({ id: 'dc_offset', severity: 'warn' });
             }
 
+            // Simple 3-band spectral analysis (Low/Mid/High)
+            // Using Goertzel algorithm for specific frequency bands
+            const spectrum = analyzeSpectrum3Band(left, right, len, sampleRate);
+
             return {
                 peakDb, rmsDb, crest, dynamicRange, width, correlation, balanceDb,
-                hasClipping, clippedSamples, issues,
+                hasClipping, clippedSamples, issues, spectrum,
                 peakL: 20 * Math.log10(peakL || 1e-10),
                 peakR: 20 * Math.log10(peakR || 1e-10),
                 duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels
             };
+        }
+
+        // 3-Band Spectrum Analysis with octave normalization
+        function analyzeSpectrum3Band(left, right, len, sampleRate) {
+            // Band definitions (musical ranges)
+            // Low: 20-250Hz (~3.6 octaves) - Bass, Sub
+            // Mid: 250-4000Hz (~4 octaves) - Vocals, instruments body
+            // High: 4000-16000Hz (~2 octaves) - Air, brilliance
+            
+            const bands = [
+                { name: 'low', minHz: 20, maxHz: 250, testFreqs: [40, 80, 125, 200] },
+                { name: 'mid', minHz: 250, maxHz: 4000, testFreqs: [400, 800, 1600, 2500, 3500] },
+                { name: 'high', minHz: 4000, maxHz: Math.min(16000, sampleRate/2 - 1000), testFreqs: [5000, 8000, 12000] }
+            ];
+            
+            // Calculate octaves for each band
+            bands.forEach(b => {
+                b.octaves = Math.log2(b.maxHz / b.minHz);
+            });
+            
+            const blockSize = 4096;
+            const numBlocks = Math.min(50, Math.floor(len / blockSize));
+            if (numBlocks < 1) return null;
+            
+            const bandEnergy = { low: 0, mid: 0, high: 0 };
+            
+            // Process blocks across the track
+            for (let block = 0; block < numBlocks; block++) {
+                const startIdx = Math.floor((block / numBlocks) * (len - blockSize));
+                
+                // Prepare mono signal with Hanning window
+                const signal = new Float32Array(blockSize);
+                for (let i = 0; i < blockSize; i++) {
+                    const mono = (left[startIdx + i] + right[startIdx + i]) * 0.5;
+                    const window = 0.5 * (1 - Math.cos(2 * Math.PI * i / blockSize));
+                    signal[i] = mono * window;
+                }
+                
+                // Goertzel for each test frequency
+                for (const band of bands) {
+                    let bandSum = 0;
+                    for (const freq of band.testFreqs) {
+                        if (freq >= sampleRate / 2) continue;
+                        
+                        const k = Math.round(freq * blockSize / sampleRate);
+                        const w = 2 * Math.PI * k / blockSize;
+                        const coeff = 2 * Math.cos(w);
+                        
+                        let s1 = 0, s2 = 0;
+                        for (let i = 0; i < blockSize; i++) {
+                            const s0 = signal[i] + coeff * s1 - s2;
+                            s2 = s1;
+                            s1 = s0;
+                        }
+                        
+                        const mag = Math.sqrt(s1*s1 + s2*s2 - coeff*s1*s2) / blockSize;
+                        bandSum += mag * mag;  // Energy
+                    }
+                    bandEnergy[band.name] += bandSum / band.testFreqs.length;
+                }
+            }
+            
+            // Average over blocks
+            bandEnergy.low /= numBlocks;
+            bandEnergy.mid /= numBlocks;
+            bandEnergy.high /= numBlocks;
+            
+            // Normalize by octaves (wider bands have more energy naturally)
+            const normLow = bandEnergy.low / bands[0].octaves;
+            const normMid = bandEnergy.mid / bands[1].octaves;
+            const normHigh = bandEnergy.high / bands[2].octaves;
+            
+            // Calculate percentages
+            const total = normLow + normMid + normHigh;
+            if (total < 1e-10) return null;
+            
+            const result = {
+                low: (normLow / total) * 100,
+                mid: (normMid / total) * 100,
+                high: (normHigh / total) * 100
+            };
+            
+            // Reference: typical balanced mix has roughly 30-35% low, 40-45% mid, 20-30% high
+            // After octave normalization
+            console.log('=== Spectrum Balance ===');
+            console.log(`Low (20-250Hz): ${result.low.toFixed(1)}%`);
+            console.log(`Mid (250-4kHz): ${result.mid.toFixed(1)}%`);
+            console.log(`High (4-16kHz): ${result.high.toFixed(1)}%`);
+            console.log('Reference: Low ~30-35%, Mid ~40-45%, High ~20-30%');
+            console.log('========================');
+            
+            return result;
         }
 
         function showResults(r) {
@@ -1338,7 +1561,8 @@
 
             // Checklist
             const checkItems = document.getElementById('checkItems');
-            const peakOk = r.peakDb < 0;
+            const hasClippingIssue = r.hasClipping || r.peakDb >= -0.1;
+            const peakOk = r.peakDb < -0.1;  // True Peak should be below -0.1dB for safety
             const phaseOk = r.correlation >= 0;
             const balanceOk = Math.abs(r.balanceDb) <= 1.5;
             const dynOk = r.crest >= 4;
@@ -1436,8 +1660,8 @@
 
             // Metrics
             document.getElementById('peakValue').textContent = r.peakDb.toFixed(1) + ' dB';
-            document.getElementById('peakStatus').textContent = r.peakDb < -1 ? t('ok') : (r.peakDb < 0 ? t('high') : t('clipping'));
-            document.getElementById('peakStatus').className = 'metric-status ' + (r.peakDb < -1 ? 'good' : (r.peakDb < 0 ? 'warn' : 'bad'));
+            document.getElementById('peakStatus').textContent = r.peakDb < -1 ? t('ok') : (r.peakDb < -0.1 ? t('high') : t('clipping'));
+            document.getElementById('peakStatus').className = 'metric-status ' + (r.peakDb < -1 ? 'good' : (r.peakDb < -0.1 ? 'warn' : 'bad'));
 
             document.getElementById('rmsValue').textContent = r.rmsDb.toFixed(1) + ' dB';
             document.getElementById('rmsStatus').textContent = r.rmsDb < -20 ? t('weak') : (r.rmsDb < -6 ? t('ok') : t('strong'));
@@ -1454,6 +1678,19 @@
             document.getElementById('balanceValue').textContent = Math.abs(r.balanceDb) < 0.5 ? t('centered') : (r.balanceDb > 0 ? 'R' : 'L') + ' +' + Math.abs(r.balanceDb).toFixed(1) + 'dB';
             document.getElementById('balanceStatus').textContent = Math.abs(r.balanceDb) < 1 ? t('balanced') : t('unbalanced');
             document.getElementById('balanceStatus').className = 'metric-status ' + (Math.abs(r.balanceDb) < 1.5 ? 'good' : 'warn');
+
+            // 3-Band Frequency Balance
+            if (r.spectrum) {
+                document.getElementById('freqBarLow').style.width = r.spectrum.low + '%';
+                document.getElementById('freqBarMid').style.width = r.spectrum.mid + '%';
+                document.getElementById('freqBarHigh').style.width = r.spectrum.high + '%';
+                document.getElementById('freqValLow').textContent = r.spectrum.low.toFixed(0) + '%';
+                document.getElementById('freqValMid').textContent = r.spectrum.mid.toFixed(0) + '%';
+                document.getElementById('freqValHigh').textContent = r.spectrum.high.toFixed(0) + '%';
+                document.getElementById('freqBalance').style.display = 'block';
+            } else {
+                document.getElementById('freqBalance').style.display = 'none';
+            }
 
             // Player
             document.getElementById('player').classList.add('show');
@@ -1645,6 +1882,54 @@
                 doc.setTextColor(...statusColor);
                 doc.text(m[2], 120, rowY);
             });
+            
+            // Frequency Balance
+            if (r.spectrum) {
+                y += 60;
+                doc.setTextColor(...dark);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Frequency Balance', 20, y);
+                
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'italic');
+                doc.setTextColor(...gray);
+                doc.text('Energy distribution (octave-normalized)', 20, y + 6);
+                
+                y += 14;
+                const bands = [
+                    { name: 'Low (20-250Hz)', value: r.spectrum.low, color: [59, 130, 246] },
+                    { name: 'Mid (250Hz-4kHz)', value: r.spectrum.mid, color: [34, 197, 94] },
+                    { name: 'High (4-16kHz)', value: r.spectrum.high, color: [245, 158, 11] }
+                ];
+                
+                bands.forEach((band, i) => {
+                    const rowY = y + (i * 12);
+                    
+                    doc.setTextColor(...gray);
+                    doc.setFontSize(10);
+                    doc.text(band.name, 20, rowY);
+                    
+                    // Bar background
+                    doc.setFillColor(230, 230, 230);
+                    doc.roundedRect(75, rowY - 4, 80, 6, 2, 2, 'F');
+                    
+                    // Bar fill
+                    doc.setFillColor(...band.color);
+                    doc.roundedRect(75, rowY - 4, band.value * 0.8, 6, 2, 2, 'F');
+                    
+                    // Value
+                    doc.setTextColor(...dark);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(Math.round(band.value) + '%', 162, rowY);
+                    doc.setFont('helvetica', 'normal');
+                });
+                
+                y += 40;
+                doc.setFontSize(8);
+                doc.setTextColor(...gray);
+                doc.text('Typical mix: Low ~30-35%, Mid ~40-45%, High ~20-30%', 20, y);
+            }
             
             // Issues
             if (r.issues.length > 0) {
