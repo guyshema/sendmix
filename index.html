@@ -3271,69 +3271,94 @@
             const white = [244, 244, 245];
             const gray = [113, 113, 122];
             
+            const pageHeight = 280; // Leave room for footer
+            let y = 0;
+            
+            // Helper: check if we need a new page
+            function checkPage(neededSpace = 20) {
+                if (y + neededSpace > pageHeight) {
+                    // Add footer to current page
+                    addFooter();
+                    doc.addPage();
+                    y = 20;
+                    return true;
+                }
+                return false;
+            }
+            
+            // Helper: add footer
+            function addFooter() {
+                doc.setFillColor(...dark);
+                doc.rect(0, 285, 210, 12, 'F');
+                doc.setTextColor(...gray);
+                doc.setFontSize(8);
+                doc.text('guyshema.com | oppenmasters © 2025', 105, 292, { align: 'center' });
+            }
+            
+            // === PAGE 1: Header and Metrics ===
+            
             // Header background
             doc.setFillColor(...dark);
-            doc.rect(0, 0, 210, 50, 'F');
+            doc.rect(0, 0, 210, 45, 'F');
             
-            // Logo - oppenmasters as styled text
-            doc.setFontSize(28);
+            // Logo
+            doc.setFontSize(24);
             doc.setFont('helvetica', 'bold');
-            // Draw "oppen" in white
             doc.setTextColor(...white);
-            doc.text('oppen', 20, 28);
-            // Draw "masters" in gold right after (measure oppen width)
+            doc.text('oppen', 20, 25);
             const oppenWidth = doc.getTextWidth('oppen');
             doc.setTextColor(...gold);
-            doc.text('masters', 20 + oppenWidth, 28);
+            doc.text('masters', 20 + oppenWidth, 25);
             
             // Subtitle
             doc.setTextColor(...gray);
-            doc.setFontSize(12);
+            doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text('Pre-Mastering Mix Analysis Report', 20, 38);
+            doc.text('Pre-Mastering Mix Analysis Report', 20, 35);
             
             // File info
+            y = 55;
             doc.setTextColor(...dark);
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
-            doc.text('File: ' + fileName, 20, 60);
+            doc.text('File: ' + fileName, 20, y);
             
-            doc.setFontSize(10);
+            y += 7;
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(...gray);
             const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            doc.text('Generated: ' + dateStr, 20, 68);
-            doc.text('Duration: ' + formatTime(r.duration) + ' | Sample Rate: ' + formatSampleRate(r.sampleRate) + ' | Channels: ' + r.channels, 20, 74);
+            doc.text('Generated: ' + dateStr + ' | Duration: ' + formatTime(r.duration) + ' | ' + formatSampleRate(r.sampleRate) + ' | ' + r.channels + 'ch', 20, y);
             
-            // Status
-            let y = 88;
+            // Status box
+            y += 12;
             const hasBadIssues = r.issues.some(i => i.severity === 'bad');
             const hasWarnIssues = r.issues.some(i => i.severity === 'warn');
             
             doc.setFillColor(...(hasBadIssues ? [239, 68, 68] : (hasWarnIssues ? [245, 158, 11] : [34, 197, 94])));
-            doc.roundedRect(20, y, 170, 20, 3, 3, 'F');
+            doc.roundedRect(20, y, 170, 14, 3, 3, 'F');
             
             doc.setTextColor(255, 255, 255);
-            doc.setFontSize(14);
+            doc.setFontSize(11);
             doc.setFont('helvetica', 'bold');
             const statusText = hasBadIssues ? 'Issues Found - Needs Attention' : (hasWarnIssues ? 'Minor Issues - Review Recommended' : 'Mix is Ready for Mastering');
-            doc.text(statusText, 105, y + 13, { align: 'center' });
+            doc.text(statusText, 105, y + 9, { align: 'center' });
             
-            // Metrics section
-            y = 118;
+            // === Audio Metrics ===
+            y += 25;
             doc.setTextColor(...dark);
-            doc.setFontSize(14);
+            doc.setFontSize(12);
             doc.setFont('helvetica', 'bold');
             doc.text('Audio Metrics', 20, y);
             
-            y += 10;
-            doc.setFontSize(10);
+            y += 8;
+            doc.setFontSize(9);
             doc.setFont('helvetica', 'normal');
             
             const metrics = [
                 ['Peak Level', r.peakDb.toFixed(1) + ' dB', r.peakDb < -1 ? 'OK' : (r.peakDb < 0 ? 'High' : 'Clipping!')],
                 ['RMS Level', r.rmsDb.toFixed(1) + ' dB', r.rmsDb < -20 ? 'Quiet' : 'OK'],
-                ['Loudness', r.lufs.toFixed(1) + ' LUFS', '-'],
+                ['Loudness (LUFS)', r.lufs.toFixed(1) + ' LUFS', '-'],
                 ['Dynamic Range', r.crest.toFixed(1) + ' dB', r.crest < 4 ? 'Compressed' : (r.crest > 16 ? 'Very Dynamic' : 'OK')],
                 ['Stereo Width', r.width.toFixed(0) + '%', r.width > 80 ? 'Very Wide' : 'OK'],
                 ['Mono Correlation', r.correlation.toFixed(2), r.correlation < 0 ? 'Phase Issues!' : 'OK'],
@@ -3341,38 +3366,39 @@
             ];
             
             metrics.forEach((m, i) => {
-                const rowY = y + (i * 8);
+                const rowY = y + (i * 7);
                 doc.setTextColor(...gray);
                 doc.text(m[0] + ':', 20, rowY);
                 doc.setTextColor(...dark);
                 doc.setFont('helvetica', 'bold');
-                doc.text(m[1], 80, rowY);
+                doc.text(m[1], 75, rowY);
                 doc.setFont('helvetica', 'normal');
                 const statusColor = m[2].includes('!') || m[2].includes('Issue') ? [239, 68, 68] : 
                                     (m[2] === 'OK' ? [34, 197, 94] : [245, 158, 11]);
                 doc.setTextColor(...statusColor);
-                doc.text(m[2], 120, rowY);
+                doc.text(m[2], 115, rowY);
             });
             
-            // Frequency Balance - Perceptual (A-weighted)
+            y += metrics.length * 7 + 5;
+            
+            // === Frequency Balance - Perceptual ===
             if (r.spectrum) {
-                y += 60;
+                checkPage(70);
+                
                 doc.setTextColor(...dark);
-                doc.setFontSize(14);
+                doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
                 doc.text('Frequency Balance', 20, y);
                 
-                y += 8;
-                doc.setFontSize(10);
-                doc.setTextColor(34, 211, 238); // Cyan
-                doc.text('👂 Perceptual (A-weighted)', 20, y);
-                
-                doc.setFontSize(8);
-                doc.setFont('helvetica', 'italic');
+                y += 7;
+                doc.setFontSize(9);
+                doc.setTextColor(34, 211, 238);
+                doc.text('Perceptual (A-weighted)', 20, y);
                 doc.setTextColor(...gray);
-                doc.text('Shows how the human ear perceives the frequency balance', 75, y);
+                doc.setFontSize(8);
+                doc.text('- how human ear perceives it', 65, y);
                 
-                y += 10;
+                y += 7;
                 const bands = [
                     { name: 'Sub (20-60Hz)', value: r.spectrum.sub },
                     { name: 'Bass (60-200Hz)', value: r.spectrum.bass },
@@ -3383,53 +3409,46 @@
                 ];
                 
                 bands.forEach((band, i) => {
-                    const rowY = y + (i * 9);
-                    
+                    const rowY = y + (i * 7);
                     doc.setTextColor(...gray);
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(8);
                     doc.text(band.name, 20, rowY);
                     
-                    // Bar background
+                    // Bar
                     doc.setFillColor(230, 230, 230);
-                    doc.roundedRect(80, rowY - 3, 60, 5, 2, 2, 'F');
-                    
-                    // Center line
+                    doc.roundedRect(70, rowY - 2.5, 50, 4, 1, 1, 'F');
                     doc.setFillColor(150, 150, 150);
-                    doc.rect(109.5, rowY - 3, 1, 5, 'F');
+                    doc.rect(94.5, rowY - 2.5, 1, 4, 'F');
                     
-                    // Bar from center
-                    const barWidth = Math.min(28, Math.abs(band.value) * (28/6));
+                    const barWidth = Math.min(23, Math.abs(band.value) * (23/6));
                     const isBalanced = Math.abs(band.value) <= 3;
                     doc.setFillColor(isBalanced ? 34 : 245, isBalanced ? 197 : 158, isBalanced ? 94 : 11);
                     if (band.value >= 0) {
-                        doc.roundedRect(110, rowY - 3, barWidth, 5, 2, 2, 'F');
+                        doc.roundedRect(95, rowY - 2.5, barWidth, 4, 1, 1, 'F');
                     } else {
-                        doc.roundedRect(110 - barWidth, rowY - 3, barWidth, 5, 2, 2, 'F');
+                        doc.roundedRect(95 - barWidth, rowY - 2.5, barWidth, 4, 1, 1, 'F');
                     }
                     
-                    // Value
                     doc.setTextColor(...dark);
                     doc.setFont('helvetica', 'bold');
-                    const valText = (band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB';
-                    doc.text(valText, 145, rowY);
+                    doc.text((band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB', 125, rowY);
                     doc.setFont('helvetica', 'normal');
                 });
                 
-                y += 58;
+                y += bands.length * 7 + 5;
                 
-                // Flat (Raw Measurement)
+                // === Frequency Balance - Flat ===
                 if (r.spectrumFlatBands) {
-                    doc.setFontSize(10);
-                    doc.setTextColor(167, 139, 250); // Purple
-                    doc.text('📊 Raw Measurement (Flat)', 20, y);
+                    checkPage(55);
                     
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'italic');
+                    doc.setFontSize(9);
+                    doc.setTextColor(167, 139, 250);
+                    doc.text('Raw Measurement (Flat)', 20, y);
                     doc.setTextColor(...gray);
-                    doc.text('Actual energy levels at each frequency', 80, y);
+                    doc.setFontSize(8);
+                    doc.text('- actual energy levels', 62, y);
                     
-                    y += 10;
+                    y += 7;
                     const flatBands = [
                         { name: 'Sub (20-60Hz)', value: r.spectrumFlatBands.sub },
                         { name: 'Bass (60-200Hz)', value: r.spectrumFlatBands.bass },
@@ -3440,101 +3459,178 @@
                     ];
                     
                     flatBands.forEach((band, i) => {
-                        const rowY = y + (i * 9);
-                        
+                        const rowY = y + (i * 7);
                         doc.setTextColor(...gray);
-                        doc.setFontSize(9);
-                        doc.setFont('helvetica', 'normal');
+                        doc.setFontSize(8);
                         doc.text(band.name, 20, rowY);
                         
                         doc.setFillColor(230, 230, 230);
-                        doc.roundedRect(80, rowY - 3, 60, 5, 2, 2, 'F');
-                        
+                        doc.roundedRect(70, rowY - 2.5, 50, 4, 1, 1, 'F');
                         doc.setFillColor(150, 150, 150);
-                        doc.rect(109.5, rowY - 3, 1, 5, 'F');
+                        doc.rect(94.5, rowY - 2.5, 1, 4, 'F');
                         
-                        const barWidth = Math.min(28, Math.abs(band.value) * (28/6));
+                        const barWidth = Math.min(23, Math.abs(band.value) * (23/6));
                         const isBalanced = Math.abs(band.value) <= 3;
-                        // Purple shades for flat
                         doc.setFillColor(isBalanced ? 139 : 245, isBalanced ? 92 : 158, isBalanced ? 246 : 11);
                         if (band.value >= 0) {
-                            doc.roundedRect(110, rowY - 3, barWidth, 5, 2, 2, 'F');
+                            doc.roundedRect(95, rowY - 2.5, barWidth, 4, 1, 1, 'F');
                         } else {
-                            doc.roundedRect(110 - barWidth, rowY - 3, barWidth, 5, 2, 2, 'F');
+                            doc.roundedRect(95 - barWidth, rowY - 2.5, barWidth, 4, 1, 1, 'F');
                         }
                         
                         doc.setTextColor(...dark);
                         doc.setFont('helvetica', 'bold');
-                        const valText = (band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB';
-                        doc.text(valText, 145, rowY);
+                        doc.text((band.value > 0 ? '+' : '') + band.value.toFixed(1) + ' dB', 125, rowY);
                         doc.setFont('helvetica', 'normal');
                     });
                     
-                    y += 55;
+                    y += flatBands.length * 7 + 5;
                 }
-                
-                doc.setFontSize(8);
-                doc.setTextColor(...gray);
-                doc.text('All bands near 0 dB = balanced', 20, y);
             }
             
-            // Issues
+            // === Issues ===
             if (r.issues.length > 0) {
-                y += 20;
-                doc.setTextColor(...dark);
-                doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
-                doc.text('Issues Found', 20, y);
+                checkPage(15 + r.issues.length * 6);
                 
-                y += 8;
-                doc.setFontSize(10);
-                doc.setFont('helvetica', 'normal');
-                
-                r.issues.forEach((issue, i) => {
-                    const issueY = y + (i * 7);
-                    const icon = issue.severity === 'bad' ? '❌' : '⚠️';
-                    let text = issue.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    doc.setTextColor(issue.severity === 'bad' ? 239 : 245, issue.severity === 'bad' ? 68 : 158, issue.severity === 'bad' ? 68 : 11);
-                    doc.text(icon + ' ' + text, 20, issueY);
-                });
-                
-                y += r.issues.length * 7;
-            }
-            
-            // Clip events list
-            if (r.clipEvents && r.clipEvents.length > 0) {
-                y += 15;
                 doc.setTextColor(...dark);
                 doc.setFontSize(12);
                 doc.setFont('helvetica', 'bold');
-                doc.text('Clip Events', 20, y);
+                doc.text('Issues Found', 20, y);
+                
+                y += 7;
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                
+                r.issues.forEach((issue, i) => {
+                    checkPage(7);
+                    const icon = issue.severity === 'bad' ? '❌' : '⚠️';
+                    let text = issue.id.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    doc.setTextColor(issue.severity === 'bad' ? 239 : 245, issue.severity === 'bad' ? 68 : 158, issue.severity === 'bad' ? 68 : 11);
+                    doc.text(icon + ' ' + text, 20, y);
+                    y += 6;
+                });
+                
+                y += 5;
+            }
+            
+            // === Clip Events ===
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                checkPage(25);
+                
+                doc.setTextColor(...dark);
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Clip Events (' + r.clipEvents.length + ' total)', 20, y);
                 
                 y += 6;
                 doc.setFontSize(8);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(239, 68, 68);
                 
-                const maxClips = Math.min(10, r.clipEvents.length);
+                const maxClips = Math.min(15, r.clipEvents.length);
                 for (let i = 0; i < maxClips; i++) {
+                    checkPage(5);
                     const clip = r.clipEvents[i];
-                    const clipY = y + (i * 5);
-                    doc.text('⚡ ' + formatTime(clip.time) + ' - ' + clip.peakDb.toFixed(1) + ' dB (' + clip.channel + ')', 20, clipY);
+                    doc.text((i+1) + '. ' + formatTime(clip.time) + ' - ' + clip.peakDb.toFixed(1) + ' dB (' + clip.channel + ')', 20, y);
+                    y += 5;
                 }
-                if (r.clipEvents.length > 10) {
-                    doc.text('... and ' + (r.clipEvents.length - 10) + ' more', 20, y + (maxClips * 5));
+                if (r.clipEvents.length > 15) {
+                    doc.text('... and ' + (r.clipEvents.length - 15) + ' more clips', 20, y);
+                    y += 5;
+                }
+                
+                y += 5;
+            }
+            
+            // === Full Analysis Log (New Page) ===
+            doc.addPage();
+            y = 20;
+            
+            doc.setTextColor(...dark);
+            doc.setFontSize(14);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Full Analysis Log', 20, y);
+            
+            y += 10;
+            doc.setFontSize(8);
+            doc.setFont('courier', 'normal');
+            doc.setTextColor(...gray);
+            
+            // Build log text
+            let logLines = [];
+            logLines.push('=== oppenmasters Analysis Log ===');
+            logLines.push('File: ' + fileName);
+            logLines.push('Date: ' + dateStr);
+            logLines.push('Duration: ' + formatTime(r.duration));
+            logLines.push('Sample Rate: ' + formatSampleRate(r.sampleRate));
+            logLines.push('Channels: ' + r.channels);
+            logLines.push('');
+            logLines.push('--- Levels ---');
+            logLines.push('Peak: ' + r.peakDb.toFixed(2) + ' dB');
+            logLines.push('RMS: ' + r.rmsDb.toFixed(2) + ' dB');
+            logLines.push('LUFS: ' + r.lufs.toFixed(2) + ' LUFS');
+            logLines.push('Dynamic Range: ' + r.crest.toFixed(2) + ' dB');
+            logLines.push('');
+            logLines.push('--- Stereo ---');
+            logLines.push('Correlation: ' + r.correlation.toFixed(3));
+            logLines.push('Stereo Width: ' + r.width.toFixed(1) + '%');
+            logLines.push('L/R Balance: ' + (r.balanceDb > 0 ? '+' : '') + r.balanceDb.toFixed(2) + ' dB');
+            logLines.push('');
+            logLines.push('--- Spectrum: Perceptual (A-weighted) ---');
+            if (r.spectrum) {
+                logLines.push('Sub (20-60Hz): ' + (r.spectrum.sub > 0 ? '+' : '') + r.spectrum.sub.toFixed(1) + ' dB');
+                logLines.push('Bass (60-200Hz): ' + (r.spectrum.bass > 0 ? '+' : '') + r.spectrum.bass.toFixed(1) + ' dB');
+                logLines.push('Low-Mid (200-500Hz): ' + (r.spectrum.lowMid > 0 ? '+' : '') + r.spectrum.lowMid.toFixed(1) + ' dB');
+                logLines.push('Mid (500Hz-2kHz): ' + (r.spectrum.mid > 0 ? '+' : '') + r.spectrum.mid.toFixed(1) + ' dB');
+                logLines.push('High-Mid (2-4kHz): ' + (r.spectrum.highMid > 0 ? '+' : '') + r.spectrum.highMid.toFixed(1) + ' dB');
+                logLines.push('High (4-16kHz): ' + (r.spectrum.high > 0 ? '+' : '') + r.spectrum.high.toFixed(1) + ' dB');
+            }
+            logLines.push('');
+            logLines.push('--- Spectrum: Raw Measurement (Flat) ---');
+            if (r.spectrumFlatBands) {
+                logLines.push('Sub (20-60Hz): ' + (r.spectrumFlatBands.sub > 0 ? '+' : '') + r.spectrumFlatBands.sub.toFixed(1) + ' dB');
+                logLines.push('Bass (60-200Hz): ' + (r.spectrumFlatBands.bass > 0 ? '+' : '') + r.spectrumFlatBands.bass.toFixed(1) + ' dB');
+                logLines.push('Low-Mid (200-500Hz): ' + (r.spectrumFlatBands.lowMid > 0 ? '+' : '') + r.spectrumFlatBands.lowMid.toFixed(1) + ' dB');
+                logLines.push('Mid (500Hz-2kHz): ' + (r.spectrumFlatBands.mid > 0 ? '+' : '') + r.spectrumFlatBands.mid.toFixed(1) + ' dB');
+                logLines.push('High-Mid (2-4kHz): ' + (r.spectrumFlatBands.highMid > 0 ? '+' : '') + r.spectrumFlatBands.highMid.toFixed(1) + ' dB');
+                logLines.push('High (4-16kHz): ' + (r.spectrumFlatBands.high > 0 ? '+' : '') + r.spectrumFlatBands.high.toFixed(1) + ' dB');
+            }
+            logLines.push('');
+            logLines.push('--- Technical ---');
+            logLines.push('Clipped Samples: ' + r.clippedSamples + ' (' + ((r.clippedSamples / r.samples) * 100).toFixed(4) + '%)');
+            if (r.dcOffset) {
+                logLines.push('DC Offset: L=' + (r.dcOffset.left * 100).toFixed(4) + '%, R=' + (r.dcOffset.right * 100).toFixed(4) + '%');
+            }
+            
+            if (r.clipEvents && r.clipEvents.length > 0) {
+                logLines.push('');
+                logLines.push('--- Clip Events (' + r.clipEvents.length + ') ---');
+                r.clipEvents.slice(0, 30).forEach((clip, i) => {
+                    logLines.push((i+1) + '. ' + formatTime(clip.time) + ' - ' + clip.peakDb.toFixed(1) + ' dB (' + clip.channel + ')');
+                });
+                if (r.clipEvents.length > 30) {
+                    logLines.push('... and ' + (r.clipEvents.length - 30) + ' more');
                 }
             }
             
-            // Footer
-            doc.setFillColor(...dark);
-            doc.rect(0, 280, 210, 17, 'F');
+            if (r.issues.length > 0) {
+                logLines.push('');
+                logLines.push('--- Issues ---');
+                r.issues.forEach(issue => {
+                    const icon = issue.severity === 'bad' ? '[!]' : '[?]';
+                    logLines.push(icon + ' ' + issue.id);
+                });
+            }
             
-            doc.setTextColor(...gray);
-            doc.setFontSize(9);
-            doc.text('guyshema.com', 105, 288, { align: 'center' });
-            doc.setTextColor(...gold);
-            doc.setFontSize(8);
-            doc.text('oppenmasters © 2025', 105, 294, { align: 'center' });
+            // Print log lines
+            logLines.forEach(line => {
+                checkPage(4);
+                doc.text(line, 20, y);
+                y += 4;
+            });
+            
+            // Add footer to last page
+            addFooter();
             
             // Save
             const safeName = fileName.replace(/[^a-zA-Z0-9\-_\u0590-\u05FF]/g, '_').substring(0, 50);
