@@ -943,6 +943,8 @@
                 issue_crushed_desc: 'Almost no dynamic range. If using a limiter, send version without it.',
                 issue_wide: 'Too Wide',
                 issue_wide_desc: 'Extreme stereo width may cause issues.',
+                issue_dc_offset: 'DC Offset Detected',
+                issue_dc_offset_desc: 'Low frequency bias in the signal. May cause clicks or asymmetric headroom.',
                 
                 // Instructions
                 inst_clipping: 'Lower the Mix Bus or Master Fader so peaks don\'t hit 0dB',
@@ -1000,6 +1002,8 @@
                 issue_crushed_desc: 'כמעט אין טווח דינמי. אם יש לימיטר - שלחו גרסה בלעדיו.',
                 issue_wide: 'רחב מדי',
                 issue_wide_desc: 'רוחב סטריאו קיצוני עלול לגרום לבעיות.',
+                issue_dc_offset: 'זוהה DC Offset',
+                issue_dc_offset_desc: 'הטיה בתדר נמוך באות. עלול לגרום לקליקים או חוסר סימטריה ב-headroom.',
                 
                 // Instructions
                 inst_clipping: 'הורידו את עוצמת ה-Mix Bus או Master Fader כך שהפיקים לא יגעו ב-0dB',
@@ -1141,73 +1145,98 @@
             const len = left.length;
             const sampleRate = buf.sampleRate;
 
-            const maxSamples = 200000;
-            const step = Math.max(1, Math.floor(len / maxSamples));
-            const samples = Math.floor(len / step);
+            console.log(`Analyzing ${len} samples at ${sampleRate}Hz (${(len/sampleRate).toFixed(2)}s)`);
 
-            let sumL = 0, sumR = 0, peak = 0;
-            let sumMono = 0, sumSide = 0;
-            let dotProduct = 0;
+            // Single pass for: Peak, RMS, Correlation components, M/S, Clipping
+            let peakL = 0, peakR = 0;
+            let sumLsq = 0, sumRsq = 0;
+            let sumLR = 0;  // For correlation
+            let sumMid = 0, sumSide = 0;
             let clippedSamples = 0;
+            let dcL = 0, dcR = 0;  // DC offset detection
 
-            for (let i = 0; i < len; i += step) {
+            // Process ALL samples
+            for (let i = 0; i < len; i++) {
                 const l = left[i];
                 const r = right[i];
-                const mono = (l + r) / 2;
-                const side = (l - r) / 2;
-
-                sumL += l * l;
-                sumR += r * r;
-                sumMono += mono * mono;
-                sumSide += side * side;
-                dotProduct += l * r;
-
+                
+                // Peak (absolute)
                 const absL = Math.abs(l);
                 const absR = Math.abs(r);
-                if (absL > peak) peak = absL;
-                if (absR > peak) peak = absR;
-
+                if (absL > peakL) peakL = absL;
+                if (absR > peakR) peakR = absR;
+                
+                // RMS components
+                sumLsq += l * l;
+                sumRsq += r * r;
+                
+                // Correlation component
+                sumLR += l * r;
+                
+                // M/S
+                const mid = (l + r) * 0.5;
+                const side = (l - r) * 0.5;
+                sumMid += mid * mid;
+                sumSide += side * side;
+                
+                // DC offset
+                dcL += l;
+                dcR += r;
+                
+                // Clipping (samples at or very near max)
                 if (absL >= 0.9999 || absR >= 0.9999) {
                     clippedSamples++;
                 }
             }
 
-            const rmsL = Math.sqrt(sumL / samples);
-            const rmsR = Math.sqrt(sumR / samples);
-            const rms = Math.sqrt((sumL + sumR) / (samples * 2));
-            const rmsMono = Math.sqrt(sumMono / samples);
-            const rmsSide = Math.sqrt(sumSide / samples);
-
-            const rmsDb = 20 * Math.log10(rms || 0.0001);
-            const peakDb = 20 * Math.log10(peak || 0.0001);
+            // Calculate final values
+            const peak = Math.max(peakL, peakR);
+            const peakDb = 20 * Math.log10(peak || 1e-10);
+            
+            const rmsL = Math.sqrt(sumLsq / len);
+            const rmsR = Math.sqrt(sumRsq / len);
+            const rms = Math.sqrt((sumLsq + sumRsq) / (len * 2));
+            const rmsDb = 20 * Math.log10(rms || 1e-10);
+            
             const crest = peakDb - rmsDb;
 
-            const correlation = dotProduct / (Math.sqrt(sumL) * Math.sqrt(sumR) || 1);
+            // Correlation: Pearson coefficient
+            // r = Σ(L*R) / sqrt(Σ(L²) * Σ(R²))
+            const corrDenom = Math.sqrt(sumLsq * sumRsq);
+            const correlation = corrDenom > 1e-10 ? sumLR / corrDenom : 1;
 
+            // Stereo Width (Side/Mid ratio in dB, converted to %)
+            const rmsMid = Math.sqrt(sumMid / len);
+            const rmsSide = Math.sqrt(sumSide / len);
             let width = 0;
-            if (rmsMono > 0.0001) {
-                width = Math.min(100, (rmsSide / rmsMono) * 100);
+            if (rmsMid > 1e-10) {
+                // 0% = mono (no side), 100% = equal M/S
+                width = (rmsSide / rmsMid) * 100;
             }
 
-            const balanceDb = 20 * Math.log10((rmsR || 0.0001) / (rmsL || 0.0001));
+            // L/R Balance in dB
+            const balanceDb = 20 * Math.log10((rmsR || 1e-10) / (rmsL || 1e-10));
 
-            // Dynamic range
-            const windowSize = Math.floor(sampleRate * 0.4 / step);
-            const windowCount = Math.floor(samples / windowSize);
+            // DC Offset
+            const dcOffsetL = dcL / len;
+            const dcOffsetR = dcR / len;
+
+            // Dynamic Range: analyze loudness over time windows
+            const drWindowMs = 400;  // 400ms windows
+            const drWindowSize = Math.floor(sampleRate * drWindowMs / 1000);
+            const drWindowCount = Math.floor(len / drWindowSize);
             const windowLoudness = [];
 
-            for (let w = 0; w < windowCount; w++) {
+            for (let w = 0; w < drWindowCount; w++) {
                 let windowSum = 0;
-                const start = w * windowSize;
-                for (let i = 0; i < windowSize; i++) {
-                    const idx = (start + i) * step;
-                    if (idx < len) {
-                        const mono = (left[idx] + right[idx]) / 2;
-                        windowSum += mono * mono;
-                    }
+                const start = w * drWindowSize;
+                for (let i = 0; i < drWindowSize; i++) {
+                    const idx = start + i;
+                    const mono = (left[idx] + right[idx]) * 0.5;
+                    windowSum += mono * mono;
                 }
-                const windowRms = Math.sqrt(windowSum / windowSize);
-                if (windowRms > 0.0001) {
+                const windowRms = Math.sqrt(windowSum / drWindowSize);
+                if (windowRms > 1e-10) {
                     windowLoudness.push(20 * Math.log10(windowRms));
                 }
             }
@@ -1215,14 +1244,29 @@
             let dynamicRange = crest;
             if (windowLoudness.length > 10) {
                 windowLoudness.sort((a, b) => a - b);
-                const low = windowLoudness[Math.floor(windowLoudness.length * 0.1)];
-                const high = windowLoudness[Math.floor(windowLoudness.length * 0.95)];
+                const lowIdx = Math.floor(windowLoudness.length * 0.1);
+                const highIdx = Math.floor(windowLoudness.length * 0.95);
+                const low = windowLoudness[lowIdx];
+                const high = windowLoudness[highIdx];
                 dynamicRange = Math.max(0, high - low);
             }
 
-            // Issues
+            // Log results for verification
+            console.log('=== Analysis Results ===');
+            console.log(`Peak: ${peakDb.toFixed(2)} dBFS (L: ${(20*Math.log10(peakL||1e-10)).toFixed(2)}, R: ${(20*Math.log10(peakR||1e-10)).toFixed(2)})`);
+            console.log(`RMS: ${rmsDb.toFixed(2)} dBFS (L: ${(20*Math.log10(rmsL||1e-10)).toFixed(2)}, R: ${(20*Math.log10(rmsR||1e-10)).toFixed(2)})`);
+            console.log(`Crest Factor: ${crest.toFixed(2)} dB`);
+            console.log(`Dynamic Range: ${dynamicRange.toFixed(2)} dB`);
+            console.log(`Correlation: ${correlation.toFixed(3)}`);
+            console.log(`Stereo Width: ${width.toFixed(1)}%`);
+            console.log(`L/R Balance: ${balanceDb.toFixed(2)} dB`);
+            console.log(`Clipped Samples: ${clippedSamples} (${(clippedSamples/len*100).toFixed(4)}%)`);
+            console.log(`DC Offset: L=${(dcOffsetL*100).toFixed(4)}%, R=${(dcOffsetR*100).toFixed(4)}%`);
+            console.log('========================');
+
+            // Issues detection
             const issues = [];
-            const hasClipping = peak >= 0.9999 || clippedSamples > 10;
+            const hasClipping = peak >= 0.9999 || clippedSamples > Math.floor(sampleRate * 0.001);
             
             if (hasClipping) {
                 issues.push({ id: 'clipping', severity: 'bad' });
@@ -1246,13 +1290,20 @@
                 issues.push({ id: 'crushed', severity: 'warn' });
             }
 
-            if (width > 80) {
+            if (width > 150) {
                 issues.push({ id: 'wide', severity: 'warn' });
+            }
+
+            // DC offset warning
+            if (Math.abs(dcOffsetL) > 0.001 || Math.abs(dcOffsetR) > 0.001) {
+                issues.push({ id: 'dc_offset', severity: 'warn' });
             }
 
             return {
                 peakDb, rmsDb, crest, dynamicRange, width, correlation, balanceDb,
                 hasClipping, clippedSamples, issues,
+                peakL: 20 * Math.log10(peakL || 1e-10),
+                peakR: 20 * Math.log10(peakR || 1e-10),
                 duration: buf.duration, sampleRate: buf.sampleRate, channels: buf.numberOfChannels
             };
         }
