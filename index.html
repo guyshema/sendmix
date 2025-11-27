@@ -25,6 +25,9 @@
             --success: #22c55e;
             --success-muted: rgba(34, 197, 94, 0.15);
             
+            --warning: #f59e0b;
+            --warning-muted: rgba(245, 158, 11, 0.15);
+            
             --border-subtle: rgba(255, 255, 255, 0.08);
             --border-default: rgba(255, 255, 255, 0.12);
             --border-hover: rgba(255, 255, 255, 0.2);
@@ -262,6 +265,28 @@
 
         .service-cta .arrow {
             transition: transform var(--transition-fast);
+        }
+
+        .beta-badge {
+            display: inline-block;
+            background: var(--warning);
+            color: var(--bg-primary);
+            font-size: var(--text-xs);
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            margin-inline-start: var(--space-sm);
+            vertical-align: middle;
+            letter-spacing: 0.5px;
+        }
+
+        .beta-notice {
+            font-size: var(--text-sm);
+            color: var(--warning);
+            background: var(--warning-muted);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-md);
         }
 
         body.ltr .service-card:hover .service-cta .arrow {
@@ -506,6 +531,7 @@
                     <h3 class="service-title">
                         <span data-lang-he>הנחיות הגשה למאסטר</span>
                         <span data-lang-en>Mastering Submission Guidelines</span>
+                        <span class="beta-badge">BETA</span>
                     </h3>
                     <p class="service-description" id="master-desc">
                         <span data-lang-he>
@@ -516,6 +542,10 @@
                             Preparing a stereo mix for professional mastering.
                             Includes an automatic check tool to verify your mix is ready!
                         </span>
+                    </p>
+                    <p class="beta-notice">
+                        <span data-lang-he>🚧 כלי הבדיקה עדיין בפיתוח – ייתכנו שינויים ושיפורים</span>
+                        <span data-lang-en>🚧 Check tool still in development – updates coming soon</span>
                     </p>
                     <span class="service-cta">
                         <span data-lang-he>לקריאת ההנחיות + כלי בדיקה</span>
@@ -559,8 +589,8 @@
 
             <section class="promo-section" aria-labelledby="promo-title">
                 <span class="promo-badge">
-                    <span data-lang-he>חינם!</span>
-                    <span data-lang-en>Free!</span>
+                    <span data-lang-he>חינם! | BETA</span>
+                    <span data-lang-en>Free! | BETA</span>
                 </span>
                 <h3 class="promo-title" id="promo-title">
                     <span data-lang-he>כלי בדיקת מיקס אוטומטי</span>
@@ -569,9 +599,11 @@
                 <p class="promo-text">
                     <span data-lang-he>
                         בדקו את המיקס שלכם לפני שליחה למאסטר – רמות, קליפינג, סטריאו, ספקטרום ועוד!
+                        <br><small>🚧 עדיין בפיתוח</small>
                     </span>
                     <span data-lang-en>
                         Check your mix before sending for mastering – levels, clipping, stereo, spectrum and more!
+                        <br><small>🚧 Still in development</small>
                     </span>
                 </p>
                 <a href="oppenmasters-mix-check.html" class="promo-btn">
